@@ -438,11 +438,11 @@
       <input type="range" id="feedback-shift-y" min="-10" max="10" step="0.5" value="0">
     </div>
     <div class="control-group">
-      <span class="control-label">Performance Mode</span>
+      <span class="control-label">Performance</span>
       <select id="performance-mode">
-        <option value="high">High Quality</option>
-        <option value="balanced">Balanced</option>
-        <option value="mobile">Mobile Optimized</option>
+        <option value="high">High</option>
+        <option value="medium">Medium</option>
+        <option value="low">Low</option>
       </select>
     </div>
     <!-- Transition time control -->
@@ -527,7 +527,10 @@
       const feedbackShiftXControl = document.getElementById('feedback-shift-x');
       const feedbackShiftYControl = document.getElementById('feedback-shift-y');
       const performanceModeControl = document.getElementById('performance-mode');
-      
+      performanceModeControl.addEventListener('change', () => {
+        setPerformanceMode(performanceModeControl.value);
+      });
+            
       // Preset Controls
       const togglePresetPanel = document.querySelector('.toggle-preset-panel');
       const presetPanel = document.querySelector('.preset-panel');
@@ -587,8 +590,9 @@
       let feedbackZoom = parseFloat(feedbackZoomControl.value);
       let feedbackShiftX = parseFloat(feedbackShiftXControl.value);
       let feedbackShiftY = parseFloat(feedbackShiftYControl.value);
-      let performanceMode = performanceModeControl.value;
       let transitionTime = transitionTimeControl && transitionTimeControl.value ? parseFloat(transitionTimeControl.value) : 0.1;
+      let performanceMode = 'high'; // 'high', 'medium', 'low'
+      let canvasScale = 1; // Scale factor for the canvas
       
       // Target values for interpolation
       let targetFontSize = fontSize;
@@ -878,15 +882,47 @@
 
       // Set canvas dimensions
       function setCanvasDimensions() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-
-        // Set dimensions for feedback canvas
-        feedbackCanvas.width = window.innerWidth;
-        feedbackCanvas.height = window.innerHeight;
+        // Get the device pixel ratio
+        const dpr = window.devicePixelRatio || 1;
         
-        // Apply performance scaling to feedback canvas if needed
-        resizeFeedbackCanvas();
+        // Set base dimensions
+        const baseWidth = window.innerWidth;
+        const baseHeight = window.innerHeight;
+        
+        // Apply scaling based on performance mode
+        switch (performanceMode) {
+          case 'high':
+            canvasScale = 1;
+            break;
+          case 'medium':
+            canvasScale = 0.75;
+            break;
+          case 'low':
+            canvasScale = 0.5;
+            break;
+        }
+        
+        // Calculate scaled dimensions (integer values for clean rendering)
+        const scaledWidth = Math.floor(baseWidth * canvasScale);
+        const scaledHeight = Math.floor(baseHeight * canvasScale);
+        
+        // Set canvas dimensions (physical pixels)
+        canvas.width = scaledWidth;
+        canvas.height = scaledHeight;
+        
+        // Set CSS dimensions for proper display (display pixels)
+        canvas.style.width = `${baseWidth}px`;
+        canvas.style.height = `${baseHeight}px`;
+        
+        // Update the canvas context to handle the scaling correctly
+        ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset transform
+        ctx.scale(canvasScale, canvasScale);
+      }
+
+      function setPerformanceMode(mode) {
+        performanceMode = mode;
+        setCanvasDimensions();
+        showNotification(`Performance mode set to: ${mode}`);
       }
 
       function resizeFeedbackCanvas() {
@@ -1251,7 +1287,11 @@
         }
 
         // Clear canvas
+        ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset transform
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+          // Apply scaling transformation
+        ctx.scale(canvasScale, canvasScale);
         
         // Update time
         time += 0.01 * rotationSpeed;
