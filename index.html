@@ -441,24 +441,27 @@
 
   <script>
     function validateControls() {
-      const requiredControls = {
-        'typography-canvas': canvas,
-        'text-content': textInput,
-        'font-size': fontSizeControl,
-        'duplications': duplicationsControl,
-        'blur': blurControl,
-        'rotation-speed': rotationSpeedControl,
-        'distortion': distortionControl,
-        'primary-color': primaryColorControl,
-        'secondary-color': secondaryColorControl,
-        'effect-type': effectTypeControl,
-        'font-type': fontTypeControl,
-        'transition-time': transitionTimeControl
-      };
+      // Check for elements directly by ID instead of referencing variables
+      const requiredElementIds = [
+        'typography-canvas',
+        'text-content',
+        'font-size',
+        'duplications',
+        'blur',
+        'rotation-speed',
+        'distortion',
+        'primary-color',
+        'secondary-color',
+        'effect-type',
+        'font-type',
+        'transition-time'
+      ];
       
       let missingControls = [];
       
-      for (const [id, element] of Object.entries(requiredControls)) {
+      // Check each element by ID
+      for (const id of requiredElementIds) {
+        const element = document.getElementById(id);
         if (!element) {
           missingControls.push(id);
           console.error(`Missing required control element: #${id}`);
@@ -482,7 +485,7 @@
       }
       
       return missingControls.length === 0;
-    }     
+    }  
 
     document.addEventListener('DOMContentLoaded', () => {
       // Elements
