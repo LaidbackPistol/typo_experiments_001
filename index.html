@@ -1304,29 +1304,29 @@
               break;
           }
 
-          // Transform to the calculated position
-          ctx.translate(xPos, yPos);
+        // Transform to the calculated position
+        ctx.translate(xPos, yPos);
+        
+        // Apply rotation
+        rotationAngle = angle * rotationSpeed;
+        ctx.rotate(rotationAngle);
+        
+        // Apply scaling
+        ctx.scale(1 + progress * 0.2, 1 + progress * 0.2);
+        
+        // Set font size - desktop uses original size
+        const adjustedFontSize = isMobile ? fontSize * responsiveScale : fontSize;
+        ctx.font = `${adjustedFontSize}px ${fontType}`;
+        
+        // Draw text at origin (0,0) since we've translated to the right position
+        ctx.fillText(text, 0, 0);
+        
+        ctx.restore();
           
-          // Apply rotation
-          rotationAngle = angle * rotationSpeed;
-          ctx.rotate(rotationAngle);
-          
-          // Apply scaling
-          ctx.scale(1 + progress * 0.2, 1 + progress * 0.2);
-          
-          // Set font size - desktop uses original size
-          const adjustedFontSize = isMobile ? fontSize * responsiveScale : fontSize;
-          ctx.font = `${adjustedFontSize}px ${fontType}`;
-          
-          // Draw text at origin (0,0) since we've translated to the right position
-          ctx.fillText(text, 0, 0);
-          
-          ctx.restore();
-          }
         }
         
-      requestAnimationFrame(animate);
-      
+        requestAnimationFrame(animate);
+      }
       
       // Function to generate preset code
       function generatePresetCode(preset) {
