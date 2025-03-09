@@ -390,6 +390,84 @@
       const ctx = canvas.getContext('2d');
       const textInput = document.getElementById('text-content');
 
+            // Controls
+            const fontSizeControl = document.getElementById('font-size');
+      const duplicationsControl = document.getElementById('duplications');
+      const blurControl = document.getElementById('blur');
+      const rotationSpeedControl = document.getElementById('rotation-speed');
+      const distortionControl = document.getElementById('distortion');
+      const primaryColorControl = document.getElementById('primary-color');
+      const secondaryColorControl = document.getElementById('secondary-color');
+      const effectTypeControl = document.getElementById('effect-type');
+      const fontTypeControl = document.getElementById('font-type');
+      const transitionTimeControl = document.getElementById('transition-time');
+      const randomizeBtn = document.getElementById('randomize');
+      
+      // Preset Controls
+      const togglePresetPanel = document.querySelector('.toggle-preset-panel');
+      const presetPanel = document.querySelector('.preset-panel');
+      const userPresetList = document.getElementById('user-preset-list');
+      const builtinPresetList = document.getElementById('builtin-preset-list');
+      const presetNameInput = document.getElementById('preset-name');
+      const saveCurrentBtn = document.getElementById('save-current');
+      const generateCodeBtn = document.getElementById('generate-code');
+      const importPresetBtn = document.getElementById('import-preset');
+      const exportPresetBtn = document.getElementById('export-preset');
+      const presetCodeTextarea = document.getElementById('preset-code');
+      const savePresetBtn = document.getElementById('save-preset-btn');
+      const notification = document.getElementById('notification');
+
+      // State
+      let text = textInput.value;
+      let fontSize = parseInt(fontSizeControl.value);
+      let duplications = parseInt(duplicationsControl.value);
+      let blur = parseInt(blurControl.value);
+      let rotationSpeed = parseFloat(rotationSpeedControl.value);
+      let distortion = parseInt(distortionControl.value);
+      let primaryColor = primaryColorControl.value;
+      let secondaryColor = secondaryColorControl.value;
+      let effectType = effectTypeControl.value;
+      let fontType = fontTypeControl.value;
+      let transitionTime = parseFloat(transitionTimeControl.value);
+      
+      // Target values for interpolation
+      let targetFontSize = fontSize;
+      let targetDuplications = duplications;
+      let targetBlur = blur;
+      let targetRotationSpeed = rotationSpeed;
+      let targetDistortion = distortion;
+      let targetPrimaryColor = primaryColor;
+      let targetSecondaryColor = secondaryColor;
+      let targetEffectType = effectType;
+      let targetFontType = fontType;
+      
+      // Interpolation state
+      let isInterpolating = false;
+      let interpolationStartTime = 0;
+      let interpolationDuration = transitionTime * 1000; // in milliseconds
+      
+      // Previous values for interpolation
+      let prevFontSize = fontSize;
+      let prevDuplications = duplications;
+      let prevBlur = blur;
+      let prevRotationSpeed = rotationSpeed;
+      let prevDistortion = distortion;
+      let prevPrimaryColor = primaryColor;
+      let prevSecondaryColor = secondaryColor;
+      let prevEffectType = effectType;
+      let prevFontType = fontType;
+      
+      // Mouse position for interactive effects
+      let mouseX = 0;
+      let mouseY = 0;
+      
+      // Animation variables
+      let time = 0;
+      let isAnimating = true;
+      
+      // User presets storage
+      let userPresets = JSON.parse(localStorage.getItem('typographyPresets')) || [];
+
       // Device detection
       const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
       let gyroSupported = false;
@@ -800,84 +878,6 @@
           }
         }, 100);
       }
-      
-      // Controls
-      const fontSizeControl = document.getElementById('font-size');
-      const duplicationsControl = document.getElementById('duplications');
-      const blurControl = document.getElementById('blur');
-      const rotationSpeedControl = document.getElementById('rotation-speed');
-      const distortionControl = document.getElementById('distortion');
-      const primaryColorControl = document.getElementById('primary-color');
-      const secondaryColorControl = document.getElementById('secondary-color');
-      const effectTypeControl = document.getElementById('effect-type');
-      const fontTypeControl = document.getElementById('font-type');
-      const transitionTimeControl = document.getElementById('transition-time');
-      const randomizeBtn = document.getElementById('randomize');
-      
-      // Preset Controls
-      const togglePresetPanel = document.querySelector('.toggle-preset-panel');
-      const presetPanel = document.querySelector('.preset-panel');
-      const userPresetList = document.getElementById('user-preset-list');
-      const builtinPresetList = document.getElementById('builtin-preset-list');
-      const presetNameInput = document.getElementById('preset-name');
-      const saveCurrentBtn = document.getElementById('save-current');
-      const generateCodeBtn = document.getElementById('generate-code');
-      const importPresetBtn = document.getElementById('import-preset');
-      const exportPresetBtn = document.getElementById('export-preset');
-      const presetCodeTextarea = document.getElementById('preset-code');
-      const savePresetBtn = document.getElementById('save-preset-btn');
-      const notification = document.getElementById('notification');
-
-      // State
-      let text = textInput.value;
-      let fontSize = parseInt(fontSizeControl.value);
-      let duplications = parseInt(duplicationsControl.value);
-      let blur = parseInt(blurControl.value);
-      let rotationSpeed = parseFloat(rotationSpeedControl.value);
-      let distortion = parseInt(distortionControl.value);
-      let primaryColor = primaryColorControl.value;
-      let secondaryColor = secondaryColorControl.value;
-      let effectType = effectTypeControl.value;
-      let fontType = fontTypeControl.value;
-      let transitionTime = parseFloat(transitionTimeControl.value);
-      
-      // Target values for interpolation
-      let targetFontSize = fontSize;
-      let targetDuplications = duplications;
-      let targetBlur = blur;
-      let targetRotationSpeed = rotationSpeed;
-      let targetDistortion = distortion;
-      let targetPrimaryColor = primaryColor;
-      let targetSecondaryColor = secondaryColor;
-      let targetEffectType = effectType;
-      let targetFontType = fontType;
-      
-      // Interpolation state
-      let isInterpolating = false;
-      let interpolationStartTime = 0;
-      let interpolationDuration = transitionTime * 1000; // in milliseconds
-      
-      // Previous values for interpolation
-      let prevFontSize = fontSize;
-      let prevDuplications = duplications;
-      let prevBlur = blur;
-      let prevRotationSpeed = rotationSpeed;
-      let prevDistortion = distortion;
-      let prevPrimaryColor = primaryColor;
-      let prevSecondaryColor = secondaryColor;
-      let prevEffectType = effectType;
-      let prevFontType = fontType;
-      
-      // Mouse position for interactive effects
-      let mouseX = 0;
-      let mouseY = 0;
-      
-      // Animation variables
-      let time = 0;
-      let isAnimating = true;
-      
-      // User presets storage
-      let userPresets = JSON.parse(localStorage.getItem('typographyPresets')) || [];
       
       // Built-in presets
       const builtinPresets = [
