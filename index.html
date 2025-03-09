@@ -590,52 +590,55 @@
       
       setCanvasDimensions();
 
-      const controlsPanel = document.querySelector('.controls');
-      const toggleControlsBtn = document.createElement('div');
-      toggleControlsBtn.className = 'toggle-controls-panel';
-      toggleControlsBtn.textContent = 'C';
-      document.body.appendChild(toggleControlsBtn);
+     // First, remove any existing toggle buttons to prevent duplicates
+    const existingToggleButtons = document.querySelectorAll('.toggle-controls-panel');
+    existingToggleButtons.forEach(button => {
+      if (button) button.remove();
+    });
 
-      // Initially position the toggle button
-      updateTogglePosition();
+    // Get control elements
+    const controlsPanel = document.querySelector('.controls');
 
-      // Make sure we always have both buttons visible
-      // Toggle preset panel button reference 
-      const presetToggleBtn = document.querySelector('.toggle-preset-panel');
+    // Create a single toggle button
+    const toggleControlsBtn = document.createElement('div');
+    toggleControlsBtn.className = 'toggle-controls-panel';
+    toggleControlsBtn.textContent = 'C';
+    document.body.appendChild(toggleControlsBtn);
 
-      // Toggle controls panel
-      toggleControlsBtn.addEventListener('click', () => {
-        controlsPanel.classList.toggle('hidden');
-        toggleControlsBtn.classList.toggle('panel-hidden');
-        updateTogglePosition();
-        
-        // Save the state to localStorage
-        localStorage.setItem('controlsPanelHidden', controlsPanel.classList.contains('hidden'));
-      });
-
-      // Update toggle button position and ensure it's positioned correctly
-      function updateTogglePosition() {
-        if (controlsPanel.classList.contains('hidden')) {
-          // When panel is hidden, position button at the right edge
-          toggleControlsBtn.style.right = '20px';
-        } else {
-          // When panel is visible, position button to the left of the panel
-          const controlsWidth = controlsPanel.offsetWidth;
-          toggleControlsBtn.style.right = (controlsWidth + 30) + 'px';
-        }
-      }
-
-      // Check if the controls panel was hidden in the previous session
-      const wasPanelHidden = localStorage.getItem('controlsPanelHidden') === 'true';
-      if (wasPanelHidden) {
-        controlsPanel.classList.add('hidden');
-        toggleControlsBtn.classList.add('panel-hidden');
+    // Update toggle button position based on panel state
+    function updateTogglePosition() {
+      if (controlsPanel.classList.contains('hidden')) {
+        toggleControlsBtn.style.right = '20px';
       } else {
-        // If not hidden, position the toggle button correctly on load
-        window.addEventListener('load', () => {
-          updateTogglePosition();
-        });
+        const controlsWidth = controlsPanel.offsetWidth;
+        toggleControlsBtn.style.right = (controlsWidth + 30) + 'px';
       }
+    }
+
+    // Initial positioning
+    updateTogglePosition();
+
+    // Toggle controls panel
+    toggleControlsBtn.addEventListener('click', () => {
+      controlsPanel.classList.toggle('hidden');
+      toggleControlsBtn.classList.toggle('panel-hidden');
+      updateTogglePosition();
+      
+      // Save the state to localStorage
+      localStorage.setItem('controlsPanelHidden', controlsPanel.classList.contains('hidden'));
+    });
+
+    // Check if the controls panel was hidden in the previous session
+    const wasPanelHidden = localStorage.getItem('controlsPanelHidden') === 'true';
+    if (wasPanelHidden) {
+      controlsPanel.classList.add('hidden');
+      toggleControlsBtn.classList.add('panel-hidden');
+    } else {
+      // If not hidden, position the toggle button correctly on load
+      window.addEventListener('load', () => {
+        updateTogglePosition();
+      });
+    }
 
       window.addEventListener('resize', () => {
         setCanvasDimensions();
