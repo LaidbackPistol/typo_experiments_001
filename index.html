@@ -935,20 +935,9 @@
       toggleControlsBtn.classList.add('panel-hidden');
     } else {
       // If not hidden, position the toggle button correctly on load
-      // Force panel position update on load
-      window.addEventListener('load', () => {
-        // Update toggle position based on panel state
-        function updateTogglePosition() {
-          if (controlsPanel.classList.contains('hidden')) {
-            toggleControlsBtn.style.right = '20px';
-          } else {
-            const controlsWidth = controlsPanel.offsetWidth;
-            toggleControlsBtn.style.right = (controlsWidth + 30) + 'px';
-          }
-        }
-        
-        updateTogglePosition();
-      });
+      // window.addEventListener('load', () => {
+      //   updateTogglePosition();
+      // });
     }
 
       window.addEventListener('resize', () => {
