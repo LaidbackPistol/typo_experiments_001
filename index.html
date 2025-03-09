@@ -510,6 +510,8 @@
       let secondaryColor = secondaryColorControl && secondaryColorControl.value ? secondaryColorControl.value : '#ffffff';
       let effectType = effectTypeControl && effectTypeControl.value ? effectTypeControl.value : 'glitch';
       let fontType = fontTypeControl && fontTypeControl.value ? fontTypeControl.value : 'sans-serif';
+
+      let transitionTime = transitionTimeControl && transitionTimeControl.value ? parseFloat(transitionTimeControl.value) : 0.1;
       
       // Target values for interpolation
       let targetFontSize = fontSize;
