@@ -633,6 +633,29 @@
       
       // Set interpolation duration
       interpolationDuration = transitionTime * 1000;
+
+      function setupMouseTracking() {
+        // This is the original mouse move event from your code
+        // Make sure this isn't being overridden elsewhere
+        window.addEventListener('mousemove', (e) => {
+          // On desktop, directly update mouseX and mouseY with current mouse position
+          if (!isMobile) {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            
+            // Optional: Show mouse coordinates in debug mode
+            if (deviceInfoDiv) {
+              deviceInfoDiv.textContent = `Mouse: ${mouseX.toFixed(0)}, ${mouseY.toFixed(0)}`;
+            }
+          }
+        });
+        
+        // Log that mouse tracking is set up
+        console.log("Mouse tracking initialized");
+      }
+
+      // Call this function to set up mouse tracking
+      setupMouseTracking();
       
       // Function to get responsive scale
       function getResponsiveScale() {
@@ -661,7 +684,7 @@
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         
-        // Update center coordinates
+        // IMPORTANT: Update center coordinates immediately
         centerX = canvas.width / 2;
         centerY = canvas.height / 2;
         
