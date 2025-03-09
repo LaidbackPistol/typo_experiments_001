@@ -80,7 +80,9 @@
       font-weight: bold;
       font-size: 18px;
       opacity: 0.5;
-      transition: opacity 0.3s ease;
+      transition: all 0.3s ease;
+      transform: scale(1);
+      visibility: hidden;
     }
 
     .toggle-controls-panel:hover {
@@ -90,6 +92,7 @@
 
     .toggle-controls-panel.panel-hidden {
       right: 20px;
+      visibility: visible;
     }
 
     .control-group {
@@ -605,6 +608,17 @@
         toggleControlsBtn.classList.toggle('panel-hidden');
         updateTogglePosition();
         
+        // Properly show/hide toggle button based on panel state
+        if (controlsPanel.classList.contains('hidden')) {
+          // Show toggle button when panel is hidden
+          setTimeout(() => {
+            toggleControlsBtn.style.visibility = 'visible';
+          }, 50);
+        } else {
+          // Hide toggle button when panel is visible
+          toggleControlsBtn.style.visibility = 'hidden';
+        }
+        
         // Save the state to localStorage
         localStorage.setItem('controlsPanelHidden', controlsPanel.classList.contains('hidden'));
       });
@@ -624,8 +638,10 @@
       if (wasPanelHidden) {
         controlsPanel.classList.add('hidden');
         toggleControlsBtn.classList.add('panel-hidden');
+        toggleControlsBtn.style.visibility = 'visible';
       } else {
-        // If not hidden, position the toggle button correctly on load
+        // If not hidden, position the toggle button correctly on load but keep it invisible
+        toggleControlsBtn.style.visibility = 'hidden';
         window.addEventListener('load', () => {
           updateTogglePosition();
         });
@@ -635,7 +651,7 @@
         setCanvasDimensions();
         updateTogglePosition();
       });
-      
+
       // Mouse move event
       window.addEventListener('mousemove', (e) => {
         mouseX = e.clientX;
