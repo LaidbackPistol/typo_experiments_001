@@ -473,61 +473,6 @@
       const savePresetBtn = document.getElementById('save-preset-btn');
       const notification = document.getElementById('notification');
 
-      let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-      let hasGyro = false;
-      let gyroData = { beta: 0, gamma: 0 };
-
-      // State
-      let text = textInput.value;
-      let fontSize = parseInt(fontSizeControl.value);
-      let duplications = parseInt(duplicationsControl.value);
-      let blur = parseInt(blurControl.value);
-      let rotationSpeed = parseFloat(rotationSpeedControl.value);
-      let distortion = parseInt(distortionControl.value);
-      let primaryColor = primaryColorControl.value;
-      let secondaryColor = secondaryColorControl.value;
-      let effectType = effectTypeControl.value;
-      let fontType = fontTypeControl.value;
-      let transitionTime = parseFloat(transitionTimeControl.value);
-      
-      // Target values for interpolation
-      let targetFontSize = fontSize;
-      let targetDuplications = duplications;
-      let targetBlur = blur;
-      let targetRotationSpeed = rotationSpeed;
-      let targetDistortion = distortion;
-      let targetPrimaryColor = primaryColor;
-      let targetSecondaryColor = secondaryColor;
-      let targetEffectType = effectType;
-      let targetFontType = fontType;
-      
-      // Interpolation state
-      let isInterpolating = false;
-      let interpolationStartTime = 0;
-      let interpolationDuration = transitionTime * 1000; // in milliseconds
-      
-      // Previous values for interpolation
-      let prevFontSize = fontSize;
-      let prevDuplications = duplications;
-      let prevBlur = blur;
-      let prevRotationSpeed = rotationSpeed;
-      let prevDistortion = distortion;
-      let prevPrimaryColor = primaryColor;
-      let prevSecondaryColor = secondaryColor;
-      let prevEffectType = effectType;
-      let prevFontType = fontType;
-      
-      // Mouse position for interactive effects
-      let mouseX = 0;
-      let mouseY = 0;
-      
-      // Animation variables
-      let time = 0;
-      let isAnimating = true;
-      
-      // User presets storage
-      let userPresets = JSON.parse(localStorage.getItem('typographyPresets')) || [];
-      
       const fontSystem = {
         // Maps display names to actual CSS font families
         fontMap: {
@@ -605,6 +550,101 @@
           }, 3000);
         }
       };
+
+      function populateFontSelector() {
+        const fontTypeSelect = document.getElementById('font-type');
+        fontTypeSelect.innerHTML = ''; // Clear existing options
+        
+        // Add each category and its fonts
+        for (const [category, fonts] of Object.entries(fontSystem.categories)) {
+          // Add category group
+          const groupElement = document.createElement('optgroup');
+          groupElement.label = category;
+          
+          // Add fonts in this category
+          fonts.forEach(fontName => {
+            const option = document.createElement('option');
+            option.value = fontName;
+            option.textContent = fontName;
+            option.style.fontFamily = fontSystem.getFontFamily(fontName);
+            groupElement.appendChild(option);
+          });
+          
+          fontTypeSelect.appendChild(groupElement);
+        }
+        
+        // Update the select styling to show the actual font
+        fontTypeSelect.addEventListener('change', function() {
+          this.style.fontFamily = fontSystem.getFontFamily(this.value);
+        });
+        
+        // Set initial style
+        fontTypeSelect.style.fontFamily = fontSystem.getFontFamily(fontTypeSelect.value);
+      }   
+
+      // Make it available globally if needed
+      window.fontSystem = fontSystem;
+      
+      // Only then initialize the font selector
+      populateFontSelector();
+      
+      // And finally, preload fonts
+      fontSystem.preloadFonts();
+
+      let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      let hasGyro = false;
+      let gyroData = { beta: 0, gamma: 0 };
+
+      // State
+      let text = textInput.value;
+      let fontSize = parseInt(fontSizeControl.value);
+      let duplications = parseInt(duplicationsControl.value);
+      let blur = parseInt(blurControl.value);
+      let rotationSpeed = parseFloat(rotationSpeedControl.value);
+      let distortion = parseInt(distortionControl.value);
+      let primaryColor = primaryColorControl.value;
+      let secondaryColor = secondaryColorControl.value;
+      let effectType = effectTypeControl.value;
+      let fontType = fontTypeControl.value;
+      let transitionTime = parseFloat(transitionTimeControl.value);
+      
+      // Target values for interpolation
+      let targetFontSize = fontSize;
+      let targetDuplications = duplications;
+      let targetBlur = blur;
+      let targetRotationSpeed = rotationSpeed;
+      let targetDistortion = distortion;
+      let targetPrimaryColor = primaryColor;
+      let targetSecondaryColor = secondaryColor;
+      let targetEffectType = effectType;
+      let targetFontType = fontType;
+      
+      // Interpolation state
+      let isInterpolating = false;
+      let interpolationStartTime = 0;
+      let interpolationDuration = transitionTime * 1000; // in milliseconds
+      
+      // Previous values for interpolation
+      let prevFontSize = fontSize;
+      let prevDuplications = duplications;
+      let prevBlur = blur;
+      let prevRotationSpeed = rotationSpeed;
+      let prevDistortion = distortion;
+      let prevPrimaryColor = primaryColor;
+      let prevSecondaryColor = secondaryColor;
+      let prevEffectType = effectType;
+      let prevFontType = fontType;
+      
+      // Mouse position for interactive effects
+      let mouseX = 0;
+      let mouseY = 0;
+      
+      // Animation variables
+      let time = 0;
+      let isAnimating = true;
+      
+      // User presets storage
+      let userPresets = JSON.parse(localStorage.getItem('typographyPresets')) || [];
 
       // Built-in presets
       const builtinPresets = [
@@ -794,42 +834,7 @@
         // Normalize gyroscope data
         gyroData.beta = event.beta;  // Front/back tilt: -180 to 180
         gyroData.gamma = event.gamma; // Left/right tilt: -90 to 90
-      }
-
-      function populateFontSelector() {
-        const fontTypeSelect = document.getElementById('font-type');
-        fontTypeSelect.innerHTML = ''; // Clear existing options
-        
-        // Add each category and its fonts
-        for (const [category, fonts] of Object.entries(fontSystem.categories)) {
-          // Add category group
-          const groupElement = document.createElement('optgroup');
-          groupElement.label = category;
-          
-          // Add fonts in this category
-          fonts.forEach(fontName => {
-            const option = document.createElement('option');
-            option.value = fontName;
-            option.textContent = fontName;
-            option.style.fontFamily = fontSystem.getFontFamily(fontName);
-            groupElement.appendChild(option);
-          });
-          
-          fontTypeSelect.appendChild(groupElement);
-        }
-        
-        // Update the select styling to show the actual font
-        fontTypeSelect.addEventListener('change', function() {
-          this.style.fontFamily = fontSystem.getFontFamily(this.value);
-        });
-        
-        // Set initial style
-        fontTypeSelect.style.fontFamily = fontSystem.getFontFamily(fontTypeSelect.value);
-      }                                       
-
-      // Initialize the font system
-      fontSystem.preloadFonts();
-      populateFontSelector();
+      }                                    
 
       // Function to convert hex color to RGB array
       function hexToRgb(hex) {
