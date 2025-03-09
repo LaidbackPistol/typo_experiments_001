@@ -384,14 +384,16 @@
   <div class="notification" id="notification"></div>
 
   <script>
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
     document.addEventListener('DOMContentLoaded', () => {
       // Elements
       const canvas = document.getElementById('typography-canvas');
       const ctx = canvas.getContext('2d');
       const textInput = document.getElementById('text-content');
 
-            // Controls
-            const fontSizeControl = document.getElementById('font-size');
+      // Controls
+      const fontSizeControl = document.getElementById('font-size');
       const duplicationsControl = document.getElementById('duplications');
       const blurControl = document.getElementById('blur');
       const rotationSpeedControl = document.getElementById('rotation-speed');
@@ -468,10 +470,36 @@
       // User presets storage
       let userPresets = JSON.parse(localStorage.getItem('typographyPresets')) || [];
 
-            // Set canvas dimensions
-            function setCanvasDimensions() {
+      // Add responsive scaling to make typography look consistent across screen sizes
+      function getResponsiveScale() {
+        // Base dimensions reference (desktop size)
+        const baseWidth = 1920;
+        const baseHeight = 1080;
+        
+        // Calculate scaling factors
+        const widthScale = canvas.width / baseWidth;
+        const heightScale = canvas.height / baseHeight;
+        
+        // Use the smaller scale to ensure everything fits
+        return Math.min(widthScale, heightScale);
+      }
+
+      function setCanvasDimensions() {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
+        
+        // If this is a mobile device, adjust the preset scaling
+        if (isMobile) {
+          // Use a safety check when accessing potentially undefined variables
+          if (typeof deviceInfoDiv !== 'undefined' && deviceInfoDiv) {
+            // Now we can safely use deviceInfoDiv
+            if (window.orientation === 0 || window.orientation === 180) {
+              deviceInfoDiv.textContent += ' (Portrait)';
+            } else {
+              deviceInfoDiv.textContent += ' (Landscape)';
+            }
+          }
+        }
       }
       
       setCanvasDimensions();
@@ -484,7 +512,6 @@
       });
 
       // Device detection
-      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
       let gyroSupported = false;
       let gyroPermissionGranted = false;
       let deviceRotation = { beta: 0, gamma: 0 }; // beta: front-to-back tilt, gamma: left-to-right tilt
@@ -602,20 +629,6 @@
             }
           }
         });
-      }
-
-      // Add responsive scaling to make typography look consistent across screen sizes
-      function getResponsiveScale() {
-        // Base dimensions reference (desktop size)
-        const baseWidth = 1920;
-        const baseHeight = 1080;
-        
-        // Calculate scaling factors
-        const widthScale = canvas.width / baseWidth;
-        const heightScale = canvas.height / baseHeight;
-        
-        // Use the smaller scale to ensure everything fits
-        return Math.min(widthScale, heightScale);
       }
 
       // Update the animation function to use responsive scaling
