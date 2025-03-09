@@ -808,9 +808,9 @@
 
       // Also update the distortion calculation to be responsive:
       // Change the mouseInfluence calculations to:
-      const adjustedDistortion = distortion * responsiveScale;
-      const mouseInfluenceX = (mouseX - centerX) / centerX * adjustedDistortion;
-      const mouseInfluenceY = (mouseY - centerY) / centerY * adjustedDistortion;
+      adjustedDistortion = distortion * responsiveScale;
+      mouseInfluenceX = (mouseX - centerX) / centerX * adjustedDistortion;
+      mouseInfluenceY = (mouseY - centerY) / centerY * adjustedDistortion;
 
       // And in the effects cases, replace distortion with adjustedDistortion:
       // For example in the 'wave' case:
@@ -1050,7 +1050,6 @@
         document.body.appendChild(loadingIndicator);
         
         // Simulate loading progress
-        let progress = 0;
         const progressBar = document.getElementById('progress-bar');
         
         const loadingInterval = setInterval(() => {
@@ -1163,47 +1162,47 @@
       // Animation function
       function animate() {
         if (!isAnimating) return;
-
-        // Calculate responsive scale factor
+        
+        // Calculate responsive scale - use a local variable since it's only used in this function
         const responsiveScale = getResponsiveScale();
-
+        
         // Handle interpolation
         if (isInterpolating) {
           const currentTime = Date.now();
           const elapsed = currentTime - interpolationStartTime;
-          let progress = Math.min(elapsed / interpolationDuration, 1);
+          let progressTemp = Math.min(elapsed / interpolationDuration, 1);
           
           // Ease in-out function for smoother transitions
-          progress = progress < 0.5 ? 4 * progress * progress * progress : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+          progressTemp = progressTemp < 0.5 ? 4 * progressTemp * progressTemp * progressTemp : 1 - Math.pow(-2 * progressTemp + 2, 3) / 2;
           
           // Interpolate numeric values
-          fontSize = Math.round(prevFontSize + (targetFontSize - prevFontSize) * progress);
-          duplications = Math.round(prevDuplications + (targetDuplications - prevDuplications) * progress);
-          blur = Math.round(prevBlur + (targetBlur - prevBlur) * progress);
-          rotationSpeed = prevRotationSpeed + (targetRotationSpeed - prevRotationSpeed) * progress;
-          distortion = Math.round(prevDistortion + (targetDistortion - prevDistortion) * progress);
+          fontSize = Math.round(prevFontSize + (targetFontSize - prevFontSize) * progressTemp);
+          duplications = Math.round(prevDuplications + (targetDuplications - prevDuplications) * progressTemp);
+          blur = Math.round(prevBlur + (targetBlur - prevBlur) * progressTemp);
+          rotationSpeed = prevRotationSpeed + (targetRotationSpeed - prevRotationSpeed) * progressTemp;
+          distortion = Math.round(prevDistortion + (targetDistortion - prevDistortion) * progressTemp);
           
           // Interpolate colors
-          primaryColor = interpolateColor(prevPrimaryColor, targetPrimaryColor, progress);
-          secondaryColor = interpolateColor(prevSecondaryColor, targetSecondaryColor, progress);
+          primaryColor = interpolateColor(prevPrimaryColor, targetPrimaryColor, progressTemp);
+          secondaryColor = interpolateColor(prevSecondaryColor, targetSecondaryColor, progressTemp);
           
           // For effect type and font type, we switch immediately at the midpoint of interpolation
-          if (progress >= 0.5) {
+          if (progressTemp >= 0.5) {
             effectType = targetEffectType;
             fontType = targetFontType;
           }
           
           // Update UI controls to reflect current interpolated values
-          fontSizeControl.value = fontSize;
-          duplicationsControl.value = duplications;
-          blurControl.value = blur;
-          rotationSpeedControl.value = rotationSpeed;
-          distortionControl.value = distortion;
-          primaryColorControl.value = primaryColor;
-          secondaryColorControl.value = secondaryColor;
+          if (fontSizeControl) fontSizeControl.value = fontSize;
+          if (duplicationsControl) duplicationsControl.value = duplications;
+          if (blurControl) blurControl.value = blur;
+          if (rotationSpeedControl) rotationSpeedControl.value = rotationSpeed;
+          if (distortionControl) distortionControl.value = distortion;
+          if (primaryColorControl) primaryColorControl.value = primaryColor;
+          if (secondaryColorControl) secondaryColorControl.value = secondaryColor;
           
           // End interpolation when complete
-          if (progress >= 1) {
+          if (progressTemp >= 1) {
             isInterpolating = false;
             effectType = targetEffectType;
             fontType = targetFontType;
@@ -1211,40 +1210,45 @@
         }
         
         // Clear canvas
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
         
         // Update time
         time += 0.01 * rotationSpeed;
         
         // Apply canvas-level blur if needed
-        if (blur > 0) {
-          ctx.filter = `blur(${blur / 5}px)`;
-        } else {
-          ctx.filter = 'none';
+        if (ctx) {
+          if (blur > 0) {
+            ctx.filter = `blur(${blur / 5}px)`;
+          } else {
+            ctx.filter = 'none';
+          }
         }
         
-        // Calculate mouse influence
-        // Modify mouse influence calculations
+        // Calculate mouse influence with responsive scaling
+        // IMPORTANT: Use global variables without 'const' or 'let'
         adjustedDistortion = distortion * responsiveScale;
         mouseInfluenceX = (mouseX - centerX) / centerX * adjustedDistortion;
         mouseInfluenceY = (mouseY - centerY) / centerY * adjustedDistortion;
         
         // Set text properties
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
+        if (ctx) {
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+        }
         
         // Draw each duplication
         for (let i = 0; i < duplications; i++) {
+          // IMPORTANT: Assign to global variables, don't redeclare with 'const' or 'let'
           progress = i / duplications;
           angle = time + progress * Math.PI * 2;
           
           // Color gradient
           ratio = progress;
           color = interpolateColor(primaryColor, secondaryColor, ratio);
-          ctx.fillStyle = color;
+          if (ctx) ctx.fillStyle = color;
           
           // Apply effect-specific transformations
-          ctx.save();
+          if (ctx) ctx.save();
           
           // Base position
           xPos = centerX + mouseInfluenceX * Math.sin(progress * Math.PI * 2);
@@ -1275,23 +1279,26 @@
             case 'glitch':
               if (Math.random() > 0.7) {
                 xPos += (Math.random() - 0.5) * adjustedDistortion * 4;
-                ctx.filter = `blur(${Math.random() * blur / 2}px) contrast(${1 + Math.random()})`;
+                if (ctx) ctx.filter = `blur(${Math.random() * blur / 2}px) contrast(${1 + Math.random()})`;
               }
               break;
           }
           
           // Apply transforms
-          ctx.translate(xPos, yPos);
-          ctx.rotate(rotationAngle);
-          ctx.scale(1 + progress * 0.2, 1 + progress * 0.2);
-          
-          // Draw text with responsive scaling
-          const adjustedFontSize = fontSize * responsiveScale;
-          ctx.font = `${adjustedFontSize}px ${fontType}`;
-          ctx.fillText(text, 0, 0);
-          
-          ctx.restore();
+          if (ctx) {
+            ctx.translate(xPos, yPos);
+            ctx.rotate(rotationAngle);
+            ctx.scale(1 + progress * 0.2, 1 + progress * 0.2);
+            
+            // Draw text with responsive scaling
+            const adjustedFontSize = fontSize * responsiveScale;
+            ctx.font = `${adjustedFontSize}px ${fontType}`;
+            ctx.fillText(text, 0, 0);
+            
+            ctx.restore();
+          }
         }
+        
         requestAnimationFrame(animate);
       }
       
