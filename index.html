@@ -340,11 +340,15 @@
   <div class="toggle-controls-panel">C</div>
   <div class="controls">
     <div class="control-group">
+      <span class="control-label">Font Size</span>
+      <input type="range" id="font-size" min="50" max="400" value="138">
+    </div>
+    <div class="control-group">
       <span class="control-label">Font Type</span>
       <select id="font-type">
-        <!-- Font options will be populated by JavaScript -->
       </select>
     </div>
+  </div>
     <div class="control-group">
       <span class="control-label">Duplications</span>
       <input type="range" id="duplications" min="1" max="20" value="20">
@@ -440,30 +444,6 @@
   <div class="notification" id="notification"></div>
 
   <script>
-    function validateControls() {
-      const requiredControls = [
-        { id: 'font-size', element: fontSizeControl },
-        { id: 'duplications', element: duplicationsControl },
-        { id: 'blur', element: blurControl },
-        { id: 'rotation-speed', element: rotationSpeedControl },
-        { id: 'distortion', element: distortionControl },
-        { id: 'primary-color', element: primaryColorControl },
-        { id: 'secondary-color', element: secondaryColorControl },
-        { id: 'effect-type', element: effectTypeControl },
-        { id: 'font-type', element: fontTypeControl }
-      ];
-      
-      const missingControls = requiredControls.filter(control => !control.element);
-      if (missingControls.length > 0) {
-        missingControls.forEach(control => {
-          console.error(`Missing required control element: #${control.id}`);
-        });
-        console.warn(`Found ${missingControls.length} missing controls. App may not function correctly.`);
-      }
-      
-      return missingControls.length === 0;
-    }
-
     document.addEventListener('DOMContentLoaded', () => {
       // Validate controls before proceeding
       if (!validateControls()) {
@@ -501,6 +481,30 @@
       const presetCodeTextarea = document.getElementById('preset-code');
       const savePresetBtn = document.getElementById('save-preset-btn');
       const notification = document.getElementById('notification');
+
+      function validateControls() {
+        const requiredControls = [
+          { id: 'font-size', element: fontSizeControl },
+          { id: 'duplications', element: duplicationsControl },
+          { id: 'blur', element: blurControl },
+          { id: 'rotation-speed', element: rotationSpeedControl },
+          { id: 'distortion', element: distortionControl },
+          { id: 'primary-color', element: primaryColorControl },
+          { id: 'secondary-color', element: secondaryColorControl },
+          { id: 'effect-type', element: effectTypeControl },
+          { id: 'font-type', element: fontTypeControl }
+        ];
+        
+        const missingControls = requiredControls.filter(control => !control.element);
+        if (missingControls.length > 0) {
+          missingControls.forEach(control => {
+            console.error(`Missing required control element: #${control.id}`);
+          });
+          console.warn(`Found ${missingControls.length} missing controls. App may not function correctly.`);
+        }
+        
+        return missingControls.length === 0;
+      }
 
       const controlsValid = validateControls();
 
