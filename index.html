@@ -417,6 +417,10 @@
       const savePresetBtn = document.getElementById('save-preset-btn');
       const notification = document.getElementById('notification');
 
+      let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      let hasGyro = false;
+      let gyroData = { beta: 0, gamma: 0 };
+
       // State
       let text = textInput.value;
       let fontSize = parseInt(fontSizeControl.value);
@@ -556,7 +560,54 @@
         mouseX = e.clientX;
         mouseY = e.clientY;
       });
-      
+
+      if (isMobile) {
+        // Create a button to request permission on iOS (required for iOS 13+)
+        if (typeof DeviceOrientationEvent !== 'undefined' && 
+            typeof DeviceOrientationEvent.requestPermission === 'function') {
+          
+          const permissionBtn = document.createElement('button');
+          permissionBtn.textContent = 'Enable Gyroscope';
+          permissionBtn.style.position = 'fixed';
+          permissionBtn.style.top = '50%';
+          permissionBtn.style.left = '50%';
+          permissionBtn.style.transform = 'translate(-50%, -50%)';
+          permissionBtn.style.zIndex = '1000';
+          permissionBtn.style.padding = '12px 24px';
+          permissionBtn.style.backgroundColor = '#333';
+          permissionBtn.style.color = 'white';
+          permissionBtn.style.border = 'none';
+          permissionBtn.style.borderRadius = '4px';
+          permissionBtn.style.fontSize = '16px';
+          
+          permissionBtn.addEventListener('click', () => {
+            DeviceOrientationEvent.requestPermission()
+              .then(response => {
+                if (response === 'granted') {
+                  window.addEventListener('deviceorientation', handleOrientation);
+                  hasGyro = true;
+                  document.body.removeChild(permissionBtn);
+                  showNotification('Gyroscope enabled');
+                }
+              })
+              .catch(console.error);
+          });
+          
+          document.body.appendChild(permissionBtn);
+        } else {
+          // For non-iOS devices or older iOS versions
+          window.addEventListener('deviceorientation', handleOrientation);
+          hasGyro = true;
+        }
+      }
+
+      // Handle orientation data
+      function handleOrientation(event) {
+        // Normalize gyroscope data
+        gyroData.beta = event.beta;  // Front/back tilt: -180 to 180
+        gyroData.gamma = event.gamma; // Left/right tilt: -90 to 90
+      }
+
       // Function to convert hex color to RGB array
       function hexToRgb(hex) {
         const r = parseInt(hex.slice(1, 3), 16);
@@ -710,9 +761,23 @@
         const centerX = canvas.width / 2;
         const centerY = canvas.height / 2;
         
-        // Calculate mouse influence
-        const mouseInfluenceX = (mouseX - centerX) / centerX * distortion;
-        const mouseInfluenceY = (mouseY - centerY) / centerY * distortion;
+        // Replace with this code:
+        let inputX, inputY;
+
+        if (isMobile && hasGyro) {
+          // Use gyroscope data
+          // Map gamma (-90 to 90) to canvas width with increased sensitivity for better effect
+          inputX = centerX + (gyroData.gamma / 30) * centerX;
+          // Map beta (-180 to 180) to canvas height with a limited range for better control
+          inputY = centerY + (Math.max(-30, Math.min(30, gyroData.beta)) / 30) * centerY;
+        } else {
+          // Use mouse data on desktop
+          inputX = mouseX;
+          inputY = mouseY;
+        }
+
+        const inputInfluenceX = (inputX - centerX) / centerX * distortion;
+        const inputInfluenceY = (inputY - centerY) / centerY * distortion;
         
         // Set text properties
         ctx.textAlign = 'center';
@@ -732,8 +797,8 @@
           ctx.save();
           
           // Base position influenced by mouse
-          let xPos = centerX + mouseInfluenceX * Math.sin(progress * Math.PI * 2);
-          let yPos = centerY + mouseInfluenceY * Math.cos(progress * Math.PI * 2);
+          let xPos = centerX + inputInfluenceX * Math.sin(progress * Math.PI * 2);
+          let yPos = centerY + inputInfluenceY * Math.cos(progress * Math.PI * 2);
           
           let scaleFactor = 1;
           let rotationAngle = angle * rotationSpeed;
