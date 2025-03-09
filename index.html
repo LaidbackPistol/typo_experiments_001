@@ -384,712 +384,178 @@
   <div class="notification" id="notification"></div>
 
   <script>
-    // ===== COMPLETE GLOBAL VARIABLES - ADD AT THE VERY TOP OF YOUR SCRIPT =====
-    // Device detection
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-
-    // Canvas and context
-    let canvas;
-    let ctx;
-
-    // Canvas center coordinates
-    let centerX = 0;
-    let centerY = 0;
-
-    // Mouse/touch/gyro position
-    let mouseX = 0;
-    let mouseY = 0;
-
-    // Animation variables
-    let xPos = 0;
-    let yPos = 0;
-    let progress = 0;
-    let angle = 0;
-    let ratio = 0;
-    let time = 0;
-    let scaleFactor = 1;
-    let rotationAngle = 0;
-    let color = "#ffffff";
-    let adjustedDistortion = 0;
-    let mouseInfluenceX = 0;
-    let mouseInfluenceY = 0;
-    let spiralRadius = 0;
-
-    // Typography settings
-    let text = "";
-    let fontSize = 100;
-    let duplications = 10;
-    let blur = 0;
-    let rotationSpeed = 0;
-    let distortion = 0;
-    let primaryColor = "#ffffff";
-    let secondaryColor = "#ffffff";
-    let effectType = "glitch";
-    let fontType = "sans-serif";
-    let transitionTime = 0.1;
-
-    // Target values for interpolation
-    let targetFontSize = fontSize;
-    let targetDuplications = duplications;
-    let targetBlur = blur;
-    let targetRotationSpeed = rotationSpeed;
-    let targetDistortion = distortion;
-    let targetPrimaryColor = primaryColor;
-    let targetSecondaryColor = secondaryColor;
-    let targetEffectType = effectType;
-    let targetFontType = fontType;
-
-    // Interpolation state
-    let isInterpolating = false;
-    let interpolationStartTime = 0;
-    let interpolationDuration = transitionTime * 1000;
-
-    // Previous values for interpolation
-    let prevFontSize = fontSize;
-    let prevDuplications = duplications;
-    let prevBlur = blur;
-    let prevRotationSpeed = rotationSpeed;
-    let prevDistortion = distortion;
-    let prevPrimaryColor = primaryColor;
-    let prevSecondaryColor = secondaryColor;
-    let prevEffectType = effectType;
-    let prevFontType = fontType;
-
-    // Animation control
-    let isAnimating = true;
-
-    // UI elements
-    let deviceInfoDiv;
-
-    // Control elements
-    let fontSizeControl;
-    let duplicationsControl;
-    let blurControl;
-    let rotationSpeedControl;
-    let distortionControl;
-    let primaryColorControl;
-    let secondaryColorControl;
-    let effectTypeControl;
-    let fontTypeControl;
-    let transitionTimeControl;
-    let randomizeBtn;
-    let textInput;
-
-    // Gyroscope variables
-    let gyroSupported = false;
-    let gyroPermissionGranted = false;
-    let deviceRotation = { beta: 0, gamma: 0 };
-    let requestGyroButton;
-
-    // Preset system variables
-    let userPresetList;
-    let builtinPresetList;
-    let presetPanel;
-    let presetNameInput;
-    let saveCurrentBtn;
-    let generateCodeBtn;
-    let importPresetBtn;
-    let exportPresetBtn;
-    let presetCodeTextarea;
-    let savePresetBtn;
-    let notification;
-    let togglePresetPanel;
-    let userPresets = [];
-
-    // Built-in presets
-    let builtinPresets = [
-      {
-        name: "Unsure",
-        settings: {
-          fontSize: 138,
-          duplications: 20,
-          blur: 50,
-          rotationSpeed: 0,
-          distortion: 1000,
-          primaryColor: "#ffffff",
-          secondaryColor: "#ffffff",
-          effectType: "glitch",
-          fontType: "sans-serif"
-        }
-      },
-      {
-        name: "Beacon of truth",
-        settings: {
-          fontSize: 50,
-          duplications: 20,
-          blur: 0,
-          rotationSpeed: 3,
-          distortion: 390,
-          primaryColor: "#ffffff",
-          secondaryColor: "#ffffff",
-          effectType: "wave",
-          fontType: "monospace"
-        }
-      },
-      {
-        name: "Skeud",
-        settings: {
-          fontSize: 168,
-          duplications: 9,
-          blur: 2,
-          rotationSpeed: 5,
-          distortion: 0,
-          primaryColor: "#ffffff",
-          secondaryColor: "#ffffff",
-          effectType: "spiral",
-          fontType: "serif"
-        }
-      },
-      {
-        name: "Arabesque",
-        settings: {
-          fontSize: 400,
-          duplications: 9,
-          blur: 2,
-          rotationSpeed: 9,
-          distortion: 0,
-          primaryColor: "#ffffff",
-          secondaryColor: "#000000",
-          effectType: "spiral",
-          fontType: "serif"
-        }
-      },
-      {
-        name: "Simple",
-        settings: {
-          fontSize: 292,
-          duplications: 20,
-          blur: 50,
-          rotationSpeed: 0,
-          distortion: 1000,
-          primaryColor: "#ffffff",
-          secondaryColor: "#ffffff",
-          effectType: "wave",
-          fontType: "sans-serif"
-        }
-      }
-    ];
-
-    // Additional mobile UI elements
-    let mobileUIToggle;
-    let fullscreenToggle;
-
     document.addEventListener('DOMContentLoaded', () => {
-      // Initialize DOM elements
-      canvas = document.getElementById('typography-canvas');
-      ctx = canvas.getContext('2d');
-      textInput = document.getElementById('text-content');
-      text = textInput.value;
+      // Elements
+      const canvas = document.getElementById('typography-canvas');
+      const ctx = canvas.getContext('2d');
+      const textInput = document.getElementById('text-content');
       
-      // Initialize controls
-      fontSizeControl = document.getElementById('font-size');
-      duplicationsControl = document.getElementById('duplications');
-      blurControl = document.getElementById('blur');
-      rotationSpeedControl = document.getElementById('rotation-speed');
-      distortionControl = document.getElementById('distortion');
-      primaryColorControl = document.getElementById('primary-color');
-      secondaryColorControl = document.getElementById('secondary-color');
-      effectTypeControl = document.getElementById('effect-type');
-      fontTypeControl = document.getElementById('font-type');
-      transitionTimeControl = document.getElementById('transition-time');
-      randomizeBtn = document.getElementById('randomize');
+      // Controls
+      const fontSizeControl = document.getElementById('font-size');
+      const duplicationsControl = document.getElementById('duplications');
+      const blurControl = document.getElementById('blur');
+      const rotationSpeedControl = document.getElementById('rotation-speed');
+      const distortionControl = document.getElementById('distortion');
+      const primaryColorControl = document.getElementById('primary-color');
+      const secondaryColorControl = document.getElementById('secondary-color');
+      const effectTypeControl = document.getElementById('effect-type');
+      const fontTypeControl = document.getElementById('font-type');
+      const transitionTimeControl = document.getElementById('transition-time');
+      const randomizeBtn = document.getElementById('randomize');
       
-      // Initialize preset system elements
-      togglePresetPanel = document.querySelector('.toggle-preset-panel');
-      presetPanel = document.querySelector('.preset-panel');
-      userPresetList = document.getElementById('user-preset-list');
-      builtinPresetList = document.getElementById('builtin-preset-list');
-      presetNameInput = document.getElementById('preset-name');
-      saveCurrentBtn = document.getElementById('save-current');
-      generateCodeBtn = document.getElementById('generate-code');
-      importPresetBtn = document.getElementById('import-preset');
-      exportPresetBtn = document.getElementById('export-preset');
-      presetCodeTextarea = document.getElementById('preset-code');
-      savePresetBtn = document.getElementById('save-preset-btn');
-      notification = document.getElementById('notification');
-      
-      // Initialize values from controls
-      fontSize = parseInt(fontSizeControl.value);
-      duplications = parseInt(duplicationsControl.value);
-      blur = parseInt(blurControl.value);
-      rotationSpeed = parseFloat(rotationSpeedControl.value);
-      distortion = parseInt(distortionControl.value);
-      primaryColor = primaryColorControl.value;
-      secondaryColor = secondaryColorControl.value;
-      effectType = effectTypeControl.value;
-      fontType = fontTypeControl.value;
-      transitionTime = parseFloat(transitionTimeControl.value);
-      
-      // Set target values
-      targetFontSize = fontSize;
-      targetDuplications = duplications;
-      targetBlur = blur;
-      targetRotationSpeed = rotationSpeed;
-      targetDistortion = distortion;
-      targetPrimaryColor = primaryColor;
-      targetSecondaryColor = secondaryColor;
-      targetEffectType = effectType;
-      targetFontType = fontType;
-      
-      // Set interpolation duration
-      interpolationDuration = transitionTime * 1000;
+      // Preset Controls
+      const togglePresetPanel = document.querySelector('.toggle-preset-panel');
+      const presetPanel = document.querySelector('.preset-panel');
+      const userPresetList = document.getElementById('user-preset-list');
+      const builtinPresetList = document.getElementById('builtin-preset-list');
+      const presetNameInput = document.getElementById('preset-name');
+      const saveCurrentBtn = document.getElementById('save-current');
+      const generateCodeBtn = document.getElementById('generate-code');
+      const importPresetBtn = document.getElementById('import-preset');
+      const exportPresetBtn = document.getElementById('export-preset');
+      const presetCodeTextarea = document.getElementById('preset-code');
+      const savePresetBtn = document.getElementById('save-preset-btn');
+      const notification = document.getElementById('notification');
 
-      function setupMouseTracking() {
-        // This is the original mouse move event from your code
-        // Make sure this isn't being overridden elsewhere
-        window.addEventListener('mousemove', (e) => {
-          // On desktop, directly update mouseX and mouseY with current mouse position
-          if (!isMobile) {
-            mouseX = e.clientX;
-            mouseY = e.clientY;
-            
-            // Optional: Show mouse coordinates in debug mode
-            if (deviceInfoDiv) {
-              deviceInfoDiv.textContent = `Mouse: ${mouseX.toFixed(0)}, ${mouseY.toFixed(0)}`;
-            }
-          }
-        });
-        
-        // Log that mouse tracking is set up
-        console.log("Mouse tracking initialized");
-      }
-
-      // Call this function to set up mouse tracking
-      setupMouseTracking();
+      // State
+      let text = textInput.value;
+      let fontSize = parseInt(fontSizeControl.value);
+      let duplications = parseInt(duplicationsControl.value);
+      let blur = parseInt(blurControl.value);
+      let rotationSpeed = parseFloat(rotationSpeedControl.value);
+      let distortion = parseInt(distortionControl.value);
+      let primaryColor = primaryColorControl.value;
+      let secondaryColor = secondaryColorControl.value;
+      let effectType = effectTypeControl.value;
+      let fontType = fontTypeControl.value;
+      let transitionTime = parseFloat(transitionTimeControl.value);
       
-      // Function to get responsive scale
-      function getResponsiveScale() {
-        const baseWidth = 1920;
-        const baseHeight = 1080;
-        
-        const widthScale = canvas.width / baseWidth;
-        const heightScale = canvas.height / baseHeight;
-        
-        let scale = Math.min(widthScale, heightScale);
-        const minScale = 0.3;
-        scale = Math.max(scale, minScale);
-        
-        if (isMobile) {
-          const isPhone = Math.min(screen.width, screen.height) < 768;
-          if (isPhone) {
-            scale *= 0.8;
+      // Target values for interpolation
+      let targetFontSize = fontSize;
+      let targetDuplications = duplications;
+      let targetBlur = blur;
+      let targetRotationSpeed = rotationSpeed;
+      let targetDistortion = distortion;
+      let targetPrimaryColor = primaryColor;
+      let targetSecondaryColor = secondaryColor;
+      let targetEffectType = effectType;
+      let targetFontType = fontType;
+      
+      // Interpolation state
+      let isInterpolating = false;
+      let interpolationStartTime = 0;
+      let interpolationDuration = transitionTime * 1000; // in milliseconds
+      
+      // Previous values for interpolation
+      let prevFontSize = fontSize;
+      let prevDuplications = duplications;
+      let prevBlur = blur;
+      let prevRotationSpeed = rotationSpeed;
+      let prevDistortion = distortion;
+      let prevPrimaryColor = primaryColor;
+      let prevSecondaryColor = secondaryColor;
+      let prevEffectType = effectType;
+      let prevFontType = fontType;
+      
+      // Mouse position for interactive effects
+      let mouseX = 0;
+      let mouseY = 0;
+      
+      // Animation variables
+      let time = 0;
+      let isAnimating = true;
+      
+      // User presets storage
+      let userPresets = JSON.parse(localStorage.getItem('typographyPresets')) || [];
+      
+      // Built-in presets
+      const builtinPresets = [
+        {
+          name: "Unsure",
+          settings: {
+            fontSize: 138,
+            duplications: 20,
+            blur: 50,
+            rotationSpeed: 0,
+            distortion: 1000,
+            primaryColor: "#ffffff",
+            secondaryColor: "#ffffff",
+            effectType: "glitch",
+            fontType: "sans-serif"
           }
+        },
+        {
+          name: "Beacon of truth",
+          settings: {
+            fontSize: 50,
+            duplications: 20,
+            blur: 0,
+            rotationSpeed: 3,
+            distortion: 390,
+            primaryColor: "#ffffff",
+            secondaryColor: "#ffffff",
+            effectType: "wave",
+            fontType: "monospace"
+          }
+        },
+        {
+            name: "Skeud",
+            settings: {
+            fontSize: 168,
+            duplications: 9,
+            blur: 2,
+            rotationSpeed: 5,
+            distortion: 0,
+            primaryColor: "#ffffff",
+            secondaryColor: "#ffffff",
+            effectType: "spiral",
+            fontType: "serif"
         }
-        
-        return scale;
-      }
-      
-      // Update canvas dimensions
+        },
+        {
+            name: "Arabesque",
+            settings: {
+            fontSize: 400,
+            duplications: 9,
+            blur: 2,
+            rotationSpeed: 9,
+            distortion: 0,
+            primaryColor: "#ffffff",
+            secondaryColor: "#000000",
+            effectType: "spiral",
+            fontType: "serif"
+        }
+        },
+        {
+            name: "Simple",
+            settings: {
+            fontSize: 292,
+            duplications: 20,
+            blur: 50,
+            rotationSpeed: 0,
+            distortion: 1000,
+            primaryColor: "#ffffff",
+            secondaryColor: "#ffffff",
+            effectType: "wave",
+            fontType: "sans-serif"
+        }
+        }
+      ];
+
+      // Set canvas dimensions
       function setCanvasDimensions() {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
-        
-        // IMPORTANT: Update center coordinates immediately
-        centerX = canvas.width / 2;
-        centerY = canvas.height / 2;
-        
-        if (isMobile && deviceInfoDiv) {
-          if (window.orientation === 0 || window.orientation === 180) {
-            deviceInfoDiv.textContent += ' (Portrait)';
-          } else {
-            deviceInfoDiv.textContent += ' (Landscape)';
-          }
-        }
       }
       
-      // Initialize canvas dimensions
       setCanvasDimensions();
       window.addEventListener('resize', setCanvasDimensions);
       
-      // Create UI elements
-      deviceInfoDiv = document.createElement('div');
-      deviceInfoDiv.className = 'device-info';
-      deviceInfoDiv.style.cssText = `
-        position: fixed;
-        top: 80px;
-        left: 20px;
-        background: rgba(0, 0, 0, 0.5);
-        backdrop-filter: blur(5px);
-        padding: 10px;
-        border-radius: 8px;
-        z-index: 100;
-        color: white;
-        font-size: 12px;
-        opacity: 0.6;
-        transition: opacity 0.3s ease;
-      `;
-      deviceInfoDiv.textContent = isMobile ? 'Mobile device detected' : 'Desktop device detected';
-      document.body.appendChild(deviceInfoDiv);
-
-      if (isMobile) {
-        // Request gyroscope permission
-        const requestGyroButton = document.createElement('button');
-        requestGyroButton.textContent = 'Enable Gyroscope';
-        requestGyroButton.style.cssText = `
-          position: fixed;
-          top: 130px;
-          left: 20px;
-          background: rgba(0, 0, 0, 0.7);
-          color: white;
-          padding: 8px 15px;
-          border-radius: 8px;
-          border: 1px solid #444;
-          z-index: 100;
-          display: none; // Initially hidden
-        `;
-        
-        document.body.appendChild(requestGyroButton);
-        
-        // Check if DeviceOrientation is available
-        if (typeof DeviceOrientationEvent !== 'undefined') {
-          gyroSupported = true;
-          
-          // For iOS 13+ which requires permission
-          if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-            requestGyroButton.style.display = 'block';
-            
-            requestGyroButton.addEventListener('click', async () => {
-              try {
-                const permission = await DeviceOrientationEvent.requestPermission();
-                if (permission === 'granted') {
-                  gyroPermissionGranted = true;
-                  requestGyroButton.style.display = 'none';
-                  setupGyroscope();
-                  showNotification('Gyroscope enabled');
-                } else {
-                  showNotification('Gyroscope permission denied');
-                }
-              } catch (error) {
-                console.error('Error requesting gyroscope permission:', error);
-                showNotification('Error accessing gyroscope');
-              }
-            });
-          } else {
-            // For Android and older iOS which don't require permission
-            gyroPermissionGranted = true;
-            setupGyroscope();
-          }
-        } else {
-          // Fallback for devices without gyroscope
-          deviceInfoDiv.textContent = 'Gyroscope not supported - using touch instead';
-          // We'll implement touch fallback later
-        }
-      }
-
-      // Setup gyroscope event listeners
-      function setupGyroscope() {
-        window.addEventListener('deviceorientation', (event) => {
-          // Normalize gyroscope data to be similar to mouse coordinates
-          // beta: front-to-back tilt (-180 to 180), gamma: left-to-right tilt (-90 to 90)
-          deviceRotation.beta = event.beta || 0;
-          deviceRotation.gamma = event.gamma || 0;
-          
-          // Map gyroscope data to mouse coordinates
-          // We'll use a multiplier to adjust sensitivity
-          const sensitivity = 10;
-          const centerX = canvas.width / 2;
-          const centerY = canvas.height / 2;
-          
-          // Map gamma (-90 to 90) to mouseX, beta (-180 to 180) to mouseY
-          // Restricted to a range to prevent extreme values
-          mouseX = centerX + (deviceRotation.gamma / 45) * centerX * sensitivity;
-          mouseY = centerY + (deviceRotation.beta / 90) * centerY * sensitivity;
-          
-          // Update device info display
-          deviceInfoDiv.textContent = `Gyro: ${deviceRotation.gamma.toFixed(1)}°, ${deviceRotation.beta.toFixed(1)}°`;
-        });
-      }
-
-      // Add touch support as a fallback
-      if (isMobile) {
-        canvas.addEventListener('touchmove', (e) => {
-          e.preventDefault(); // Prevent scrolling
-          if (e.touches.length > 0) {
-            mouseX = e.touches[0].clientX;
-            mouseY = e.touches[0].clientY;
-            
-            // Update device info if not using gyro
-            if (!gyroPermissionGranted) {
-              deviceInfoDiv.textContent = `Touch: ${mouseX.toFixed(0)}, ${mouseY.toFixed(0)}`;
-            }
-          }
-        });
-      }
-
-      // Update the animation function to use responsive scaling
-      // In the existing animate function, add this near the beginning before any drawing:
-
-      // Calculate responsive scale factor
-      const responsiveScale = getResponsiveScale();
-
-      // And then modify these lines inside the animate function:
-      // Change
-      // ctx.font = `${fontSize}px ${fontType}`;
-      // To:
-      const adjustedFontSize = fontSize * responsiveScale;
-      ctx.font = `${adjustedFontSize}px ${fontType}`;
-
-      // Also update the distortion calculation to be responsive:
-      // Change the mouseInfluence calculations to:
-      adjustedDistortion = distortion * responsiveScale;
-      mouseInfluenceX = (mouseX - centerX) / centerX * adjustedDistortion;
-      mouseInfluenceY = (mouseY - centerY) / centerY * adjustedDistortion;
-
-      // And in the effects cases, replace distortion with adjustedDistortion:
-      // For example in the 'wave' case:
-      xPos += Math.sin(time * 2 + progress * Math.PI * 4) * adjustedDistortion;
-      yPos += Math.cos(time * 2 + progress * Math.PI * 4) * adjustedDistortion;
-      // And the same for other effects
-
-      // Make controls more mobile-friendly
-      if (isMobile) {
-        // Adjust the controls panel for better touch interaction
-        const controls = document.querySelector('.controls');
-        controls.style.width = '80%';
-        controls.style.maxWidth = '300px';
-        controls.style.left = '50%';
-        controls.style.transform = 'translateX(-50%)';
-        controls.style.padding = '15px';
-        
-        // Make sliders easier to touch
-        const sliders = document.querySelectorAll('input[type="range"]');
-        sliders.forEach(slider => {
-          slider.style.height = '25px';
-        });
-        
-        // Larger buttons for touch
-        const buttons = document.querySelectorAll('button');
-        buttons.forEach(button => {
-          button.style.padding = '10px';
-          button.style.margin = '5px 0';
-          button.style.fontSize = '16px';
-        });
-      }
-
-      // Handle orientation changes
-      window.addEventListener('orientationchange', () => {
-        // Short delay to allow the browser to complete the orientation change
-        setTimeout(() => {
-          setCanvasDimensions();
-          showNotification('Orientation changed');
-        }, 300);
+      // Mouse move event
+      window.addEventListener('mousemove', (e) => {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
       });
-
-      // Update the setCanvasDimensions function to be more responsive
-      function setCanvasDimensions() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-        
-        // If this is a mobile device, adjust the preset scaling
-        if (isMobile) {
-          // Force redraw with the new dimensions
-          draw();
-          
-          // Update device info
-          if (window.orientation === 0 || window.orientation === 180) {
-            deviceInfoDiv.textContent += ' (Portrait)';
-          } else {
-            deviceInfoDiv.textContent += ' (Landscape)';
-          }
-        }
-      }
-
-      // Add a dedicated mobile UI toggle
-      if (isMobile) {
-        const mobileUIToggle = document.createElement('button');
-        mobileUIToggle.textContent = '≡';
-        mobileUIToggle.style.cssText = `
-          position: fixed;
-          bottom: 20px;
-          left: 20px;
-          width: 50px;
-          height: 50px;
-          border-radius: 50%;
-          background: rgba(0, 0, 0, 0.7);
-          color: white;
-          border: 1px solid #444;
-          font-size: 24px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          z-index: 1000;
-        `;
-        
-        document.body.appendChild(mobileUIToggle);
-        
-        // By default, hide controls on mobile for better viewing experience
-        const controls = document.querySelector('.controls');
-        controls.style.display = 'none';
-        
-        mobileUIToggle.addEventListener('click', () => {
-          if (controls.style.display === 'none') {
-            controls.style.display = 'flex';
-            mobileUIToggle.textContent = '×';
-          } else {
-            controls.style.display = 'none';
-            mobileUIToggle.textContent = '≡';
-          }
-        });
-        
-        // Make the text input more mobile-friendly
-        const textInput = document.getElementById('text-content');
-        textInput.style.width = '60%';
-        textInput.style.padding = '10px';
-        textInput.style.fontSize = '16px'; // Prevent zoom on iOS when focusing
-      }
-
-      // Update the draw function to handle different screen orientations
-      function draw() {
-        // This function can be called directly to force a redraw
-        // Calculate responsive scale based on current orientation
-        const responsiveScale = getResponsiveScale();
-        
-        // For mobile devices, we need to adjust the typography positioning
-        if (isMobile) {
-          // Determine if we're in portrait or landscape
-          const isPortrait = window.innerHeight > window.innerWidth;
-          
-          // Adjust scale factor based on orientation
-          // In portrait mode, we may want to reduce size further to fit
-          const orientationFactor = isPortrait ? 0.7 : 1;
-          
-          // Apply adjusted scale to fontSize when drawing
-          // This will be used in the animate function
-          const adjustedFontSize = fontSize * responsiveScale * orientationFactor;
-          
-          // We can use this to make any orientation-specific adjustments
-        }
-      }
-
-      // Improve the getResponsiveScale function to be smarter about different devices
-      function getResponsiveScale() {
-        // Base dimensions reference (desktop size)
-        const baseWidth = 1920;
-        const baseHeight = 1080;
-        
-        // Calculate scaling factors
-        const widthScale = canvas.width / baseWidth;
-        const heightScale = canvas.height / baseHeight;
-        
-        // Use the smaller scale to ensure everything fits
-        let scale = Math.min(widthScale, heightScale);
-        
-        // For very small devices, we may want to add a minimum scale
-        const minScale = 0.3;
-        scale = Math.max(scale, minScale);
-        
-        // For mobile devices, we can add additional adjustments
-        if (isMobile) {
-          // Detect if it's a phone or tablet based on screen size
-          const isPhone = Math.min(screen.width, screen.height) < 768;
-          
-          if (isPhone) {
-            // Phones may need more aggressive scaling
-            scale *= 0.8;
-          }
-        }
-        
-        return scale;
-      }
-
-      // Add a fullscreen toggle for better mobile experience
-      const fullscreenToggle = document.createElement('button');
-      fullscreenToggle.textContent = '⛶';
-      fullscreenToggle.style.cssText = `
-        position: fixed;
-        bottom: ${isMobile ? '85px' : '20px'};
-        left: 20px;
-        width: ${isMobile ? '50px' : '35px'};
-        height: ${isMobile ? '50px' : '35px'};
-        border-radius: 50%;
-        background: rgba(0, 0, 0, 0.7);
-        color: white;
-        border: 1px solid #444;
-        font-size: ${isMobile ? '24px' : '18px'};
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 1000;
-      `;
-
-      document.body.appendChild(fullscreenToggle);
-
-      fullscreenToggle.addEventListener('click', () => {
-        if (!document.fullscreenElement) {
-          document.documentElement.requestFullscreen().catch(err => {
-            showNotification(`Error: ${err.message}`);
-          });
-          fullscreenToggle.textContent = '⤢';
-        } else {
-          if (document.exitFullscreen) {
-            document.exitFullscreen();
-            fullscreenToggle.textContent = '⛶';
-          }
-        }
-      });
-
-      // Listen for fullscreen changes
-      document.addEventListener('fullscreenchange', () => {
-        if (document.fullscreenElement) {
-          fullscreenToggle.textContent = '⤢';
-          showNotification('Fullscreen mode');
-        } else {
-          fullscreenToggle.textContent = '⛶';
-          showNotification('Exited fullscreen');
-        }
-        
-        // Resize canvas when entering/exiting fullscreen
-        setCanvasDimensions();
-      });
-
-      // Add a simple loading indicator for mobile devices
-      if (isMobile) {
-        const loadingIndicator = document.createElement('div');
-        loadingIndicator.style.cssText = `
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background: black;
-          color: white;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          z-index: 9999;
-          font-family: monospace;
-          transition: opacity 0.5s ease;
-        `;
-        
-        loadingIndicator.innerHTML = `
-          <h2>Typography Experiment</h2>
-          <p style="margin: 20px 0;">Loading mobile experience...</p>
-          <div style="width: 200px; height: 4px; background: #333; border-radius: 2px; overflow: hidden;">
-            <div id="progress-bar" style="width: 0%; height: 100%; background: white; transition: width 0.3s ease;"></div>
-          </div>
-        `;
-        
-        document.body.appendChild(loadingIndicator);
-        
-        // Simulate loading progress
-        const progressBar = document.getElementById('progress-bar');
-        
-        const loadingInterval = setInterval(() => {
-          progress += 5;
-          progressBar.style.width = `${progress}%`;
-          
-          if (progress >= 100) {
-            clearInterval(loadingInterval);
-            setTimeout(() => {
-              loadingIndicator.style.opacity = 0;
-              setTimeout(() => {
-                loadingIndicator.remove();
-              }, 500);
-            }, 500);
-          }
-        }, 100);
-      }
       
       // Function to convert hex color to RGB array
       function hexToRgb(hex) {
@@ -1118,8 +584,6 @@
       
       // Function to show notification
       function showNotification(message) {
-        if (!notification) return; // Exit if notification element not available
-        
         notification.textContent = message;
         notification.classList.add('show');
         setTimeout(() => {
@@ -1186,46 +650,43 @@
       function animate() {
         if (!isAnimating) return;
         
-        // Calculate responsive scale - use a local variable since it's only used in this function
-        const responsiveScale = isMobile ? getResponsiveScale() : 1;
-        
         // Handle interpolation
         if (isInterpolating) {
           const currentTime = Date.now();
           const elapsed = currentTime - interpolationStartTime;
-          let progressTemp = Math.min(elapsed / interpolationDuration, 1);
+          let progress = Math.min(elapsed / interpolationDuration, 1);
           
           // Ease in-out function for smoother transitions
-          progressTemp = progressTemp < 0.5 ? 4 * progressTemp * progressTemp * progressTemp : 1 - Math.pow(-2 * progressTemp + 2, 3) / 2;
+          progress = progress < 0.5 ? 4 * progress * progress * progress : 1 - Math.pow(-2 * progress + 2, 3) / 2;
           
           // Interpolate numeric values
-          fontSize = Math.round(prevFontSize + (targetFontSize - prevFontSize) * progressTemp);
-          duplications = Math.round(prevDuplications + (targetDuplications - prevDuplications) * progressTemp);
-          blur = Math.round(prevBlur + (targetBlur - prevBlur) * progressTemp);
-          rotationSpeed = prevRotationSpeed + (targetRotationSpeed - prevRotationSpeed) * progressTemp;
-          distortion = Math.round(prevDistortion + (targetDistortion - prevDistortion) * progressTemp);
+          fontSize = Math.round(prevFontSize + (targetFontSize - prevFontSize) * progress);
+          duplications = Math.round(prevDuplications + (targetDuplications - prevDuplications) * progress);
+          blur = Math.round(prevBlur + (targetBlur - prevBlur) * progress);
+          rotationSpeed = prevRotationSpeed + (targetRotationSpeed - prevRotationSpeed) * progress;
+          distortion = Math.round(prevDistortion + (targetDistortion - prevDistortion) * progress);
           
           // Interpolate colors
-          primaryColor = interpolateColor(prevPrimaryColor, targetPrimaryColor, progressTemp);
-          secondaryColor = interpolateColor(prevSecondaryColor, targetSecondaryColor, progressTemp);
+          primaryColor = interpolateColor(prevPrimaryColor, targetPrimaryColor, progress);
+          secondaryColor = interpolateColor(prevSecondaryColor, targetSecondaryColor, progress);
           
           // For effect type and font type, we switch immediately at the midpoint of interpolation
-          if (progressTemp >= 0.5) {
+          if (progress >= 0.5) {
             effectType = targetEffectType;
             fontType = targetFontType;
           }
           
           // Update UI controls to reflect current interpolated values
-          if (fontSizeControl) fontSizeControl.value = fontSize;
-          if (duplicationsControl) duplicationsControl.value = duplications;
-          if (blurControl) blurControl.value = blur;
-          if (rotationSpeedControl) rotationSpeedControl.value = rotationSpeed;
-          if (distortionControl) distortionControl.value = distortion;
-          if (primaryColorControl) primaryColorControl.value = primaryColor;
-          if (secondaryColorControl) secondaryColorControl.value = secondaryColor;
+          fontSizeControl.value = fontSize;
+          duplicationsControl.value = duplications;
+          blurControl.value = blur;
+          rotationSpeedControl.value = rotationSpeed;
+          distortionControl.value = distortion;
+          primaryColorControl.value = primaryColor;
+          secondaryColorControl.value = secondaryColor;
           
           // End interpolation when complete
-          if (progressTemp >= 1) {
+          if (progress >= 1) {
             isInterpolating = false;
             effectType = targetEffectType;
             fontType = targetFontType;
@@ -1233,7 +694,7 @@
         }
         
         // Clear canvas
-        if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
         
         // Update time
         time += 0.01 * rotationSpeed;
@@ -1245,15 +706,13 @@
           ctx.filter = 'none';
         }
         
-        // CRITICAL: Use correct distortion based on device
-        if (isMobile) {
-          adjustedDistortion = distortion * responsiveScale;
-        } else {
-          adjustedDistortion = distortion; // Original behavior
-        }
-
-        mouseInfluenceX = (mouseX - centerX) / centerX * adjustedDistortion;
-        mouseInfluenceY = (mouseY - centerY) / centerY * adjustedDistortion;
+        // Calculate center position
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+        
+        // Calculate mouse influence
+        const mouseInfluenceX = (mouseX - centerX) / centerX * distortion;
+        const mouseInfluenceY = (mouseY - centerY) / centerY * distortion;
         
         // Set text properties
         ctx.textAlign = 'center';
@@ -1261,68 +720,60 @@
         
         // Draw each duplication
         for (let i = 0; i < duplications; i++) {
-          // IMPORTANT: Assign to global variables, don't redeclare with 'const' or 'let'
-          progress = i / duplications;
-          angle = time + progress * Math.PI * 2;
+          const progress = i / duplications;
+          const angle = time + progress * Math.PI * 2;
           
-          // Color gradient
-          ratio = progress;
-          color = interpolateColor(primaryColor, secondaryColor, ratio);
+          // Color gradient based on progress
+          const ratio = progress;
+          const color = interpolateColor(primaryColor, secondaryColor, ratio);
           ctx.fillStyle = color;
           
           // Apply effect-specific transformations
           ctx.save();
           
-          // Base position
-          xPos = centerX + mouseInfluenceX * Math.sin(progress * Math.PI * 2);
-          yPos = centerY + mouseInfluenceY * Math.cos(progress * Math.PI * 2);
+          // Base position influenced by mouse
+          let xPos = centerX + mouseInfluenceX * Math.sin(progress * Math.PI * 2);
+          let yPos = centerY + mouseInfluenceY * Math.cos(progress * Math.PI * 2);
           
-          // Apply effect
+          let scaleFactor = 1;
+          let rotationAngle = angle * rotationSpeed;
+          
           switch (effectType) {
             case 'wave':
-              xPos += Math.sin(time * 2 + progress * Math.PI * 4) * adjustedDistortion;
-              yPos += Math.cos(time * 2 + progress * Math.PI * 4) * adjustedDistortion;
+              xPos += Math.sin(time * 2 + progress * Math.PI * 4) * distortion;
+              yPos += Math.cos(time * 2 + progress * Math.PI * 4) * distortion;
               break;
               
             case 'fracture':
-              xPos += (Math.random() - 0.5) * adjustedDistortion * 2;
-              yPos += (Math.random() - 0.5) * adjustedDistortion * 2;
-              rotationAngle += (Math.random() - 0.5) * adjustedDistortion / 100;
+              xPos += (Math.random() - 0.5) * distortion * 2;
+              yPos += (Math.random() - 0.5) * distortion * 2;
+              rotationAngle += (Math.random() - 0.5) * distortion / 100;
               break;
               
             case 'spiral':
-              spiralRadius = progress * adjustedDistortion * 2;
+              const spiralRadius = progress * distortion * 2;
               xPos += Math.cos(angle * 3) * spiralRadius;
               yPos += Math.sin(angle * 3) * spiralRadius;
               break;
               
             case 'glitch':
               if (Math.random() > 0.7) {
-                xPos += (Math.random() - 0.5) * adjustedDistortion * 4;
-                if (ctx) ctx.filter = `blur(${Math.random() * blur / 2}px) contrast(${1 + Math.random()})`;
+                xPos += (Math.random() - 0.5) * distortion * 4;
+                ctx.filter = `blur(${Math.random() * blur / 2}px) contrast(${1 + Math.random()})`;
               }
               break;
           }
-
-        // Transform to the calculated position
-        ctx.translate(xPos, yPos);
-        
-        // Apply rotation
-        rotationAngle = angle * rotationSpeed;
-        ctx.rotate(rotationAngle);
-        
-        // Apply scaling
-        ctx.scale(1 + progress * 0.2, 1 + progress * 0.2);
-        
-        // Set font size - desktop uses original size
-        const adjustedFontSize = isMobile ? fontSize * responsiveScale : fontSize;
-        ctx.font = `${adjustedFontSize}px ${fontType}`;
-        
-        // Draw text at origin (0,0) since we've translated to the right position
-        ctx.fillText(text, 0, 0);
-        
-        ctx.restore();
           
+          // Apply transforms
+          ctx.translate(xPos, yPos);
+          ctx.rotate(rotationAngle);
+          ctx.scale(1 + progress * 0.2, 1 + progress * 0.2);
+          
+          // Draw text
+          ctx.font = `${fontSize}px ${fontType}`;
+          ctx.fillText(text, 0, 0);
+          
+          ctx.restore();
         }
         
         requestAnimationFrame(animate);
