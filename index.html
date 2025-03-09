@@ -393,6 +393,16 @@
     let mouseX = 0;
     let mouseY = 0;
 
+    // Position variables for typography effects
+    let xPos = 0;
+    let yPos = 0;
+
+    // Variables for UI elements and gyroscope
+    let deviceInfoDiv;
+    let gyroSupported = false;
+    let gyroPermissionGranted = false;
+    let deviceRotation = { beta: 0, gamma: 0 };
+
     document.addEventListener('DOMContentLoaded', () => {
       // Elements
       const canvas = document.getElementById('typography-canvas');
@@ -1158,6 +1168,10 @@
         for (let i = 0; i < duplications; i++) {
           const progress = i / duplications;
           const angle = time + progress * Math.PI * 2;
+
+          // IMPORTANT: Initialize xPos and yPos here first before using them
+          xPos = centerX + mouseInfluenceX * Math.sin(progress * Math.PI * 2);
+          yPos = centerY + mouseInfluenceY * Math.cos(progress * Math.PI * 2);
           
           // Color gradient based on progress
           const ratio = progress;
