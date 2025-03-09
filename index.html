@@ -80,7 +80,7 @@
       font-weight: bold;
       font-size: 18px;
       opacity: 0.5;
-      transition: all 0.3s ease;
+      transition: opacity 0.3s ease;
     }
 
     .toggle-controls-panel:hover {
@@ -90,7 +90,6 @@
 
     .toggle-controls-panel.panel-hidden {
       right: 20px;
-      visibility: visible;
     }
 
     .control-group {
@@ -600,32 +599,27 @@
       // Initially position the toggle button
       updateTogglePosition();
 
+      // Make sure we always have both buttons visible
+      // Toggle preset panel button reference 
+      const presetToggleBtn = document.querySelector('.toggle-preset-panel');
+
       // Toggle controls panel
       toggleControlsBtn.addEventListener('click', () => {
         controlsPanel.classList.toggle('hidden');
         toggleControlsBtn.classList.toggle('panel-hidden');
         updateTogglePosition();
         
-        // Properly show/hide toggle button based on panel state
-        if (controlsPanel.classList.contains('hidden')) {
-          // Show toggle button when panel is hidden
-          setTimeout(() => {
-            toggleControlsBtn.style.visibility = 'visible';
-          }, 50);
-        } else {
-          // Hide toggle button when panel is visible
-          toggleControlsBtn.style.visibility = 'hidden';
-        }
-        
         // Save the state to localStorage
         localStorage.setItem('controlsPanelHidden', controlsPanel.classList.contains('hidden'));
       });
 
-      // Update toggle button position based on panel state
+      // Update toggle button position and ensure it's positioned correctly
       function updateTogglePosition() {
         if (controlsPanel.classList.contains('hidden')) {
+          // When panel is hidden, position button at the right edge
           toggleControlsBtn.style.right = '20px';
         } else {
+          // When panel is visible, position button to the left of the panel
           const controlsWidth = controlsPanel.offsetWidth;
           toggleControlsBtn.style.right = (controlsWidth + 30) + 'px';
         }
@@ -636,10 +630,8 @@
       if (wasPanelHidden) {
         controlsPanel.classList.add('hidden');
         toggleControlsBtn.classList.add('panel-hidden');
-        toggleControlsBtn.style.visibility = 'visible';
       } else {
-        // If not hidden, position the toggle button correctly on load but keep it invisible
-        toggleControlsBtn.style.visibility = 'hidden';
+        // If not hidden, position the toggle button correctly on load
         window.addEventListener('load', () => {
           updateTogglePosition();
         });
