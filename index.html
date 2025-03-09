@@ -4,9 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Typography Experiment</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Bebas+Neue&family=Cinzel:wght@700&family=Comfortaa:wght@700&family=DM+Serif+Display&family=Faster+One&family=Permanent+Marker&family=Righteous&family=Rubik+Glitch&family=Russo+One&family=Special+Elite&family=VT323&display=swap" rel="stylesheet">
   <style>
     * {
       margin: 0;
@@ -53,46 +50,11 @@
       backdrop-filter: blur(5px);
       z-index: 100;
       opacity: 0.3;
-      transition: all 0.3s ease;
-      transform: translateX(0);
+      transition: opacity 0.3s ease;
     }
 
     .controls:hover {
       opacity: 1;
-    }
-
-    .controls.hidden {
-      transform: translateX(calc(100% + 20px));
-    }
-
-    .toggle-controls-panel {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background: rgba(0, 0, 0, 0.7);
-      color: white;
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      z-index: 101;
-      border: 1px solid #444;
-      font-weight: bold;
-      font-size: 18px;
-      opacity: 0.5;
-      transition: opacity 0.3s ease;
-    }
-
-    .toggle-controls-panel:hover {
-      background: rgba(50, 50, 50, 0.7);
-      opacity: 1;
-    }
-
-    .toggle-controls-panel.panel-hidden {
-      right: 20px;
     }
 
     .control-group {
@@ -313,21 +275,6 @@
       border-bottom: 1px solid #333;
       padding-bottom: 3px;
     }
-
-    .font-heading {
-      margin-top: 10px;
-      margin-bottom: 2px;
-      font-size: 12px;
-      color: #aaa;
-      opacity: 0.8;
-    }
-
-    .font-preview {
-      display: inline-block;
-      margin-left: 10px;
-      font-size: 14px;
-      opacity: 0.8;
-    }
   </style>
 </head>
 <body>
@@ -337,13 +284,10 @@
   <div class="text-input">
     <input type="text" id="text-content" placeholder="Type something..." value="EN5EMBLE">
   </div>
-  <div class="toggle-controls-panel">C</div>
   <div class="controls">
     <div class="control-group">
-      <span class="control-label">Font Type</span>
-      <select id="font-type">
-        <!-- Font options will be populated by JavaScript -->
-      </select>
+      <span class="control-label">Font Size</span>
+      <input type="range" id="font-size" min="50" max="400" value="138">
     </div>
     <div class="control-group">
       <span class="control-label">Duplications</span>
@@ -440,60 +384,23 @@
   <div class="notification" id="notification"></div>
 
   <script>
-    function validateControls() {
-      const requiredControls = [
-        'font-size',
-        'duplications',
-        'blur',
-        'rotation-speed',
-        'distortion',
-        'primary-color',
-        'secondary-color',
-        'effect-type',
-        'font-type',
-        'transition-time',
-        'randomize',
-        'save-preset-btn'
-      ];
-      
-      let missingControls = [];
-      
-      requiredControls.forEach(controlId => {
-        if (!document.getElementById(controlId)) {
-          missingControls.push(controlId);
-          console.error(`Missing required control element: #${controlId}`);
-        }
-      });
-      
-      if (missingControls.length > 0) {
-        console.error(`Found ${missingControls.length} missing controls. App may not function correctly.`);
-      }
-      
-      return missingControls.length === 0;
-    }
-
     document.addEventListener('DOMContentLoaded', () => {
-      // Validate controls before proceeding
-      if (!validateControls()) {
-        console.warn("Some controls are missing. Attempting to continue anyway.");
-      }
-
       // Elements
       const canvas = document.getElementById('typography-canvas');
       const ctx = canvas.getContext('2d');
       const textInput = document.getElementById('text-content');
       
-      // Controls - add null checks to prevent errors
-      const fontSizeControl = document.getElementById('font-size') || { value: 138, addEventListener: () => {} };
-      const duplicationsControl = document.getElementById('duplications') || { value: 20, addEventListener: () => {} };
-      const blurControl = document.getElementById('blur') || { value: 50, addEventListener: () => {} };
-      const rotationSpeedControl = document.getElementById('rotation-speed') || { value: 0, addEventListener: () => {} };
-      const distortionControl = document.getElementById('distortion') || { value: 1000, addEventListener: () => {} };
-      const primaryColorControl = document.getElementById('primary-color') || { value: "#ffffff", addEventListener: () => {} };
-      const secondaryColorControl = document.getElementById('secondary-color') || { value: "#ffffff", addEventListener: () => {} };
-      const effectTypeControl = document.getElementById('effect-type') || { value: "glitch", addEventListener: () => {} };
-      const fontTypeControl = document.getElementById('font-type') || { value: "sans-serif", addEventListener: () => {} };
-      const transitionTimeControl = document.getElementById('transition-time') || { value: 0.1, addEventListener: () => {} };
+      // Controls
+      const fontSizeControl = document.getElementById('font-size');
+      const duplicationsControl = document.getElementById('duplications');
+      const blurControl = document.getElementById('blur');
+      const rotationSpeedControl = document.getElementById('rotation-speed');
+      const distortionControl = document.getElementById('distortion');
+      const primaryColorControl = document.getElementById('primary-color');
+      const secondaryColorControl = document.getElementById('secondary-color');
+      const effectTypeControl = document.getElementById('effect-type');
+      const fontTypeControl = document.getElementById('font-type');
+      const transitionTimeControl = document.getElementById('transition-time');
       const randomizeBtn = document.getElementById('randomize');
       
       // Preset Controls
@@ -510,18 +417,47 @@
       const savePresetBtn = document.getElementById('save-preset-btn');
       const notification = document.getElementById('notification');
 
+      // Validate that all required controls exist
+      function validateControls() {
+        const requiredControls = [
+          { id: 'font-size', element: fontSizeControl },
+          { id: 'duplications', element: duplicationsControl },
+          { id: 'blur', element: blurControl },
+          { id: 'rotation-speed', element: rotationSpeedControl },
+          { id: 'distortion', element: distortionControl },
+          { id: 'primary-color', element: primaryColorControl },
+          { id: 'secondary-color', element: secondaryColorControl },
+          { id: 'effect-type', element: effectTypeControl },
+          { id: 'font-type', element: fontTypeControl }
+        ];
+        
+        const missingControls = requiredControls.filter(control => !control.element);
+        if (missingControls.length > 0) {
+          missingControls.forEach(control => {
+            console.error(`Missing required control element: #${control.id}`);
+          });
+          console.warn(`Found ${missingControls.length} missing controls. App may not function correctly.`);
+        }
+        
+        return missingControls.length === 0;
+      }
+      
+      // Initialize state with default values from the "Unsure" preset
+      // This ensures even if controls are missing, we have sensible defaults
+      const controlsValid = validateControls();
+      
       // State
-      let text = textInput ? textInput.value : "EN5EMBLE";
-      let fontSize = parseInt(fontSizeControl.value);
-      let duplications = parseInt(duplicationsControl.value);
-      let blur = parseInt(blurControl.value);
-      let rotationSpeed = parseFloat(rotationSpeedControl.value);
-      let distortion = parseInt(distortionControl.value);
-      let primaryColor = primaryColorControl.value;
-      let secondaryColor = secondaryColorControl.value;
-      let effectType = effectTypeControl.value;
-      let fontType = fontTypeControl.value;
-      let transitionTime = parseFloat(transitionTimeControl.value);
+      let text = textInput ? textInput.value : 'EN5EMBLE';
+      let fontSize = fontSizeControl && fontSizeControl.value ? parseInt(fontSizeControl.value) : 138;
+      let duplications = duplicationsControl && duplicationsControl.value ? parseInt(duplicationsControl.value) : 20;
+      let blur = blurControl && blurControl.value ? parseInt(blurControl.value) : 50;
+      let rotationSpeed = rotationSpeedControl && rotationSpeedControl.value ? parseFloat(rotationSpeedControl.value) : 0;
+      let distortion = distortionControl && distortionControl.value ? parseInt(distortionControl.value) : 1000;
+      let primaryColor = primaryColorControl && primaryColorControl.value ? primaryColorControl.value : '#ffffff';
+      let secondaryColor = secondaryColorControl && secondaryColorControl.value ? secondaryColorControl.value : '#ffffff';
+      let effectType = effectTypeControl && effectTypeControl.value ? effectTypeControl.value : 'glitch';
+      let fontType = fontTypeControl && fontTypeControl.value ? fontTypeControl.value : 'sans-serif';
+      let transitionTime = transitionTimeControl && transitionTimeControl.value ? parseFloat(transitionTimeControl.value) : 0.1;
       
       // Target values for interpolation
       let targetFontSize = fontSize;
@@ -560,158 +496,7 @@
       
       // User presets storage
       let userPresets = JSON.parse(localStorage.getItem('typographyPresets')) || [];
-
-      const fontSystem = {
-        // Maps display names to actual CSS font families
-        fontMap: {
-          // Standard fonts (maintaining backward compatibility)
-          "sans-serif": "sans-serif",
-          "serif": "serif", 
-          "monospace": "monospace",
-          "cursive": "cursive",
-          
-          // Display fonts
-          "Alfa Slab": "'Alfa Slab One', sans-serif",
-          "Bebas Neue": "'Bebas Neue', sans-serif",
-          "Cinzel": "'Cinzel', serif",
-          "Comfortaa": "'Comfortaa', sans-serif",
-          "DM Serif": "'DM Serif Display', serif",
-          "Faster One": "'Faster One', cursive",
-          "Permanent Marker": "'Permanent Marker', cursive",
-          "Righteous": "'Righteous', sans-serif",
-          "Rubik Glitch": "'Rubik Glitch', cursive",
-          "Russo One": "'Russo One', sans-serif",
-          "Special Elite": "'Special Elite', cursive",
-          "VT323": "'VT323', monospace"
-        },
-        
-        // Categories for organization
-        categories: {
-          "Standard": ["sans-serif", "serif", "monospace", "cursive"],
-          "Display": ["Alfa Slab", "Bebas Neue", "Cinzel", "DM Serif", "Faster One", "Rubik Glitch", "Russo One"],
-          "Creative": ["Comfortaa", "Permanent Marker", "Righteous", "Special Elite", "VT323"]
-        },
-        
-        // Get actual font family from selection name
-        getFontFamily(fontName) {
-          return this.fontMap[fontName] || fontName;
-        },
-        
-        // Ensure backward compatibility with old presets
-        getCompatibleFontName(fontFamily) {
-          // If it's a direct match, return it
-          if (this.fontMap[fontFamily]) {
-            return fontFamily;
-          }
-          
-          // Look for the font family in the values
-          for (const [key, value] of Object.entries(this.fontMap)) {
-            if (value === fontFamily) {
-              return key;
-            }
-          }
-          
-          // Default fallback
-          return "sans-serif";
-        },
-        
-        // Preload fonts to prevent FOUC (Flash of Unstyled Content)
-        preloadFonts() {
-          const preloadDiv = document.createElement('div');
-          preloadDiv.style.opacity = '0';
-          preloadDiv.style.position = 'absolute';
-          preloadDiv.style.top = '-9999px';
-          
-          // Create a span for each font
-          for (const fontFamily of Object.values(this.fontMap)) {
-            const span = document.createElement('span');
-            span.style.fontFamily = fontFamily;
-            span.textContent = 'abcdefghijklmnopqrstuvwxyz0123456789';
-            preloadDiv.appendChild(span);
-          }
-          
-          document.body.appendChild(preloadDiv);
-          
-          // Remove after a delay to ensure fonts are loaded
-          setTimeout(() => {
-            document.body.removeChild(preloadDiv);
-          }, 3000);
-        }
-      };
-
-      // Replace your populateFontSelector function with this fixed version:
-      function populateFontSelector() {
-        const fontTypeSelect = document.getElementById('font-type');
-        if (!fontTypeSelect) {
-          console.error('Font type select element not found!');
-          return;
-        }
-        
-        fontTypeSelect.innerHTML = ''; // Clear existing options
-        
-        // Add each category and its fonts
-        for (const [category, fonts] of Object.entries(fontSystem.categories)) {
-          // Add category group
-          const groupElement = document.createElement('optgroup');
-          groupElement.label = category;
-          
-          // Add fonts in this category
-          fonts.forEach(fontName => {
-            const option = document.createElement('option');
-            option.value = fontName;
-            option.textContent = fontName;
-            option.style.fontFamily = fontSystem.getFontFamily(fontName);
-            
-            // Set default selection for the first standard font (sans-serif)
-            if (fontName === 'sans-serif') {
-              option.selected = true;
-            }
-            
-            groupElement.appendChild(option);
-          });
-          
-          fontTypeSelect.appendChild(groupElement);
-        }
-        
-        // Update the select styling to show the actual font
-        fontTypeSelect.addEventListener('change', function() {
-          if (this.value) {
-            this.style.fontFamily = fontSystem.getFontFamily(this.value);
-          }
-        });
-        
-        // Set initial style with safety check
-        try {
-          if (fontTypeSelect.options.length > 0) {
-            // Ensure a value exists by forcing selection of first option if none selected
-            if (!fontTypeSelect.value) {
-              fontTypeSelect.selectedIndex = 0;
-            }
-            fontTypeSelect.style.fontFamily = fontSystem.getFontFamily(fontTypeSelect.value);
-          } else {
-            // Fallback if somehow we have no options
-            fontTypeSelect.style.fontFamily = 'sans-serif';
-          }
-        } catch (e) {
-          console.error('Error setting initial font style:', e);
-          // Fallback to a safe default
-          fontTypeSelect.style.fontFamily = 'sans-serif';
-        }
-      }
-
-      // Make it available globally if needed
-      window.fontSystem = fontSystem;
       
-      // Only then initialize the font selector
-      populateFontSelector();
-      
-      // And finally, preload fonts
-      fontSystem.preloadFonts();
-
-      let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-      let hasGyro = false;
-      let gyroData = { beta: 0, gamma: 0 };
-
       // Built-in presets
       const builtinPresets = [
         {
@@ -793,115 +578,14 @@
       }
       
       setCanvasDimensions();
-
-     // First, remove any existing toggle buttons to prevent duplicates
-    const existingToggleButtons = document.querySelectorAll('.toggle-controls-panel');
-    existingToggleButtons.forEach(button => {
-      if (button) button.remove();
-    });
-
-    // Get control elements
-    const controlsPanel = document.querySelector('.controls');
-
-    // Create a single toggle button
-    const toggleControlsBtn = document.createElement('div');
-    toggleControlsBtn.className = 'toggle-controls-panel';
-    toggleControlsBtn.textContent = 'C';
-    document.body.appendChild(toggleControlsBtn);
-
-    // Update toggle button position based on panel state
-    function updateTogglePosition() {
-      if (controlsPanel.classList.contains('hidden')) {
-        toggleControlsBtn.style.right = '20px';
-      } else {
-        const controlsWidth = controlsPanel.offsetWidth;
-        toggleControlsBtn.style.right = (controlsWidth + 30) + 'px';
-      }
-    }
-
-    // Initial positioning
-    updateTogglePosition();
-
-    // Toggle controls panel
-    toggleControlsBtn.addEventListener('click', () => {
-      controlsPanel.classList.toggle('hidden');
-      toggleControlsBtn.classList.toggle('panel-hidden');
-      updateTogglePosition();
+      window.addEventListener('resize', setCanvasDimensions);
       
-      // Save the state to localStorage
-      localStorage.setItem('controlsPanelHidden', controlsPanel.classList.contains('hidden'));
-    });
-
-    // Check if the controls panel was hidden in the previous session
-    const wasPanelHidden = localStorage.getItem('controlsPanelHidden') === 'true';
-    if (wasPanelHidden) {
-      controlsPanel.classList.add('hidden');
-      toggleControlsBtn.classList.add('panel-hidden');
-    } else {
-      // If not hidden, position the toggle button correctly on load
-      window.addEventListener('load', () => {
-        updateTogglePosition();
-      });
-    }
-
-      window.addEventListener('resize', () => {
-        setCanvasDimensions();
-        updateTogglePosition();
-      });
-
       // Mouse move event
       window.addEventListener('mousemove', (e) => {
         mouseX = e.clientX;
         mouseY = e.clientY;
       });
-
-      if (isMobile) {
-        // Create a button to request permission on iOS (required for iOS 13+)
-        if (typeof DeviceOrientationEvent !== 'undefined' && 
-            typeof DeviceOrientationEvent.requestPermission === 'function') {
-          
-          const permissionBtn = document.createElement('button');
-          permissionBtn.textContent = 'Enable Gyroscope';
-          permissionBtn.style.position = 'fixed';
-          permissionBtn.style.top = '50%';
-          permissionBtn.style.left = '50%';
-          permissionBtn.style.transform = 'translate(-50%, -50%)';
-          permissionBtn.style.zIndex = '1000';
-          permissionBtn.style.padding = '12px 24px';
-          permissionBtn.style.backgroundColor = '#333';
-          permissionBtn.style.color = 'white';
-          permissionBtn.style.border = 'none';
-          permissionBtn.style.borderRadius = '4px';
-          permissionBtn.style.fontSize = '16px';
-          
-          permissionBtn.addEventListener('click', () => {
-            DeviceOrientationEvent.requestPermission()
-              .then(response => {
-                if (response === 'granted') {
-                  window.addEventListener('deviceorientation', handleOrientation);
-                  hasGyro = true;
-                  document.body.removeChild(permissionBtn);
-                  showNotification('Gyroscope enabled');
-                }
-              })
-              .catch(console.error);
-          });
-          
-          document.body.appendChild(permissionBtn);
-        } else {
-          // For non-iOS devices or older iOS versions
-          window.addEventListener('deviceorientation', handleOrientation);
-          hasGyro = true;
-        }
-      }
-
-      // Handle orientation data
-      function handleOrientation(event) {
-        // Normalize gyroscope data
-        gyroData.beta = event.beta;  // Front/back tilt: -180 to 180
-        gyroData.gamma = event.gamma; // Left/right tilt: -90 to 90
-      }                                    
-
+      
       // Function to convert hex color to RGB array
       function hexToRgb(hex) {
         const r = parseInt(hex.slice(1, 3), 16);
