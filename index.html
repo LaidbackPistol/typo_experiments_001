@@ -618,27 +618,7 @@
       // User presets storage
       let userPresets = JSON.parse(localStorage.getItem('typographyPresets')) || [];
 
-      // Performance settings for different modes
-      const performanceSettings = {
-        high: {
-          feedbackQuality: 1,     // Full resolution
-          skipFrames: 0,          // Process every frame
-          useImageSmoothing: true // Smooth images
-        },
-        balanced: {
-          feedbackQuality: 0.75,  // 75% resolution
-          skipFrames: 1,          // Process every other frame
-          useImageSmoothing: true // Smooth images
-        },
-        mobile: {
-          feedbackQuality: 0.5,   // 50% resolution
-          skipFrames: 2,          // Process every third frame
-          useImageSmoothing: false // No image smoothing
-        }
-      };
-
       // Variables for feedback processing
-      let currentPerformanceSettings = performanceSettings["high"];
       let frameCount = 0;
 
       const fontSystem = {
@@ -878,20 +858,6 @@
         // Apply performance scaling to feedback canvas if needed
         resizeFeedbackCanvas();
       }
-
-      function resizeFeedbackCanvas() {
-        const quality = currentPerformanceSettings.feedbackQuality;
-        if (quality !== 1) {
-          // We're not changing the actual canvas size to avoid layout shifts
-          // instead we'll scale the drawing operations
-          feedbackCtx.setTransform(quality, 0, 0, quality, 0, 0);
-        } else {
-          feedbackCtx.setTransform(1, 0, 0, 1, 0, 0);
-        }
-        
-        // Set image smoothing based on performance settings
-        feedbackCtx.imageSmoothingEnabled = currentPerformanceSettings.useImageSmoothing;
-      }
       
       setCanvasDimensions();
 
@@ -1053,9 +1019,6 @@
       function applyFeedback() {
         // Skip frames for performance if needed
         frameCount++;
-        if (frameCount % (currentPerformanceSettings.skipFrames + 1) !== 0) {
-          return;
-        }
         
         // Save current transformation state
         feedbackCtx.save();
@@ -1102,7 +1065,6 @@
           feedbackZoom: parseFloat(feedbackZoomControl.value),
           feedbackShiftX: parseFloat(feedbackShiftXControl.value),
           feedbackShiftY: parseFloat(feedbackShiftYControl.value),
-          performanceMode: performanceModeControl.value
         };
       }
       
@@ -1170,12 +1132,6 @@
         if (settings.feedbackShiftY !== undefined) {
           feedbackShiftYControl.value = settings.feedbackShiftY;
           feedbackShiftY = settings.feedbackShiftY;
-        }
-        
-        if (settings.performanceMode !== undefined) {
-          performanceModeControl.value = settings.performanceMode;
-          performanceMode = settings.performanceMode;
-          currentPerformanceSettings = performanceSettings[performanceMode];
         }
 
         // Start interpolation
@@ -1483,12 +1439,6 @@ const customPreset = ${presetStr};
       
       feedbackShiftYControl.addEventListener('input', () => {
         feedbackShiftY = parseFloat(feedbackShiftYControl.value);
-      });
-      
-      performanceModeControl.addEventListener('change', () => {
-        performanceMode = performanceModeControl.value;
-        currentPerformanceSettings = performanceSettings[performanceMode];
-        resizeFeedbackCanvas();
       });
 
       // Save current settings as preset
