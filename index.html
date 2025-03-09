@@ -338,10 +338,11 @@
     <input type="text" id="text-content" placeholder="Type something..." value="EN5EMBLE">
   </div>
   <div class="toggle-controls-panel">C</div>
-  <div class="control-group">
-    <span class="control-label">Font Size</span>
-    <input type="range" id="font-size" min="50" max="400" value="138">
-  </div>
+  <div class="controls">
+    <div class="control-group">
+      <span class="control-label">Font Size</span>
+      <input type="range" id="font-size" min="50" max="400" value="138">
+    </div>
     <div class="control-group">
       <span class="control-label">Duplications</span>
       <input type="range" id="duplications" min="1" max="20" value="20">
@@ -438,17 +439,12 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      // Validate controls before proceeding
-      if (!validateControls()) {
-        console.warn("Some controls are missing. Attempting to continue anyway.");
-      }
-
       // Elements
       const canvas = document.getElementById('typography-canvas');
       const ctx = canvas.getContext('2d');
       const textInput = document.getElementById('text-content');
       
-      // Controls - add null checks to prevent errors
+      // Controls - define these FIRST
       const fontSizeControl = document.getElementById('font-size') || { value: 138, addEventListener: () => {} };
       const duplicationsControl = document.getElementById('duplications') || { value: 20, addEventListener: () => {} };
       const blurControl = document.getElementById('blur') || { value: 50, addEventListener: () => {} };
@@ -475,6 +471,7 @@
       const savePresetBtn = document.getElementById('save-preset-btn');
       const notification = document.getElementById('notification');
 
+      // THEN define the validateControls function after all the controls are defined
       function validateControls() {
         const requiredControls = [
           { id: 'font-size', element: fontSizeControl },
@@ -499,6 +496,7 @@
         return missingControls.length === 0;
       }
 
+      // NOW call validateControls after it's defined and after the controls are defined
       const controlsValid = validateControls();
 
       // State - with fallbacks for each value
