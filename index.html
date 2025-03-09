@@ -497,6 +497,14 @@
       const feedbackCanvas = document.getElementById('feedback-canvas');
       const feedbackCtx = feedbackCanvas.getContext('2d');
       
+      // Function to detect if device is mobile
+      function detectMobileDevice() {
+        return window.innerWidth < 768;
+      }
+      
+      // Set initial device type
+      isMobile = detectMobileDevice();
+      
       const textInput = document.getElementById('text-content');
       
       // Controls
@@ -532,6 +540,8 @@
       const presetCodeTextarea = document.getElementById('preset-code');
       const savePresetBtn = document.getElementById('save-preset-btn');
       const notification = document.getElementById('notification');
+
+      const mobileFontScaleFactor = 0.8;
 
       // THEN define the validateControls function after all the controls are defined
       function validateControls() {
@@ -845,26 +855,6 @@
             secondaryColor: "#000000",
             effectType: "spiral",
             fontType: "serif",
-            feedbackEnabled: false,
-            feedbackDecay: 0.6,
-            feedbackOpacity: 0.1,
-            feedbackZoom: 0.98,
-            feedbackShiftX: 0,
-            feedbackShiftY: 0
-        }
-        },
-        {
-            name: "Simple",
-            settings: {
-            fontSize: 292,
-            duplications: 20,
-            blur: 50,
-            rotationSpeed: 0,
-            distortion: 1000,
-            primaryColor: "#ffffff",
-            secondaryColor: "#ffffff",
-            effectType: "wave",
-            fontType: "sans-serif",
             feedbackEnabled: false,
             feedbackDecay: 0.6,
             feedbackOpacity: 0.1,
@@ -1333,8 +1323,13 @@
           ctx.rotate(rotationAngle);
           ctx.scale(1 + progress * 0.2, 1 + progress * 0.2);
           
-          // Draw text
-          ctx.font = `${fontSize}px ${fontSystem.getFontFamily(fontType)}`;
+          let displayFontSize = fontSize;
+          if (isMobile) {
+            displayFontSize = Math.floor(fontSize * mobileFontScaleFactor);
+          }
+
+          // Draw text with mobile-adjusted font size
+          ctx.font = `${displayFontSize}px ${fontSystem.getFontFamily(fontType)}`;
           ctx.fillText(text, 0, 0);
           
           ctx.restore();
