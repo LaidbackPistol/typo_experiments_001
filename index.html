@@ -1187,7 +1187,7 @@
         if (!isAnimating) return;
         
         // Calculate responsive scale - use a local variable since it's only used in this function
-        const responsiveScale = getResponsiveScale();
+        const responsiveScale = isMobile ? getResponsiveScale() : 1;
         
         // Handle interpolation
         if (isInterpolating) {
@@ -1239,25 +1239,25 @@
         time += 0.01 * rotationSpeed;
         
         // Apply canvas-level blur if needed
-        if (ctx) {
-          if (blur > 0) {
-            ctx.filter = `blur(${blur / 5}px)`;
-          } else {
-            ctx.filter = 'none';
-          }
+        if (blur > 0) {
+          ctx.filter = `blur(${blur / 5}px)`;
+        } else {
+          ctx.filter = 'none';
         }
         
-        // Calculate mouse influence with responsive scaling
-        // IMPORTANT: Use global variables without 'const' or 'let'
-        adjustedDistortion = distortion * responsiveScale;
+        // CRITICAL: Use correct distortion based on device
+        if (isMobile) {
+          adjustedDistortion = distortion * responsiveScale;
+        } else {
+          adjustedDistortion = distortion; // Original behavior
+        }
+
         mouseInfluenceX = (mouseX - centerX) / centerX * adjustedDistortion;
         mouseInfluenceY = (mouseY - centerY) / centerY * adjustedDistortion;
         
         // Set text properties
-        if (ctx) {
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-        }
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
         
         // Draw each duplication
         for (let i = 0; i < duplications; i++) {
@@ -1268,17 +1268,14 @@
           // Color gradient
           ratio = progress;
           color = interpolateColor(primaryColor, secondaryColor, ratio);
-          if (ctx) ctx.fillStyle = color;
+          ctx.fillStyle = color;
           
           // Apply effect-specific transformations
-          if (ctx) ctx.save();
+          ctx.save();
           
           // Base position
           xPos = centerX + mouseInfluenceX * Math.sin(progress * Math.PI * 2);
           yPos = centerY + mouseInfluenceY * Math.cos(progress * Math.PI * 2);
-          
-          scaleFactor = 1;
-          rotationAngle = angle * rotationSpeed;
           
           // Apply effect
           switch (effectType) {
@@ -1306,19 +1303,25 @@
               }
               break;
           }
+
+          // Transform to the calculated position
+          ctx.translate(xPos, yPos);
           
-          // Apply transforms
-          if (ctx) {
-            ctx.translate(xPos, yPos);
-            ctx.rotate(rotationAngle);
-            ctx.scale(1 + progress * 0.2, 1 + progress * 0.2);
-            
-            // Draw text with responsive scaling
-            const adjustedFontSize = fontSize * responsiveScale;
-            ctx.font = `${adjustedFontSize}px ${fontType}`;
-            ctx.fillText(text, 0, 0);
-            
-            ctx.restore();
+          // Apply rotation
+          rotationAngle = angle * rotationSpeed;
+          ctx.rotate(rotationAngle);
+          
+          // Apply scaling
+          ctx.scale(1 + progress * 0.2, 1 + progress * 0.2);
+          
+          // Set font size - desktop uses original size
+          const adjustedFontSize = isMobile ? fontSize * responsiveScale : fontSize;
+          ctx.font = `${adjustedFontSize}px ${fontType}`;
+          
+          // Draw text at origin (0,0) since we've translated to the right position
+          ctx.fillText(text, 0, 0);
+          
+          ctx.restore();
           }
         }
         
