@@ -40,6 +40,24 @@
       height: 100%;
     }
 
+    /* New styles for the feedback canvas */
+    #feedback-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1; /* Behind the main canvas */
+    }
+
+    /* Add feedback effect controls to existing controls */
+    .control-group {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
     .controls {
       position: fixed;
       bottom: 20px;
@@ -385,6 +403,38 @@
         <option value="cursive">Cursive</option>
       </select>
     </div>
+    <div class="control-group">
+      <span class="control-label">Trail Effect</span>
+      <input type="checkbox" id="feedback-enabled" checked>
+    </div>
+    <div class="control-group">
+      <span class="control-label">Trail Decay</span>
+      <input type="range" id="feedback-decay" min="0.01" max="0.3" step="0.01" value="0.05">
+    </div>
+    <div class="control-group">
+      <span class="control-label">Trail Opacity</span>
+      <input type="range" id="feedback-opacity" min="0.1" max="1" step="0.05" value="0.8">
+    </div>
+    <div class="control-group">
+      <span class="control-label">Trail Zoom</span>
+      <input type="range" id="feedback-zoom" min="0.95" max="1.05" step="0.001" value="1.0">
+    </div>
+    <div class="control-group">
+      <span class="control-label">Trail Shift X</span>
+      <input type="range" id="feedback-shift-x" min="-10" max="10" step="0.5" value="0">
+    </div>
+    <div class="control-group">
+      <span class="control-label">Trail Shift Y</span>
+      <input type="range" id="feedback-shift-y" min="-10" max="10" step="0.5" value="0">
+    </div>
+    <div class="control-group">
+      <span class="control-label">Performance Mode</span>
+      <select id="performance-mode">
+        <option value="high">High Quality</option>
+        <option value="balanced">Balanced</option>
+        <option value="mobile">Mobile Optimized</option>
+      </select>
+    </div>
     <!-- Transition time control -->
     <div class="control-group">
       <span class="control-label">Transition Time</span>
@@ -442,9 +492,12 @@
       // Elements
       const canvas = document.getElementById('typography-canvas');
       const ctx = canvas.getContext('2d');
+      const feedbackCanvas = document.getElementById('feedback-canvas');
+      const feedbackCtx = feedbackCanvas.getContext('2d');
+      
       const textInput = document.getElementById('text-content');
       
-      // Controls - define these FIRST
+      // Controls
       const fontSizeControl = document.getElementById('font-size') || { value: 138, addEventListener: () => {} };
       const duplicationsControl = document.getElementById('duplications') || { value: 20, addEventListener: () => {} };
       const blurControl = document.getElementById('blur') || { value: 50, addEventListener: () => {} };
@@ -456,6 +509,14 @@
       const fontTypeControl = document.getElementById('font-type') || { value: "sans-serif", addEventListener: () => {} };
       const transitionTimeControl = document.getElementById('transition-time') || { value: 0.1, addEventListener: () => {} };
       const randomizeBtn = document.getElementById('randomize');
+      // feedback effect controls
+      const feedbackEnabledControl = document.getElementById('feedback-enabled');
+      const feedbackDecayControl = document.getElementById('feedback-decay');
+      const feedbackOpacityControl = document.getElementById('feedback-opacity');
+      const feedbackZoomControl = document.getElementById('feedback-zoom');
+      const feedbackShiftXControl = document.getElementById('feedback-shift-x');
+      const feedbackShiftYControl = document.getElementById('feedback-shift-y');
+      const performanceModeControl = document.getElementById('performance-mode');
       
       // Preset Controls
       const togglePresetPanel = document.querySelector('.toggle-preset-panel');
@@ -510,7 +571,13 @@
       let secondaryColor = secondaryColorControl && secondaryColorControl.value ? secondaryColorControl.value : '#ffffff';
       let effectType = effectTypeControl && effectTypeControl.value ? effectTypeControl.value : 'glitch';
       let fontType = fontTypeControl && fontTypeControl.value ? fontTypeControl.value : 'sans-serif';
-
+      let feedbackEnabled = feedbackEnabledControl.checked;
+      let feedbackDecay = parseFloat(feedbackDecayControl.value);
+      let feedbackOpacity = parseFloat(feedbackOpacityControl.value);
+      let feedbackZoom = parseFloat(feedbackZoomControl.value);
+      let feedbackShiftX = parseFloat(feedbackShiftXControl.value);
+      let feedbackShiftY = parseFloat(feedbackShiftYControl.value);
+      let performanceMode = performanceModeControl.value;
       let transitionTime = transitionTimeControl && transitionTimeControl.value ? parseFloat(transitionTimeControl.value) : 0.1;
       
       // Target values for interpolation
@@ -550,6 +617,29 @@
       
       // User presets storage
       let userPresets = JSON.parse(localStorage.getItem('typographyPresets')) || [];
+
+      // Performance settings for different modes
+      const performanceSettings = {
+        high: {
+          feedbackQuality: 1,     // Full resolution
+          skipFrames: 0,          // Process every frame
+          useImageSmoothing: true // Smooth images
+        },
+        balanced: {
+          feedbackQuality: 0.75,  // 75% resolution
+          skipFrames: 1,          // Process every other frame
+          useImageSmoothing: true // Smooth images
+        },
+        mobile: {
+          feedbackQuality: 0.5,   // 50% resolution
+          skipFrames: 2,          // Process every third frame
+          useImageSmoothing: false // No image smoothing
+        }
+      };
+
+      // Variables for feedback processing
+      let currentPerformanceSettings = performanceSettings[performanceMode];
+      let frameCount = 0;
 
       const fontSystem = {
         // Maps display names to actual CSS font families
@@ -780,6 +870,27 @@
       function setCanvasDimensions() {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
+
+        // Set dimensions for feedback canvas
+        feedbackCanvas.width = window.innerWidth;
+        feedbackCanvas.height = window.innerHeight;
+        
+        // Apply performance scaling to feedback canvas if needed
+        resizeFeedbackCanvas();
+      }
+
+      function resizeFeedbackCanvas() {
+        const quality = currentPerformanceSettings.feedbackQuality;
+        if (quality !== 1) {
+          // We're not changing the actual canvas size to avoid layout shifts
+          // instead we'll scale the drawing operations
+          feedbackCtx.setTransform(quality, 0, 0, quality, 0, 0);
+        } else {
+          feedbackCtx.setTransform(1, 0, 0, 1, 0, 0);
+        }
+        
+        // Set image smoothing based on performance settings
+        feedbackCtx.imageSmoothingEnabled = currentPerformanceSettings.useImageSmoothing;
       }
       
       setCanvasDimensions();
@@ -937,6 +1048,41 @@
           notification.classList.remove('show');
         }, 2000);
       }
+
+      // Apply feedback effect
+      function applyFeedback() {
+        // Skip frames for performance if needed
+        frameCount++;
+        if (frameCount % (currentPerformanceSettings.skipFrames + 1) !== 0) {
+          return;
+        }
+        
+        // Save current transformation state
+        feedbackCtx.save();
+        
+        // Apply fade effect by drawing a semi-transparent black rectangle
+        feedbackCtx.fillStyle = `rgba(0, 0, 0, ${feedbackDecay})`;
+        feedbackCtx.fillRect(0, 0, feedbackCanvas.width, feedbackCanvas.height);
+        
+        // Set the composite operation to only show brighter parts
+        feedbackCtx.globalCompositeOperation = 'lighter';
+        
+        // Calculate center for transformations
+        const centerX = feedbackCanvas.width / 2;
+        const centerY = feedbackCanvas.height / 2;
+        
+        // Apply transformations relative to center
+        feedbackCtx.translate(centerX, centerY);
+        feedbackCtx.scale(feedbackZoom, feedbackZoom);
+        feedbackCtx.translate(-centerX + feedbackShiftX, -centerY + feedbackShiftY);
+        
+        // Draw the current canvas onto the feedback canvas with opacity
+        feedbackCtx.globalAlpha = feedbackOpacity;
+        feedbackCtx.drawImage(canvas, 0, 0);
+        
+        // Restore the context state
+        feedbackCtx.restore();
+      }
       
       // Function to get current settings
       function getCurrentSettings() {
@@ -949,7 +1095,14 @@
           primaryColor: primaryColorControl.value,
           secondaryColor: secondaryColorControl.value,
           effectType: effectTypeControl.value,
-          fontType: fontTypeControl.value
+          fontType: fontTypeControl.value,
+          feedbackEnabled: feedbackEnabledControl.checked,
+          feedbackDecay: parseFloat(feedbackDecayControl.value),
+          feedbackOpacity: parseFloat(feedbackOpacityControl.value),
+          feedbackZoom: parseFloat(feedbackZoomControl.value),
+          feedbackShiftX: parseFloat(feedbackShiftXControl.value),
+          feedbackShiftY: parseFloat(feedbackShiftYControl.value),
+          performanceMode: performanceModeControl.value
         };
       }
       
@@ -987,7 +1140,44 @@
         targetSecondaryColor = settings.secondaryColor;
         targetEffectType = settings.effectType;
         targetFontType = settings.fontType;
+
+        // Apply feedback settings if they exist in the preset
+        if (settings.feedbackEnabled !== undefined) {
+          feedbackEnabledControl.checked = settings.feedbackEnabled;
+          feedbackEnabled = settings.feedbackEnabled;
+        }
         
+        if (settings.feedbackDecay !== undefined) {
+          feedbackDecayControl.value = settings.feedbackDecay;
+          feedbackDecay = settings.feedbackDecay;
+        }
+        
+        if (settings.feedbackOpacity !== undefined) {
+          feedbackOpacityControl.value = settings.feedbackOpacity;
+          feedbackOpacity = settings.feedbackOpacity;
+        }
+        
+        if (settings.feedbackZoom !== undefined) {
+          feedbackZoomControl.value = settings.feedbackZoom;
+          feedbackZoom = settings.feedbackZoom;
+        }
+        
+        if (settings.feedbackShiftX !== undefined) {
+          feedbackShiftXControl.value = settings.feedbackShiftX;
+          feedbackShiftX = settings.feedbackShiftX;
+        }
+        
+        if (settings.feedbackShiftY !== undefined) {
+          feedbackShiftYControl.value = settings.feedbackShiftY;
+          feedbackShiftY = settings.feedbackShiftY;
+        }
+        
+        if (settings.performanceMode !== undefined) {
+          performanceModeControl.value = settings.performanceMode;
+          performanceMode = settings.performanceMode;
+          currentPerformanceSettings = performanceSettings[performanceMode];
+        }
+
         // Start interpolation
         isInterpolating = true;
         interpolationStartTime = Date.now();
@@ -1046,6 +1236,10 @@
           }
         }
         
+        if (feedbackEnabled) {
+          applyFeedback();
+        }
+
         // Clear canvas
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
@@ -1143,6 +1337,10 @@
           ctx.restore();
         }
         
+        ctx.globalCompositeOperation = 'destination-over';
+        ctx.drawImage(feedbackCanvas, 0, 0);
+        ctx.globalCompositeOperation = 'source-over';
+      
         requestAnimationFrame(animate);
       }
       
@@ -1257,7 +1455,42 @@ const customPreset = ${presetStr};
       togglePresetPanel.addEventListener('click', () => {
         presetPanel.classList.toggle('open');
       });
+
+      feedbackEnabledControl.addEventListener('change', () => {
+        feedbackEnabled = feedbackEnabledControl.checked;
+        
+        // Clear the feedback canvas if disabled
+        if (!feedbackEnabled) {
+          feedbackCtx.clearRect(0, 0, feedbackCanvas.width, feedbackCanvas.height);
+        }
+      });
       
+      feedbackDecayControl.addEventListener('input', () => {
+        feedbackDecay = parseFloat(feedbackDecayControl.value);
+      });
+      
+      feedbackOpacityControl.addEventListener('input', () => {
+        feedbackOpacity = parseFloat(feedbackOpacityControl.value);
+      });
+      
+      feedbackZoomControl.addEventListener('input', () => {
+        feedbackZoom = parseFloat(feedbackZoomControl.value);
+      });
+      
+      feedbackShiftXControl.addEventListener('input', () => {
+        feedbackShiftX = parseFloat(feedbackShiftXControl.value);
+      });
+      
+      feedbackShiftYControl.addEventListener('input', () => {
+        feedbackShiftY = parseFloat(feedbackShiftYControl.value);
+      });
+      
+      performanceModeControl.addEventListener('change', () => {
+        performanceMode = performanceModeControl.value;
+        currentPerformanceSettings = performanceSettings[performanceMode];
+        resizeFeedbackCanvas();
+      });
+
       // Save current settings as preset
       saveCurrentBtn.addEventListener('click', () => {
         const presetName = presetNameInput.value.trim();
