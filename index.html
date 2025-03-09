@@ -1132,35 +1132,8 @@
         targetEffectType = settings.effectType;
         targetFontType = settings.fontType;
 
-        // Apply feedback settings if they exist in the preset
-        if (settings.feedbackEnabled !== undefined) {
-          feedbackEnabledControl.checked = settings.feedbackEnabled;
-          feedbackEnabled = settings.feedbackEnabled;
-        }
-        
-        if (settings.feedbackDecay !== undefined) {
-          feedbackDecayControl.value = settings.feedbackDecay;
-          feedbackDecay = settings.feedbackDecay;
-        }
-        
-        if (settings.feedbackOpacity !== undefined) {
-          feedbackOpacityControl.value = settings.feedbackOpacity;
-          feedbackOpacity = settings.feedbackOpacity;
-        }
-        
-        if (settings.feedbackZoom !== undefined) {
-          feedbackZoomControl.value = settings.feedbackZoom;
-          feedbackZoom = settings.feedbackZoom;
-        }
-        
-        if (settings.feedbackShiftX !== undefined) {
-          feedbackShiftXControl.value = settings.feedbackShiftX;
-          feedbackShiftX = settings.feedbackShiftX;
-        }
-        
-        if (settings.feedbackShiftY !== undefined) {
-          feedbackShiftYControl.value = settings.feedbackShiftY;
-          feedbackShiftY = settings.feedbackShiftY;
+        if (feedbackCanvas && feedbackCtx) {
+          feedbackCtx.clearRect(0, 0, feedbackCanvas.width, feedbackCanvas.height);
         }
 
         // Start interpolation
