@@ -468,6 +468,21 @@
       // User presets storage
       let userPresets = JSON.parse(localStorage.getItem('typographyPresets')) || [];
 
+            // Set canvas dimensions
+            function setCanvasDimensions() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+      
+      setCanvasDimensions();
+      window.addEventListener('resize', setCanvasDimensions);
+      
+      // Mouse move event
+      window.addEventListener('mousemove', (e) => {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+      });
+
       // Device detection
       const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
       let gyroSupported = false;
@@ -952,21 +967,6 @@
         }
         }
       ];
-
-      // Set canvas dimensions
-      function setCanvasDimensions() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-      }
-      
-      setCanvasDimensions();
-      window.addEventListener('resize', setCanvasDimensions);
-      
-      // Mouse move event
-      window.addEventListener('mousemove', (e) => {
-        mouseX = e.clientX;
-        mouseY = e.clientY;
-      });
       
       // Function to convert hex color to RGB array
       function hexToRgb(hex) {
