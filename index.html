@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Typography Experiment</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Bebas+Neue&family=Cinzel:wght@700&family=Comfortaa:wght@700&family=DM+Serif+Display&family=Faster+One&family=Permanent+Marker&family=Righteous&family=Rubik+Glitch&family=Russo+One&family=Special+Elite&family=VT323&display=swap" rel="stylesheet">
   <style>
     * {
       margin: 0;
@@ -310,6 +313,21 @@
       border-bottom: 1px solid #333;
       padding-bottom: 3px;
     }
+
+    .font-heading {
+      margin-top: 10px;
+      margin-bottom: 2px;
+      font-size: 12px;
+      color: #aaa;
+      opacity: 0.8;
+    }
+
+    .font-preview {
+      display: inline-block;
+      margin-left: 10px;
+      font-size: 14px;
+      opacity: 0.8;
+    }
   </style>
 </head>
 <body>
@@ -322,8 +340,10 @@
   <div class="toggle-controls-panel">C</div>
   <div class="controls">
     <div class="control-group">
-      <span class="control-label">Font Size</span>
-      <input type="range" id="font-size" min="50" max="400" value="138">
+      <span class="control-label">Font Type</span>
+      <select id="font-type">
+        <!-- Font options will be populated by JavaScript -->
+      </select>
     </div>
     <div class="control-group">
       <span class="control-label">Duplications</span>
@@ -508,6 +528,84 @@
       // User presets storage
       let userPresets = JSON.parse(localStorage.getItem('typographyPresets')) || [];
       
+      const fontSystem = {
+        // Maps display names to actual CSS font families
+        fontMap: {
+          // Standard fonts (maintaining backward compatibility)
+          "sans-serif": "sans-serif",
+          "serif": "serif", 
+          "monospace": "monospace",
+          "cursive": "cursive",
+          
+          // Display fonts
+          "Alfa Slab": "'Alfa Slab One', sans-serif",
+          "Bebas Neue": "'Bebas Neue', sans-serif",
+          "Cinzel": "'Cinzel', serif",
+          "Comfortaa": "'Comfortaa', sans-serif",
+          "DM Serif": "'DM Serif Display', serif",
+          "Faster One": "'Faster One', cursive",
+          "Permanent Marker": "'Permanent Marker', cursive",
+          "Righteous": "'Righteous', sans-serif",
+          "Rubik Glitch": "'Rubik Glitch', cursive",
+          "Russo One": "'Russo One', sans-serif",
+          "Special Elite": "'Special Elite', cursive",
+          "VT323": "'VT323', monospace"
+        },
+        
+        // Categories for organization
+        categories: {
+          "Standard": ["sans-serif", "serif", "monospace", "cursive"],
+          "Display": ["Alfa Slab", "Bebas Neue", "Cinzel", "DM Serif", "Faster One", "Rubik Glitch", "Russo One"],
+          "Creative": ["Comfortaa", "Permanent Marker", "Righteous", "Special Elite", "VT323"]
+        },
+        
+        // Get actual font family from selection name
+        getFontFamily(fontName) {
+          return this.fontMap[fontName] || fontName;
+        },
+        
+        // Ensure backward compatibility with old presets
+        getCompatibleFontName(fontFamily) {
+          // If it's a direct match, return it
+          if (this.fontMap[fontFamily]) {
+            return fontFamily;
+          }
+          
+          // Look for the font family in the values
+          for (const [key, value] of Object.entries(this.fontMap)) {
+            if (value === fontFamily) {
+              return key;
+            }
+          }
+          
+          // Default fallback
+          return "sans-serif";
+        },
+        
+        // Preload fonts to prevent FOUC (Flash of Unstyled Content)
+        preloadFonts() {
+          const preloadDiv = document.createElement('div');
+          preloadDiv.style.opacity = '0';
+          preloadDiv.style.position = 'absolute';
+          preloadDiv.style.top = '-9999px';
+          
+          // Create a span for each font
+          for (const fontFamily of Object.values(this.fontMap)) {
+            const span = document.createElement('span');
+            span.style.fontFamily = fontFamily;
+            span.textContent = 'abcdefghijklmnopqrstuvwxyz0123456789';
+            preloadDiv.appendChild(span);
+          }
+          
+          document.body.appendChild(preloadDiv);
+          
+          // Remove after a delay to ensure fonts are loaded
+          setTimeout(() => {
+            document.body.removeChild(preloadDiv);
+          }, 3000);
+        }
+      };
+
       // Built-in presets
       const builtinPresets = [
         {
@@ -698,6 +796,41 @@
         gyroData.gamma = event.gamma; // Left/right tilt: -90 to 90
       }
 
+      function populateFontSelector() {
+        const fontTypeSelect = document.getElementById('font-type');
+        fontTypeSelect.innerHTML = ''; // Clear existing options
+        
+        // Add each category and its fonts
+        for (const [category, fonts] of Object.entries(fontSystem.categories)) {
+          // Add category group
+          const groupElement = document.createElement('optgroup');
+          groupElement.label = category;
+          
+          // Add fonts in this category
+          fonts.forEach(fontName => {
+            const option = document.createElement('option');
+            option.value = fontName;
+            option.textContent = fontName;
+            option.style.fontFamily = fontSystem.getFontFamily(fontName);
+            groupElement.appendChild(option);
+          });
+          
+          fontTypeSelect.appendChild(groupElement);
+        }
+        
+        // Update the select styling to show the actual font
+        fontTypeSelect.addEventListener('change', function() {
+          this.style.fontFamily = fontSystem.getFontFamily(this.value);
+        });
+        
+        // Set initial style
+        fontTypeSelect.style.fontFamily = fontSystem.getFontFamily(fontTypeSelect.value);
+      }                                       
+
+      // Initialize the font system
+      fontSystem.preloadFonts();
+      populateFontSelector();
+
       // Function to convert hex color to RGB array
       function hexToRgb(hex) {
         const r = parseInt(hex.slice(1, 3), 16);
@@ -769,7 +902,7 @@
         primaryColorControl.value = settings.primaryColor;
         secondaryColorControl.value = settings.secondaryColor;
         effectTypeControl.value = settings.effectType;
-        fontTypeControl.value = settings.fontType;
+        fontTypeControl.value = fontSystem.getCompatibleFontName(settings.fontType);
         
         // Set target values for interpolation
         targetFontSize = settings.fontSize;
@@ -925,7 +1058,7 @@
           ctx.scale(1 + progress * 0.2, 1 + progress * 0.2);
           
           // Draw text
-          ctx.font = `${fontSize}px ${fontType}`;
+          ctx.font = `${fontSize}px ${fontSystem.getFontFamily(fontType)}`;
           ctx.fillText(text, 0, 0);
           
           ctx.restore();
