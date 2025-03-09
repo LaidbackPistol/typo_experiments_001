@@ -440,6 +440,50 @@
   <div class="notification" id="notification"></div>
 
   <script>
+    function validateControls() {
+      const requiredControls = {
+        'typography-canvas': canvas,
+        'text-content': textInput,
+        'font-size': fontSizeControl,
+        'duplications': duplicationsControl,
+        'blur': blurControl,
+        'rotation-speed': rotationSpeedControl,
+        'distortion': distortionControl,
+        'primary-color': primaryColorControl,
+        'secondary-color': secondaryColorControl,
+        'effect-type': effectTypeControl,
+        'font-type': fontTypeControl,
+        'transition-time': transitionTimeControl
+      };
+      
+      let missingControls = [];
+      
+      for (const [id, element] of Object.entries(requiredControls)) {
+        if (!element) {
+          missingControls.push(id);
+          console.error(`Missing required control element: #${id}`);
+        }
+      }
+      
+      if (missingControls.length > 0) {
+        console.error(`Found ${missingControls.length} missing controls. App may not function correctly.`);
+        // Create a visible error for easier debugging
+        const errorDiv = document.createElement('div');
+        errorDiv.style.position = 'fixed';
+        errorDiv.style.top = '10px';
+        errorDiv.style.left = '10px';
+        errorDiv.style.backgroundColor = 'rgba(255,0,0,0.8)';
+        errorDiv.style.color = 'white';
+        errorDiv.style.padding = '10px';
+        errorDiv.style.borderRadius = '5px';
+        errorDiv.style.zIndex = '9999';
+        errorDiv.innerHTML = `<strong>Error:</strong> Missing elements: ${missingControls.join(', ')}`;
+        document.body.appendChild(errorDiv);
+      }
+      
+      return missingControls.length === 0;
+    }     
+
     document.addEventListener('DOMContentLoaded', () => {
       // Elements
       const canvas = document.getElementById('typography-canvas');
@@ -624,20 +668,20 @@
       let hasGyro = false;
       let gyroData = { beta: 0, gamma: 0 };
 
-      // State
-      let text = textInput.value;
-      let fontSize = parseInt(fontSizeControl.value);
-      let duplications = parseInt(duplicationsControl.value);
-      let blur = parseInt(blurControl.value);
-      let rotationSpeed = parseFloat(rotationSpeedControl.value);
-      let distortion = parseInt(distortionControl.value);
-      let primaryColor = primaryColorControl.value;
-      let secondaryColor = secondaryColorControl.value;
-      let effectType = effectTypeControl.value;
-      let fontType = fontTypeControl.value;
-      let transitionTime = parseFloat(transitionTimeControl.value);
-      
-      // Target values for interpolation
+      // State initialization with safety checks
+      let text = textInput ? textInput.value : "EN5EMBLE";
+      let fontSize = fontSizeControl ? parseInt(fontSizeControl.value) : 138;
+      let duplications = duplicationsControl ? parseInt(duplicationsControl.value) : 20;
+      let blur = blurControl ? parseInt(blurControl.value) : 50;
+      let rotationSpeed = rotationSpeedControl ? parseFloat(rotationSpeedControl.value) : 0;
+      let distortion = distortionControl ? parseInt(distortionControl.value) : 1000;
+      let primaryColor = primaryColorControl ? primaryColorControl.value : "#ffffff";
+      let secondaryColor = secondaryColorControl ? secondaryColorControl.value : "#ffffff";
+      let effectType = effectTypeControl ? effectTypeControl.value : "glitch";
+      let fontType = fontTypeControl ? fontTypeControl.value : "sans-serif";
+      let transitionTime = transitionTimeControl ? parseFloat(transitionTimeControl.value) : 0.1;
+
+      // Target values for interpolation (also with safety checks)
       let targetFontSize = fontSize;
       let targetDuplications = duplications;
       let targetBlur = blur;
@@ -647,6 +691,8 @@
       let targetSecondaryColor = secondaryColor;
       let targetEffectType = effectType;
       let targetFontType = fontType;
+
+      validateControls();
       
       // Interpolation state
       let isInterpolating = false;
@@ -957,7 +1003,13 @@
       // Animation function
       function animate() {
         if (!isAnimating) return;
-        
+
+        if (!canvas || !ctx) {
+          console.error("Cannot animate: canvas or context is missing");
+          isAnimating = false;
+          return;
+        }
+              
         // Handle interpolation
         if (isInterpolating) {
           const currentTime = Date.now();
