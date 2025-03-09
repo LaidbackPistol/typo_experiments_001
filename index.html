@@ -385,6 +385,13 @@
 
   <script>
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    // Canvas center coordinates (globally accessible)
+    let centerX = 0;
+    let centerY = 0;
+
+    // Mouse/touch/gyro position
+    let mouseX = 0;
+    let mouseY = 0;
 
     document.addEventListener('DOMContentLoaded', () => {
       // Elements
@@ -459,10 +466,6 @@
       let prevEffectType = effectType;
       let prevFontType = fontType;
       
-      // Mouse position for interactive effects
-      let mouseX = 0;
-      let mouseY = 0;
-      
       // Animation variables
       let time = 0;
       let isAnimating = true;
@@ -488,6 +491,10 @@
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         
+        // Update global center coordinates whenever canvas dimensions change
+        centerX = canvas.width / 2;
+        centerY = canvas.height / 2;
+              
         // If this is a mobile device, adjust the preset scaling
         if (isMobile) {
           // Use a safety check when accessing potentially undefined variables
@@ -1134,8 +1141,8 @@
         }
         
         // Calculate center position
-        const centerX = canvas.width / 2;
-        const centerY = canvas.height / 2;
+        // const centerX = canvas.width / 2;
+        // const centerY = canvas.height / 2;
         
         // Calculate mouse influence
        // Modify mouse influence calculations
