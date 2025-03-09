@@ -551,6 +551,7 @@
         }
       };
 
+      // Replace your populateFontSelector function with this fixed version:
       function populateFontSelector() {
         const fontTypeSelect = document.getElementById('font-type');
         if (!fontTypeSelect) {
@@ -572,6 +573,12 @@
             option.value = fontName;
             option.textContent = fontName;
             option.style.fontFamily = fontSystem.getFontFamily(fontName);
+            
+            // Set default selection for the first standard font (sans-serif)
+            if (fontName === 'sans-serif') {
+              option.selected = true;
+            }
+            
             groupElement.appendChild(option);
           });
           
@@ -580,12 +587,29 @@
         
         // Update the select styling to show the actual font
         fontTypeSelect.addEventListener('change', function() {
-          this.style.fontFamily = fontSystem.getFontFamily(this.value);
+          if (this.value) {
+            this.style.fontFamily = fontSystem.getFontFamily(this.value);
+          }
         });
         
-        // Set initial style
-        fontTypeSelect.style.fontFamily = fontSystem.getFontFamily(fontTypeSelect.value);
-      }   
+        // Set initial style with safety check
+        try {
+          if (fontTypeSelect.options.length > 0) {
+            // Ensure a value exists by forcing selection of first option if none selected
+            if (!fontTypeSelect.value) {
+              fontTypeSelect.selectedIndex = 0;
+            }
+            fontTypeSelect.style.fontFamily = fontSystem.getFontFamily(fontTypeSelect.value);
+          } else {
+            // Fallback if somehow we have no options
+            fontTypeSelect.style.fontFamily = 'sans-serif';
+          }
+        } catch (e) {
+          console.error('Error setting initial font style:', e);
+          // Fallback to a safe default
+          fontTypeSelect.style.fontFamily = 'sans-serif';
+        }
+      }
 
       // Make it available globally if needed
       window.fontSystem = fontSystem;
