@@ -553,6 +553,11 @@
 
       function populateFontSelector() {
         const fontTypeSelect = document.getElementById('font-type');
+        if (!fontTypeSelect) {
+          console.error('Font type select element not found!');
+          return;
+        }
+        
         fontTypeSelect.innerHTML = ''; // Clear existing options
         
         // Add each category and its fonts
