@@ -1764,6 +1764,7 @@ const customPreset = ${presetStr};
       // Start animation
       animate();
 
+      // Wait for DOM to be fully loaded
       document.addEventListener('DOMContentLoaded', () => {
         setupMenu();
         // Check if URL has a hash and select the corresponding menu item
@@ -1794,6 +1795,9 @@ const customPreset = ${presetStr};
               clickedItem.classList.remove('active');
               parentLi.classList.remove('active-item');
               history.pushState(null, '', window.location.pathname); // Remove hash from URL
+              
+              // Apply default preset when deselecting
+              applyPresetByName("Unsure");
             } else {
               // First, remove active class from all items
               menuItems.forEach(i => {
@@ -1807,6 +1811,9 @@ const customPreset = ${presetStr};
               
               // Update URL without navigation - using History API
               history.pushState(null, '', `#${section}`);
+              
+              // Apply corresponding preset
+              applyPresetForSection(section);
             }
             
             // Simple feedback animation
@@ -1839,7 +1846,46 @@ const customPreset = ${presetStr};
           if (menuItem) {
             menuItem.classList.add('active');
             menuItem.parentElement.classList.add('active-item');
+            
+            // Apply the corresponding preset
+            applyPresetForSection(section);
           }
+        } else {
+          // If no hash, apply the default "Unsure" preset
+          applyPresetByName("Unsure");
+        }
+      }
+      
+      // Function to apply a preset based on the selected section
+      function applyPresetForSection(section) {
+        // Map sections to preset names
+        const presetMap = {
+          "events": "Beacon of truth",
+          "mixes": "Skeud",
+          "archives": "Arabesque",
+          "contact": "Wall"
+        };
+        
+        const presetName = presetMap[section] || "Unsure"; // Default to "Unsure" if not found
+        applyPresetByName(presetName);
+      }
+      
+      // Function to find and apply a preset by name
+      function applyPresetByName(presetName) {
+        // First check built-in presets
+        let preset = builtinPresets.find(p => p.name === presetName);
+        
+        // If not found in built-in presets, check user presets
+        if (!preset && userPresets) {
+          preset = userPresets.find(p => p.name === presetName);
+        }
+        
+        // If preset found, apply it
+        if (preset) {
+          console.log(`Applying preset: ${presetName}`);
+          applySettings(preset.settings);
+        } else {
+          console.warn(`Preset not found: ${presetName}`);
         }
       }
       
