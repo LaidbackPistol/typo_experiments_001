@@ -836,6 +836,21 @@
       const savePresetBtn = document.getElementById('save-preset-btn');
       const notification = document.getElementById('notification');
 
+      // Archive Gallery Variables
+      const archiveMenuItem = document.querySelector('.menu-item[data-section="archives"]');
+      const archiveGallery = document.getElementById('archive-gallery');
+      const galleryContainer = archiveGallery.querySelector('.gallery-container');
+      const closeButton = archiveGallery.querySelector('.gallery-close');
+
+      // Fullscreen Viewer Variables
+      const fullscreenViewer = document.getElementById('fullscreen-viewer');
+      const prevButton = fullscreenViewer.querySelector('.prev-button');
+      const nextButton = fullscreenViewer.querySelector('.next-button');
+      const closeViewerButton = fullscreenViewer.querySelector('.close-button');
+      const viewerImage = fullscreenViewer.querySelector('.viewer-image');
+      let currentImageIndex = 0;
+      let currentGalleryImages = [];
+      
       const mobileFontScaleFactor = 0.5;
 
       // THEN define the validateControls function after all the controls are defined
@@ -877,12 +892,12 @@
       let secondaryColor = secondaryColorControl && secondaryColorControl.value ? secondaryColorControl.value : '#ffffff';
       let effectType = effectTypeControl && effectTypeControl.value ? effectTypeControl.value : 'glitch';
       let fontType = fontTypeControl && fontTypeControl.value ? fontTypeControl.value : 'sans-serif';
-      let feedbackEnabled = feedbackEnabledControl.checked;
-      let feedbackDecay = parseFloat(feedbackDecayControl.value);
-      let feedbackOpacity = parseFloat(feedbackOpacityControl.value);
-      let feedbackZoom = parseFloat(feedbackZoomControl.value);
-      let feedbackShiftX = parseFloat(feedbackShiftXControl.value);
-      let feedbackShiftY = parseFloat(feedbackShiftYControl.value);
+      let feedbackEnabled = feedbackEnabledControl && feedbackEnabledControl.checked;
+      let feedbackDecay = feedbackDecayControl ? parseFloat(feedbackDecayControl.value) : 0.5;
+      let feedbackOpacity = feedbackOpacityControl ? parseFloat(feedbackOpacityControl.value) : 0.1;
+      let feedbackZoom = feedbackZoomControl ? parseFloat(feedbackZoomControl.value) : 0.95;
+      let feedbackShiftX = feedbackShiftXControl ? parseFloat(feedbackShiftXControl.value) : 0;
+      let feedbackShiftY = feedbackShiftYControl ? parseFloat(feedbackShiftYControl.value) : 0;
       let transitionTime = transitionTimeControl && transitionTimeControl.value ? parseFloat(transitionTimeControl.value) : 0.1;
       
       // Target values for interpolation
@@ -925,21 +940,6 @@
 
       // Variables for feedback processing
       let frameCount = 0;
-
-      // Archive Gallery Variables
-      const archiveMenuItem = document.querySelector('.menu-item[data-section="archives"]');
-      const archiveGallery = document.getElementById('archive-gallery');
-      const galleryContainer = archiveGallery.querySelector('.gallery-container');
-      const closeButton = archiveGallery.querySelector('.gallery-close');
-
-      // Fullscreen Viewer Variables
-      const fullscreenViewer = document.getElementById('fullscreen-viewer');
-      const prevButton = fullscreenViewer.querySelector('.prev-button');
-      const nextButton = fullscreenViewer.querySelector('.next-button');
-      const closeViewerButton = fullscreenViewer.querySelector('.close-button');
-      const viewerImage = fullscreenViewer.querySelector('.viewer-image');
-      let currentImageIndex = 0;
-      let currentGalleryImages = [];
 
       const fontSystem = {
         // Maps display names to actual CSS font families
@@ -1203,55 +1203,47 @@
       
       setCanvasDimensions();
 
-     // First, remove any existing toggle buttons to prevent duplicates
-    const existingToggleButtons = document.querySelectorAll('.toggle-controls-panel');
-    existingToggleButtons.forEach(button => {
-      if (button) button.remove();
-    });
+      // First, remove any existing toggle buttons to prevent duplicates
+      const existingToggleButtons = document.querySelectorAll('.toggle-controls-panel');
+      existingToggleButtons.forEach(button => {
+        if (button) button.remove();
+      });
 
-    // Get control elements
-    const controlsPanel = document.querySelector('.controls');
+      // Get control elements
+      const controlsPanel = document.querySelector('.controls');
 
-    // Create a single toggle button
-    const toggleControlsBtn = document.createElement('div');
-    toggleControlsBtn.className = 'toggle-controls-panel';
-    toggleControlsBtn.textContent = 'C';
-    document.body.appendChild(toggleControlsBtn);
+      // Create a single toggle button
+      const toggleControlsBtn = document.createElement('div');
+      toggleControlsBtn.className = 'toggle-controls-panel';
+      toggleControlsBtn.textContent = 'C';
+      document.body.appendChild(toggleControlsBtn);
 
-    // Update toggle button position based on panel state
-    function updateTogglePosition() {
-      if (controlsPanel.classList.contains('hidden')) {
-        toggleControlsBtn.style.right = '20px';
-      } else {
-        const controlsWidth = controlsPanel.offsetWidth;
-        toggleControlsBtn.style.right = (controlsWidth + 30) + 'px';
+      // Update toggle button position based on panel state
+      function updateTogglePosition() {
+        if (controlsPanel.classList.contains('hidden')) {
+          toggleControlsBtn.style.right = '20px';
+        } else {
+          const controlsWidth = controlsPanel.offsetWidth;
+          toggleControlsBtn.style.right = (controlsWidth + 30) + 'px';
+        }
       }
-    }
 
-    // Initial positioning
-    // updateTogglePosition();
+      // Toggle controls panel
+      toggleControlsBtn.addEventListener('click', () => {
+        controlsPanel.classList.toggle('hidden');
+        toggleControlsBtn.classList.toggle('panel-hidden');
+        updateTogglePosition();
+        
+        // Save the state to localStorage
+        localStorage.setItem('controlsPanelHidden', controlsPanel.classList.contains('hidden'));
+      });
 
-    // Toggle controls panel
-    toggleControlsBtn.addEventListener('click', () => {
-      controlsPanel.classList.toggle('hidden');
-      toggleControlsBtn.classList.toggle('panel-hidden');
-      updateTogglePosition();
-      
-      // Save the state to localStorage
-      localStorage.setItem('controlsPanelHidden', controlsPanel.classList.contains('hidden'));
-    });
-
-    // Check if the controls panel was hidden in the previous session
-    const wasPanelHidden = localStorage.getItem('controlsPanelHidden') === 'true';
-    if (wasPanelHidden) {
-      controlsPanel.classList.add('hidden');
-      toggleControlsBtn.classList.add('panel-hidden');
-    } else {
-      // If not hidden, position the toggle button correctly on load
-      // window.addEventListener('load', () => {
-      //   updateTogglePosition();
-      // });
-    }
+      // Check if the controls panel was hidden in the previous session
+      const wasPanelHidden = localStorage.getItem('controlsPanelHidden') === 'true';
+      if (wasPanelHidden) {
+        controlsPanel.classList.add('hidden');
+        toggleControlsBtn.classList.add('panel-hidden');
+      }
 
       window.addEventListener('resize', () => {
         setCanvasDimensions();
@@ -1671,12 +1663,12 @@
         // Format as JavaScript code that can be pasted directly into source
         const presetStr = JSON.stringify(codeObj.preset, null, 2);
         return `
-// -------- Typography Preset Code --------
-// Add this to the builtinPresets array in your source code
-const customPreset = ${presetStr};
-// builtinPresets.push(customPreset);
-// ----------------------------------------
-`;
+    // -------- Typography Preset Code --------
+    // Add this to the builtinPresets array in your source code
+    const customPreset = ${presetStr};
+    // builtinPresets.push(customPreset);
+    // ----------------------------------------
+    `;
       }
       
       // Function to create preset element
@@ -1763,34 +1755,46 @@ const customPreset = ${presetStr};
         presetPanel.classList.toggle('open');
       });
 
-      feedbackEnabledControl.addEventListener('change', () => {
-        feedbackEnabled = feedbackEnabledControl.checked;
-        
-        // Clear the feedback canvas if disabled
-        if (!feedbackEnabled) {
-          feedbackCtx.clearRect(0, 0, feedbackCanvas.width, feedbackCanvas.height);
-        }
-      });
+      if (feedbackEnabledControl) {
+        feedbackEnabledControl.addEventListener('change', () => {
+          feedbackEnabled = feedbackEnabledControl.checked;
+          
+          // Clear the feedback canvas if disabled
+          if (!feedbackEnabled) {
+            feedbackCtx.clearRect(0, 0, feedbackCanvas.width, feedbackCanvas.height);
+          }
+        });
+      }
       
-      feedbackDecayControl.addEventListener('input', () => {
-        feedbackDecay = parseFloat(feedbackDecayControl.value);
-      });
+      if (feedbackDecayControl) {
+        feedbackDecayControl.addEventListener('input', () => {
+          feedbackDecay = parseFloat(feedbackDecayControl.value);
+        });
+      }
       
-      feedbackOpacityControl.addEventListener('input', () => {
-        feedbackOpacity = parseFloat(feedbackOpacityControl.value);
-      });
+      if (feedbackOpacityControl) {
+        feedbackOpacityControl.addEventListener('input', () => {
+          feedbackOpacity = parseFloat(feedbackOpacityControl.value);
+        });
+      }
       
-      feedbackZoomControl.addEventListener('input', () => {
-        feedbackZoom = parseFloat(feedbackZoomControl.value);
-      });
+      if (feedbackZoomControl) {
+        feedbackZoomControl.addEventListener('input', () => {
+          feedbackZoom = parseFloat(feedbackZoomControl.value);
+        });
+      }
       
-      feedbackShiftXControl.addEventListener('input', () => {
-        feedbackShiftX = parseFloat(feedbackShiftXControl.value);
-      });
+      if (feedbackShiftXControl) {
+        feedbackShiftXControl.addEventListener('input', () => {
+          feedbackShiftX = parseFloat(feedbackShiftXControl.value);
+        });
+      }
       
-      feedbackShiftYControl.addEventListener('input', () => {
-        feedbackShiftY = parseFloat(feedbackShiftYControl.value);
-      });
+      if (feedbackShiftYControl) {
+        feedbackShiftYControl.addEventListener('input', () => {
+          feedbackShiftY = parseFloat(feedbackShiftYControl.value);
+        });
+      }
 
       // Save current settings as preset
       saveCurrentBtn.addEventListener('click', () => {
@@ -1909,7 +1913,9 @@ const customPreset = ${presetStr};
       });
       
       // Handle control changes
-      textInput.addEventListener('input', () => text = textInput.value);
+      if (textInput) {
+        textInput.addEventListener('input', () => text = textInput.value);
+      }
       fontSizeControl.addEventListener('input', () => {
         targetFontSize = parseInt(fontSizeControl.value);
         if (!isInterpolating) fontSize = targetFontSize;
@@ -1992,17 +1998,10 @@ const customPreset = ${presetStr};
       // Start animation
       animate();
 
-      document.addEventListener('DOMContentLoaded', () => {
-        setupMenu();
-        // Check if URL has a hash and select the corresponding menu item
-        checkUrlHash();
-      });
-
-      // In case the DOM is already loaded when this script runs
-      if (document.readyState === 'interactive' || document.readyState === 'complete') {
-        setupMenu();
-        checkUrlHash();
-      }
+      // Setup menu
+      setupMenu();
+      // Check if URL has a hash and select the corresponding menu item
+      checkUrlHash();
 
       function setupMenu() {
         const menuItems = document.querySelectorAll('.menu-item');
@@ -2150,213 +2149,226 @@ const customPreset = ${presetStr};
       
       // Also listen for hash changes directly (for manual URL edits)
       window.addEventListener('hashchange', checkUrlHash);
-    });
 
-    // Close gallery when clicking the close button
-    closeButton.addEventListener('click', () => {
-      archiveGallery.classList.remove('active');
-    });
-
-    // Modify the existing menu click handler for archives
-    archiveMenuItem.addEventListener('click', (e) => {
-      // If archives section becomes active, show the gallery
-      if (archiveMenuItem.classList.contains('active')) {
-        loadArchiveContent();
-        archiveGallery.classList.add('active');
+      // Now handle the archive gallery functionality
+      // Make sure closeButton exists before adding event listener
+      if (closeButton) {
+        closeButton.addEventListener('click', () => {
+          archiveGallery.classList.remove('active');
+        });
       } else {
-        archiveGallery.classList.remove('active');
+        console.warn('Gallery close button not found!');
       }
-    });
 
-    // Function to load archive content from the server
-    async function loadArchiveContent() {
-      try {
-        // Show loading state
-        galleryContainer.innerHTML = '<div style="color: white; text-align: center; padding: 50px;">Loading archives...</div>';
+      // Modify the existing menu click handler for archives
+      if (archiveMenuItem) {
+        archiveMenuItem.addEventListener('click', (e) => {
+          // If archives section becomes active, show the gallery
+          if (archiveMenuItem.classList.contains('active')) {
+            loadArchiveContent();
+            archiveGallery.classList.add('active');
+          } else {
+            archiveGallery.classList.remove('active');
+          }
+        });
+      }
+
+      // Function to load archive content from the server
+      async function loadArchiveContent() {
+        try {
+          // Show loading state
+          galleryContainer.innerHTML = '<div style="color: white; text-align: center; padding: 50px;">Loading archives...</div>';
+          
+          // Fetch albums from the server
+          const response = await fetch('/api/archives');
+          const data = await response.json();
+          
+          // Clear loading message
+          galleryContainer.innerHTML = '';
+          
+          if (!data.albums || data.albums.length === 0) {
+            galleryContainer.innerHTML = '<div style="color: white; text-align: center; padding: 50px;">No archives found. Add folders to the archive_assets directory.</div>';
+            return;
+          }
+          
+          // Create and append album elements
+          data.albums.forEach(album => {
+            const albumElement = createAlbumElement(album);
+            galleryContainer.appendChild(albumElement);
+          });
+          
+          // Enable image lazy loading
+          setupLazyLoading();
+          
+          // Setup click events for the images
+          setupImageClickEvents();
+        } catch (error) {
+          console.error('Error loading archives:', error);
+          galleryContainer.innerHTML = '<div style="color: white; text-align: center; padding: 50px;">Error loading archives. Please try again later.</div>';
+        }
+      }
+
+      // Function to create an album element
+      function createAlbumElement(album) {
+        const albumElement = document.createElement('div');
+        albumElement.className = 'album';
         
-        // Fetch albums from the server
-        const response = await fetch('/api/archives');
-        const data = await response.json();
+        const titleElement = document.createElement('h2');
+        titleElement.className = 'album-title';
+        titleElement.textContent = album.title;
+        albumElement.appendChild(titleElement);
         
-        // Clear loading message
-        galleryContainer.innerHTML = '';
+        const imagesContainer = document.createElement('div');
+        imagesContainer.className = 'album-images';
         
-        if (!data.albums || data.albums.length === 0) {
-          galleryContainer.innerHTML = '<div style="color: white; text-align: center; padding: 50px;">No archives found. Add folders to the archive_assets directory.</div>';
+        album.images.forEach(image => {
+          const imageContainer = document.createElement('div');
+          imageContainer.className = 'album-image';
+          
+          const img = document.createElement('img');
+          img.setAttribute('data-src', image.src); // Use data-src for lazy loading
+          img.alt = image.alt;
+          // Add a placeholder until the image loads
+          img.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1"%3E%3C/svg%3E';
+          
+          imageContainer.appendChild(img);
+          imagesContainer.appendChild(imageContainer);
+        });
+        
+        albumElement.appendChild(imagesContainer);
+        return albumElement;
+      }
+
+      // Function to setup lazy loading for images
+      function setupLazyLoading() {
+        // Use Intersection Observer API for modern browsers
+        if ('IntersectionObserver' in window) {
+          const lazyImageObserver = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+              if (entry.isIntersecting) {
+                const lazyImage = entry.target;
+                const src = lazyImage.getAttribute('data-src');
+                
+                if (src) {
+                  lazyImage.src = src;
+                  lazyImage.removeAttribute('data-src');
+                }
+                
+                lazyImageObserver.unobserve(lazyImage);
+              }
+            });
+          });
+          
+          // Observe all lazy images
+          const lazyImages = document.querySelectorAll('img[data-src]');
+          lazyImages.forEach(img => lazyImageObserver.observe(img));
+        } else {
+          // Fallback for browsers that don't support Intersection Observer
+          // Just load all images immediately
+          const lazyImages = document.querySelectorAll('img[data-src]');
+          lazyImages.forEach(img => {
+            img.src = img.getAttribute('data-src');
+            img.removeAttribute('data-src');
+          });
+        }
+      }
+
+      // Function to set up click events for opening the fullscreen viewer
+      function setupImageClickEvents() {
+        document.querySelectorAll('.album-image').forEach((imageContainer) => {
+          imageContainer.addEventListener('click', (e) => {
+            // Find which album this image belongs to
+            const albumElement = e.currentTarget.closest('.album');
+            const allImages = albumElement.querySelectorAll('.album-image img');
+            
+            // Collect image data
+            currentGalleryImages = Array.from(allImages).map(img => ({
+              src: img.getAttribute('data-src') || img.src,
+              alt: img.alt
+            }));
+            
+            // Set current index
+            currentImageIndex = Array.from(albumElement.querySelectorAll('.album-image')).indexOf(e.currentTarget);
+            
+            // Update and show viewer
+            updateViewerImage();
+            fullscreenViewer.classList.add('active');
+          });
+        });
+      }
+
+      // Fullscreen Viewer Functions
+      // Close viewer
+      if (closeViewerButton) {
+        closeViewerButton.addEventListener('click', () => {
+          fullscreenViewer.classList.remove('active');
+        });
+      }
+
+      // Previous image
+      if (prevButton) {
+        prevButton.addEventListener('click', () => {
+          if (currentGalleryImages.length === 0) return;
+          
+          currentImageIndex = (currentImageIndex - 1 + currentGalleryImages.length) % currentGalleryImages.length;
+          updateViewerImage();
+        });
+      }
+
+      // Next image
+      if (nextButton) {
+        nextButton.addEventListener('click', () => {
+          if (currentGalleryImages.length === 0) return;
+          
+          currentImageIndex = (currentImageIndex + 1) % currentGalleryImages.length;
+          updateViewerImage();
+        });
+      }
+
+      // Keyboard navigation
+      document.addEventListener('keydown', (e) => {
+        if (!fullscreenViewer.classList.contains('active')) return;
+        
+        if (e.key === 'Escape') {
+          fullscreenViewer.classList.remove('active');
+        } else if (e.key === 'ArrowLeft') {
+          if (prevButton) prevButton.click();
+        } else if (e.key === 'ArrowRight') {
+          if (nextButton) nextButton.click();
+        }
+      });
+
+      // Update the displayed image in the fullscreen viewer
+      function updateViewerImage() {
+        if (!viewerImage || currentGalleryImages.length === 0 || currentImageIndex < 0 || currentImageIndex >= currentGalleryImages.length) {
           return;
         }
         
-        // Create and append album elements
-        data.albums.forEach(album => {
-          const albumElement = createAlbumElement(album);
-          galleryContainer.appendChild(albumElement);
-        });
+        const imageData = currentGalleryImages[currentImageIndex];
+        viewerImage.src = imageData.src;
+        viewerImage.alt = imageData.alt || '';
         
-        // Enable image lazy loading
-        setupLazyLoading();
-        
-        // Setup click events for the images
-        setupImageClickEvents();
-      } catch (error) {
-        console.error('Error loading archives:', error);
-        galleryContainer.innerHTML = '<div style="color: white; text-align: center; padding: 50px;">Error loading archives. Please try again later.</div>';
-      }
-    }
-
-    // Function to create an album element
-    function createAlbumElement(album) {
-      const albumElement = document.createElement('div');
-      albumElement.className = 'album';
-      
-      const titleElement = document.createElement('h2');
-      titleElement.className = 'album-title';
-      titleElement.textContent = album.title;
-      albumElement.appendChild(titleElement);
-      
-      const imagesContainer = document.createElement('div');
-      imagesContainer.className = 'album-images';
-      
-      album.images.forEach(image => {
-        const imageContainer = document.createElement('div');
-        imageContainer.className = 'album-image';
-        
-        const img = document.createElement('img');
-        img.setAttribute('data-src', image.src); // Use data-src for lazy loading
-        img.alt = image.alt;
-        // Add a placeholder until the image loads
-        img.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1"%3E%3C/svg%3E';
-        
-        imageContainer.appendChild(img);
-        imagesContainer.appendChild(imageContainer);
-      });
-      
-      albumElement.appendChild(imagesContainer);
-      return albumElement;
-    }
-
-    // Function to setup lazy loading for images
-    function setupLazyLoading() {
-      // Use Intersection Observer API for modern browsers
-      if ('IntersectionObserver' in window) {
-        const lazyImageObserver = new IntersectionObserver(entries => {
-          entries.forEach(entry => {
-            if (entry.isIntersecting) {
-              const lazyImage = entry.target;
-              const src = lazyImage.getAttribute('data-src');
-              
-              if (src) {
-                lazyImage.src = src;
-                lazyImage.removeAttribute('data-src');
-              }
-              
-              lazyImageObserver.unobserve(lazyImage);
-            }
-          });
-        });
-        
-        // Observe all lazy images
-        const lazyImages = document.querySelectorAll('img[data-src]');
-        lazyImages.forEach(img => lazyImageObserver.observe(img));
-      } else {
-        // Fallback for browsers that don't support Intersection Observer
-        // Just load all images immediately
-        const lazyImages = document.querySelectorAll('img[data-src]');
-        lazyImages.forEach(img => {
-          img.src = img.getAttribute('data-src');
-          img.removeAttribute('data-src');
-        });
-      }
-    }
-
-    // Function to set up click events for opening the fullscreen viewer
-    function setupImageClickEvents() {
-      document.querySelectorAll('.album-image').forEach((imageContainer) => {
-        imageContainer.addEventListener('click', (e) => {
-          // Find which album this image belongs to
-          const albumElement = e.currentTarget.closest('.album');
-          const allImages = albumElement.querySelectorAll('.album-image img');
-          
-          // Collect image data
-          currentGalleryImages = Array.from(allImages).map(img => ({
-            src: img.getAttribute('data-src') || img.src,
-            alt: img.alt
-          }));
-          
-          // Set current index
-          currentImageIndex = Array.from(albumElement.querySelectorAll('.album-image')).indexOf(e.currentTarget);
-          
-          // Update and show viewer
-          updateViewerImage();
-          fullscreenViewer.classList.add('active');
-        });
-      });
-    }
-
-    // Fullscreen Viewer Functions
-    // Close viewer
-    closeViewerButton.addEventListener('click', () => {
-      fullscreenViewer.classList.remove('active');
-    });
-
-    // Previous image
-    prevButton.addEventListener('click', () => {
-      if (currentGalleryImages.length === 0) return;
-      
-      currentImageIndex = (currentImageIndex - 1 + currentGalleryImages.length) % currentGalleryImages.length;
-      updateViewerImage();
-    });
-
-    // Next image
-    nextButton.addEventListener('click', () => {
-      if (currentGalleryImages.length === 0) return;
-      
-      currentImageIndex = (currentImageIndex + 1) % currentGalleryImages.length;
-      updateViewerImage();
-    });
-
-    // Keyboard navigation
-    document.addEventListener('keydown', (e) => {
-      if (!fullscreenViewer.classList.contains('active')) return;
-      
-      if (e.key === 'Escape') {
-        fullscreenViewer.classList.remove('active');
-      } else if (e.key === 'ArrowLeft') {
-        prevButton.click();
-      } else if (e.key === 'ArrowRight') {
-        nextButton.click();
-      }
-    });
-
-    // Update the displayed image in the fullscreen viewer
-    function updateViewerImage() {
-      if (currentGalleryImages.length === 0 || currentImageIndex < 0 || currentImageIndex >= currentGalleryImages.length) {
-        return;
-      }
-      
-      const imageData = currentGalleryImages[currentImageIndex];
-      viewerImage.src = imageData.src;
-      viewerImage.alt = imageData.alt || '';
-      
-      // Optional: Show image caption
-      let caption = fullscreenViewer.querySelector('.image-caption');
-      if (imageData.alt) {
-        if (!caption) {
-          caption = document.createElement('div');
-          caption.className = 'image-caption';
-          fullscreenViewer.appendChild(caption);
+        // Optional: Show image caption
+        let caption = fullscreenViewer.querySelector('.image-caption');
+        if (imageData.alt) {
+          if (!caption) {
+            caption = document.createElement('div');
+            caption.className = 'image-caption';
+            fullscreenViewer.appendChild(caption);
+          }
+          caption.textContent = imageData.alt;
+          caption.style.display = 'block';
+        } else if (caption) {
+          caption.style.display = 'none';
         }
-        caption.textContent = imageData.alt;
-        caption.style.display = 'block';
-      } else if (caption) {
-        caption.style.display = 'none';
       }
-    }
 
-    // Check if archives is already active on page load
-    if (archiveMenuItem.classList.contains('active')) {
-      loadArchiveContent();
-      archiveGallery.classList.add('active');
-    }
+      // Check if archives is already active on page load
+      if (archiveMenuItem && archiveMenuItem.classList.contains('active')) {
+        loadArchiveContent();
+        archiveGallery.classList.add('active');
+      }
+    });
   </script>
 </body>
 </html>
