@@ -449,10 +449,10 @@
   <div class="menu-container">
     <nav class="main-menu">
       <ul>
-        <li><a href="#" class="menu-item">events</a></li>
-        <li><a href="#" class="menu-item">mixes</a></li>
-        <li><a href="#" class="menu-item">archives</a></li>
-        <li><a href="#" class="menu-item">contact</a></li>
+        <li><a href="#events" class="menu-item" data-section="events">events</a></li>
+        <li><a href="#mixes" class="menu-item" data-section="mixes">mixes</a></li>
+        <li><a href="#archives" class="menu-item" data-section="archives">archives</a></li>
+        <li><a href="#contact" class="menu-item" data-section="contact">contact</a></li>
       </ul>
     </nav>
   </div>
@@ -1764,13 +1764,17 @@ const customPreset = ${presetStr};
       // Start animation
       animate();
 
+      // Wait for DOM to be fully loaded
       document.addEventListener('DOMContentLoaded', () => {
         setupMenu();
+        // Check if URL has a hash and select the corresponding menu item
+        checkUrlHash();
       });
 
       // In case the DOM is already loaded when this script runs
       if (document.readyState === 'interactive' || document.readyState === 'complete') {
         setupMenu();
+        checkUrlHash();
       }
 
       function setupMenu() {
@@ -1783,12 +1787,14 @@ const customPreset = ${presetStr};
             
             const clickedItem = e.target;
             const parentLi = clickedItem.parentElement;
+            const section = clickedItem.getAttribute('data-section');
             
-            // Toggle active state (click again to deselect)
+            // Toggle active state or update URL
             if (clickedItem.classList.contains('active')) {
-              // If already active, deactivate
+              // If already active, deactivate and clear URL hash
               clickedItem.classList.remove('active');
               parentLi.classList.remove('active-item');
+              history.pushState(null, '', window.location.pathname); // Remove hash from URL
             } else {
               // First, remove active class from all items
               menuItems.forEach(i => {
@@ -1799,6 +1805,9 @@ const customPreset = ${presetStr};
               // Then, add active class to clicked item
               clickedItem.classList.add('active');
               parentLi.classList.add('active-item');
+              
+              // Update URL without navigation - using History API
+              history.pushState(null, '', `#${section}`);
             }
             
             // Simple feedback animation
@@ -1809,10 +1818,26 @@ const customPreset = ${presetStr};
               clickedItem.style.color = '';
             }, 200);
             
-            console.log(`Toggled: ${clickedItem.textContent}`);
+            console.log(`Selected section: ${section}`);
           });
         });
       }
+      
+      // Check URL hash on page load and set the active menu item
+      function checkUrlHash() {
+        if (window.location.hash) {
+          const section = window.location.hash.substring(1); // Remove the # character
+          const menuItem = document.querySelector(`.menu-item[data-section="${section}"]`);
+          
+          if (menuItem) {
+            menuItem.classList.add('active');
+            menuItem.parentElement.classList.add('active-item');
+          }
+        }
+      }
+      
+      // Listen for back/forward browser navigation
+      window.addEventListener('popstate', checkUrlHash);
     });
   </script>
 </body>
