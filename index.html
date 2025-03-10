@@ -581,445 +581,483 @@
 
   <script>
     //Image display code
-    class ImageGallery {
-    constructor() {
-      this.galleryPanel = null;
-      this.currentAlbum = null;
-      this.albums = [];
-      this.loadedImages = new Map(); // For memory management
-      this.maxLoadedImages = 50;     // Maximum number of images to keep in memory
-    }
+    class ArchivesGallery {
+      constructor() {
+        this.albums = [];
+        this.archivesContainer = null;
+        this.isInitialized = false;
+      }
 
-    // Initialize the gallery
-    async initialize() {
-      this.createGalleryUI();
-      await this.loadAlbumIndex();
-      this.renderAlbumList();
-      
-      // Add gallery toggle button to the existing UI
-      const toggleBtn = document.createElement('div');
-      toggleBtn.className = 'toggle-gallery-panel';
-      toggleBtn.textContent = 'G';
-      toggleBtn.style.top = '70px'; // Position below preset button
-      document.body.appendChild(toggleBtn);
-      
-      toggleBtn.addEventListener('click', () => {
-        this.galleryPanel.classList.toggle('open');
-      });
-    }
+      initialize() {
+        // Find the existing archives link and add click handler
+        const archivesLink = document.querySelector('a[href="#archives"]') || 
+                              document.querySelector('.archives-link') ||
+                              Array.from(document.querySelectorAll('a')).find(a => a.textContent.toLowerCase().includes('archives'));
+        
+        if (archivesLink) {
+          // Store the original click handler (if any)
+          const originalClickHandler = archivesLink.onclick;
+          
+          // Override click handler to show archives
+          archivesLink.onclick = (e) => {
+            // Call original handler if it exists
+            if (typeof originalClickHandler === 'function') {
+              originalClickHandler(e);
+            }
+            
+            // Show archives content
+            this.showArchives();
+            return false; // Prevent default navigation
+          };
+        }
+        
+        // Add styles
+        this.addStyles();
+        
+        // Create container for archives content
+        this.createArchivesContainer();
+        
+        // Load archives data
+        this.loadArchives();
+        
+        this.isInitialized = true;
+      }
 
-    // Create the gallery UI elements
-    createGalleryUI() {
-      // Create gallery panel
-      this.galleryPanel = document.createElement('div');
-      this.galleryPanel.className = 'gallery-panel';
-      
-      // Add heading
-      const heading = document.createElement('h3');
-      heading.textContent = 'Image Gallery';
-      this.galleryPanel.appendChild(heading);
-      
-      // Create album list container
-      const albumList = document.createElement('div');
-      albumList.className = 'album-list';
-      albumList.id = 'album-list';
-      this.galleryPanel.appendChild(albumList);
-      
-      // Create image gallery view
-      const galleryView = document.createElement('div');
-      galleryView.className = 'gallery-view';
-      galleryView.id = 'gallery-view';
-      this.galleryPanel.appendChild(galleryView);
-      
-      // Back button for gallery navigation
-      const backBtn = document.createElement('button');
-      backBtn.className = 'gallery-back-btn';
-      backBtn.textContent = '← Back to Albums';
-      backBtn.style.display = 'none';
-      backBtn.addEventListener('click', () => {
-        galleryView.innerHTML = '';
-        galleryView.style.display = 'none';
-        albumList.style.display = 'flex';
-        backBtn.style.display = 'none';
-        this.currentAlbum = null;
-      });
-      this.galleryPanel.insertBefore(backBtn, galleryView);
-      
-      // Add to body
-      document.body.appendChild(this.galleryPanel);
-      
-      // Add CSS for the gallery
-      this.addGalleryStyles();
-    }
-
-    // Add necessary CSS styles for the gallery
-    addGalleryStyles() {
-      const styleElement = document.createElement('style');
-      styleElement.textContent = `
-        .gallery-panel {
-          position: fixed;
-          top: 80px;
-          right: 20px;
-          background: rgba(0, 0, 0, 0.7);
-          backdrop-filter: blur(5px);
-          padding: 15px;
-          border-radius: 8px;
-          z-index: 99;
-          width: 320px;
-          max-height: 80vh;
-          overflow-y: auto;
-          transform: translateX(350px);
-          transition: transform 0.3s ease;
-          display: flex;
-          flex-direction: column;
-        }
-        
-        .gallery-panel.open {
-          transform: translateX(0);
-        }
-        
-        .gallery-panel h3 {
-          margin-bottom: 15px;
-          font-size: 16px;
-          color: #fff;
-        }
-        
-        .album-list {
-          display: flex;
-          flex-direction: column;
-          gap: 15px;
-          overflow-y: auto;
-          max-height: 60vh;
-        }
-        
-        .album-item {
-          border-radius: 8px;
-          overflow: hidden;
-          position: relative;
-          cursor: pointer;
-          transition: transform 0.2s;
-          border: 1px solid #333;
-        }
-        
-        .album-item:hover {
-          transform: translateY(-3px);
-        }
-        
-        .album-thumbnail {
-          width: 100%;
-          height: 140px;
-          object-fit: cover;
-          display: block;
-        }
-        
-        .album-title {
-          position: absolute;
-          bottom: 0;
-          left: 0;
-          right: 0;
-          background: rgba(0, 0, 0, 0.7);
-          color: white;
-          padding: 8px;
-          font-size: 14px;
-        }
-        
-        .gallery-view {
-          display: none;
-          flex-direction: column;
-          gap: 10px;
-          max-height: 60vh;
-          overflow-y: auto;
-        }
-        
-        .gallery-image-container {
-          position: relative;
-        }
-        
-        .gallery-image {
-          width: 100%;
-          border-radius: 4px;
-          cursor: pointer;
-          transition: all 0.2s;
-        }
-        
-        .gallery-image:hover {
-          transform: scale(1.02);
-        }
-        
-        .gallery-back-btn {
-          margin-bottom: 10px;
-          background: rgba(30, 30, 30, 0.8);
-          color: #fff;
-          border: 1px solid #555;
-          padding: 8px;
-          border-radius: 4px;
-          cursor: pointer;
-          display: none;
-        }
-        
-        .gallery-back-btn:hover {
-          background: rgba(60, 60, 60, 0.8);
-        }
-        
-        .toggle-gallery-panel {
-          position: fixed;
-          top: 70px;
-          right: 20px;
-          background: rgba(0, 0, 0, 0.7);
-          color: white;
-          width: 36px;
-          height: 36px;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          cursor: pointer;
-          z-index: 101;
-          border: 1px solid #444;
-          font-weight: bold;
-          font-size: 18px;
-        }
-        
-        .toggle-gallery-panel:hover {
-          background: rgba(50, 50, 50, 0.7);
-        }
-        
-        .fullscreen-view {
-          position: fixed;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: rgba(0, 0, 0, 0.9);
-          z-index: 1000;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-        
-        .fullscreen-image {
-          max-width: 90%;
-          max-height: 90%;
-          object-fit: contain;
-        }
-        
-        .fullscreen-close {
-          position: absolute;
-          top: 20px;
-          right: 20px;
-          color: white;
-          background: rgba(0, 0, 0, 0.5);
-          width: 40px;
-          height: 40px;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          cursor: pointer;
-          font-size: 20px;
-          border: 1px solid #444;
-        }
-      `;
-      document.head.appendChild(styleElement);
-    }
-
-    // Load the album index from the server
-    async loadAlbumIndex() {
-      try {
-        const response = await fetch('/api/gallery/albums');
-        this.albums = await response.json();
-      } catch (error) {
-        console.error('Error loading albums:', error);
-        // Fallback to demo data if server request fails
-        this.albums = [
-          {
-            id: 'cafe-de-france',
-            name: 'Cafe de France 27/03/24',
-            thumbnail: '/archive_assets/Cafe de France 27-03-24/thumbnail.jpg',
-            path: '/archive_assets/Cafe de France 27-03-24/'
-          },
-          {
-            id: 'typography-workshop',
-            name: 'Typography Workshop 15/04/24',
-            thumbnail: '/archive_assets/Typography Workshop 15-04-24/thumbnail.jpg',
-            path: '/archive_assets/Typography Workshop 15-04-24/'
+      addStyles() {
+        const styleElement = document.createElement('style');
+        styleElement.textContent = `
+          /* Archives styles */
+          #archives-container {
+            display: none;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            flex-direction: column;
+            gap: 40px;
+            padding: 20px;
+            overflow-y: auto;
+            max-height: calc(100vh - 40px);
           }
-        ];
+          
+          .album {
+            width: 100%;
+            margin-bottom: 60px;
+          }
+          
+          .album-title {
+            font-size: 24px;
+            margin-bottom: 20px;
+            font-weight: normal;
+            color: #fff;
+            text-align: right;
+          }
+          
+          .album-image {
+            width: 100%;
+            margin-bottom: 20px;
+            background-color: #ff0000;
+            aspect-ratio: 16/9;
+            cursor: pointer;
+            transition: opacity 0.3s ease;
+          }
+          
+          .album-image:hover {
+            opacity: 0.9;
+          }
+          
+          /* Fullscreen image viewer */
+          .fullscreen-viewer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+          }
+          
+          .fullscreen-image {
+            max-width: 90%;
+            max-height: 90%;
+          }
+          
+          .close-viewer {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: white;
+            font-size: 30px;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 50%;
+          }
+        `;
+        
+        document.head.appendChild(styleElement);
       }
-    }
 
-    // Render the album list
-    renderAlbumList() {
-      const albumList = document.getElementById('album-list');
-      albumList.innerHTML = '';
-      
-      this.albums.forEach(album => {
-        const albumElement = document.createElement('div');
-        albumElement.className = 'album-item';
-        albumElement.dataset.albumId = album.id;
+      createArchivesContainer() {
+        // Check if container already exists
+        let container = document.getElementById('archives-container');
         
-        // Create thumbnail
-        const thumbnail = document.createElement('img');
-        thumbnail.className = 'album-thumbnail';
-        thumbnail.src = album.thumbnail || 'placeholder.jpg';
-        thumbnail.alt = album.name;
-        albumElement.appendChild(thumbnail);
-        
-        // Create title
-        const title = document.createElement('div');
-        title.className = 'album-title';
-        title.textContent = album.name;
-        albumElement.appendChild(title);
-        
-        // Add click handler
-        albumElement.addEventListener('click', () => {
-          this.openAlbum(album);
-        });
-        
-        albumList.appendChild(albumElement);
-      });
-    }
-
-    // Open an album and display its images
-    async openAlbum(album) {
-      this.currentAlbum = album;
-      const albumList = document.getElementById('album-list');
-      const galleryView = document.getElementById('gallery-view');
-      const backBtn = document.querySelector('.gallery-back-btn');
-      
-      // Hide album list, show gallery view
-      albumList.style.display = 'none';
-      galleryView.style.display = 'flex';
-      backBtn.style.display = 'block';
-      
-      // Clear gallery view
-      galleryView.innerHTML = '';
-      
-      // Load images for this album
-      try {
-        let images;
-        try {
-          const response = await fetch(`/api/gallery/album/${album.id}`);
-          images = await response.json();
-        } catch (error) {
-          // Fallback to demo data
-          console.error('Error loading album images:', error);
-          images = [
-            { src: `${album.path}image1.jpg`, alt: 'Image 1' },
-            { src: `${album.path}image2.jpg`, alt: 'Image 2' },
-            { src: `${album.path}image3.jpg`, alt: 'Image 3' }
-          ];
+        if (!container) {
+          container = document.createElement('div');
+          container.id = 'archives-container';
+          document.body.appendChild(container);
         }
         
-        // Render images with lazy loading
-        this.renderAlbumImages(images, galleryView);
-      } catch (error) {
-        console.error('Error rendering album:', error);
-        galleryView.innerHTML = '<p style="color: white;">Error loading images.</p>';
+        this.archivesContainer = container;
       }
-    }
 
-    // Render images for an album with lazy loading
-    renderAlbumImages(images, container) {
-      // Create intersection observer for lazy loading
-      const observer = new IntersectionObserver(
-        (entries, observer) => {
-          entries.forEach(entry => {
-            if (entry.isIntersecting) {
-              const img = entry.target;
-              const src = img.dataset.src;
-              if (src) {
-                img.src = src;
-                img.removeAttribute('data-src');
-                this.loadedImages.set(src, img);
-                this.manageImageMemory();
+      loadArchives() {
+        // Fetch albums from the server API
+        fetch('/api/gallery/albums')
+          .then(response => {
+            if (!response.ok) {
+              throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+            }
+            return response.json();
+          })
+          .then(data => {
+            // Process album data from server
+            this.albums = data.map(album => ({
+              id: album.id,
+              title: album.name, // Use the actual folder name as the title
+              images: [] // Will be populated when album is opened
+            }));
+            
+            // If archives section is already active, render it with the new data
+            if (this.archivesContainer.style.display === 'flex') {
+              this.renderArchives();
+            }
+          })
+          .catch(error => {
+            console.error('Error loading albums:', error);
+            // Fall back to demo data if server request fails
+            this.albums = [
+              {
+                id: 'cafe-de-france',
+                title: 'Cafe de France',
+                images: [
+                  { src: 'archive_assets/cafe-de-france/image1.jpg', alt: 'Cafe de France 1' },
+                  { src: 'archive_assets/cafe-de-france/image2.jpg', alt: 'Cafe de France 2' }
+                ]
+              },
+              {
+                id: 'typographic-workshop',
+                title: 'Typographic Workshop',
+                images: [
+                  { src: 'archive_assets/typographic-workshop/image1.jpg', alt: 'Workshop 1' },
+                  { src: 'archive_assets/typographic-workshop/image2.jpg', alt: 'Workshop 2' }
+                ]
               }
-              observer.unobserve(img);
+            ];
+            
+            // If archives section is already active, render with fallback data
+            if (this.archivesContainer.style.display === 'flex') {
+              this.renderArchives();
             }
           });
-        },
-        { rootMargin: '100px' }
-      );
-      
-      // Create image elements
-      images.forEach((image, index) => {
-        const imageContainer = document.createElement('div');
-        imageContainer.className = 'gallery-image-container';
-        
-        const img = document.createElement('img');
-        img.className = 'gallery-image';
-        img.alt = image.alt || `Image ${index + 1}`;
-        
-        // Use lazy loading for images not in view
-        img.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1"%3E%3C/svg%3E'; // Tiny placeholder
-        img.dataset.src = image.src;
-        
-        // Add click handler for fullscreen view
-        img.addEventListener('click', () => {
-          this.showFullscreen(image.src);
-        });
-        
-        imageContainer.appendChild(img);
-        container.appendChild(imageContainer);
-        
-        // Observe for lazy loading
-        observer.observe(img);
-      });
-    }
+      }
 
-    // Show an image in fullscreen view
-    showFullscreen(imageSrc) {
-      const fullscreenView = document.createElement('div');
-      fullscreenView.className = 'fullscreen-view';
-      
-      const img = document.createElement('img');
-      img.className = 'fullscreen-image';
-      img.src = imageSrc;
-      
-      const closeBtn = document.createElement('div');
-      closeBtn.className = 'fullscreen-close';
-      closeBtn.innerHTML = '&times;';
-      closeBtn.addEventListener('click', () => {
-        document.body.removeChild(fullscreenView);
-      });
-      
-      fullscreenView.appendChild(img);
-      fullscreenView.appendChild(closeBtn);
-      document.body.appendChild(fullscreenView);
-      
-      // Close on click outside image
-      fullscreenView.addEventListener('click', (e) => {
-        if (e.target === fullscreenView) {
-          document.body.removeChild(fullscreenView);
+      // Add this new method to your ArchivesGallery class to load images for a specific album
+      loadAlbumImages(albumId) {
+        return fetch(`/api/gallery/album/${albumId}`)
+          .then(response => {
+            if (!response.ok) {
+              throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+            }
+            return response.json();
+          })
+          .then(images => {
+            // Find the album in our collection
+            const album = this.albums.find(a => a.id === albumId);
+            if (album) {
+              // Update the album's images array
+              album.images = images;
+            }
+            return images;
+          })
+          .catch(error => {
+            console.error(`Error loading images for album ${albumId}:`, error);
+            return []; // Return empty array on error
+          });
+      }
+
+      // Replace your current renderArchives() method with this improved version:
+      renderArchives() {
+        // Clear container
+        this.archivesContainer.innerHTML = '';
+        
+        // Create a loading indicator if no albums are loaded yet
+        if (this.albums.length === 0) {
+          const loadingElement = document.createElement('div');
+          loadingElement.className = 'loading-indicator';
+          loadingElement.textContent = 'Loading albums...';
+          loadingElement.style.textAlign = 'center';
+          loadingElement.style.padding = '50px';
+          loadingElement.style.color = '#fff';
+          this.archivesContainer.appendChild(loadingElement);
+          return;
         }
-      });
-    }
-
-    // Free memory by limiting the number of loaded images
-    manageImageMemory() {
-      if (this.loadedImages.size > this.maxLoadedImages) {
-        // Remove oldest images when we exceed the limit
-        const imagesToRemove = this.loadedImages.size - this.maxLoadedImages;
-        let count = 0;
         
-        for (const [key, value] of this.loadedImages) {
-          if (count >= imagesToRemove) break;
+        // Create a section for each album
+        this.albums.forEach(album => {
+          const albumElement = document.createElement('div');
+          albumElement.className = 'album';
+          albumElement.id = album.id;
           
-          // Check if the image is not currently visible
-          const rect = value.getBoundingClientRect();
-          const isVisible = rect.top < window.innerHeight && rect.bottom >= 0;
+          // Create album title
+          const titleElement = document.createElement('h2');
+          titleElement.className = 'album-title';
+          titleElement.textContent = album.title;
+          albumElement.appendChild(titleElement);
           
-          if (!isVisible) {
-            // Replace with placeholder and prepare for lazy loading again
-            value.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1"%3E%3C/svg%3E';
-            value.dataset.src = key;
-            this.loadedImages.delete(key);
-            count++;
+          // Check if we already have images for this album
+          if (album.images.length === 0) {
+            // Create a loading placeholder for this album
+            const loadingElement = document.createElement('div');
+            loadingElement.className = 'album-loading';
+            loadingElement.textContent = 'Loading images...';
+            loadingElement.style.height = '200px';
+            loadingElement.style.display = 'flex';
+            loadingElement.style.alignItems = 'center';
+            loadingElement.style.justifyContent = 'center';
+            loadingElement.style.color = '#fff';
+            loadingElement.style.backgroundColor = '#ff0000';
+            albumElement.appendChild(loadingElement);
+            
+            // Load images for this album
+            this.loadAlbumImages(album.id).then(images => {
+              // Remove the loading placeholder
+              if (loadingElement.parentNode) {
+                loadingElement.parentNode.removeChild(loadingElement);
+              }
+              
+              // Add images to the album element
+              images.forEach(image => {
+                const imageElement = this.createImageOrPlaceholder(image);
+                albumElement.appendChild(imageElement);
+                
+                // Add fullscreen view on click
+                imageElement.addEventListener('click', () => {
+                  this.showFullscreenImage(image.src);
+                });
+              });
+            });
+          } else {
+            // We already have images, render them directly
+            album.images.forEach(image => {
+              const imageElement = this.createImageOrPlaceholder(image);
+              albumElement.appendChild(imageElement);
+              
+              // Add fullscreen view on click
+              imageElement.addEventListener('click', () => {
+                this.showFullscreenImage(image.src);
+              });
+            });
           }
+          
+          this.archivesContainer.appendChild(albumElement);
+        });
+      }
+
+      // Add an improved version of the createImageOrPlaceholder method
+      createImageOrPlaceholder(image) {
+        // Create image element
+        const img = document.createElement('img');
+        img.className = 'album-image';
+        img.alt = image.alt || 'Gallery image';
+        
+        // Start with a placeholder
+        img.style.backgroundColor = '#ff0000'; // Red placeholder
+        img.style.aspectRatio = '16/9';
+        img.style.minHeight = '300px';
+        
+        // Create loading indicator
+        const loader = document.createElement('div');
+        loader.className = 'image-loader';
+        loader.innerHTML = 'Loading...';
+        loader.style.position = 'absolute';
+        loader.style.top = '50%';
+        loader.style.left = '50%';
+        loader.style.transform = 'translate(-50%, -50%)';
+        loader.style.color = 'white';
+        loader.style.textShadow = '0 0 3px black';
+        
+        // Create a container for the image and loading indicator
+        const container = document.createElement('div');
+        container.className = 'image-container';
+        container.style.position = 'relative';
+        container.style.marginBottom = '20px';
+        container.appendChild(img);
+        container.appendChild(loader);
+        
+        // Load the actual image
+        const tempImage = new Image();
+        tempImage.onload = () => {
+          img.src = image.src;
+          img.style.backgroundColor = 'transparent';
+          // Remove the loader when image is loaded
+          if (loader.parentNode) {
+            loader.parentNode.removeChild(loader);
+          }
+        };
+        
+        tempImage.onerror = () => {
+          // Show error state if image fails to load
+          loader.textContent = 'Image not found';
+          loader.style.color = '#ff4444';
+          console.log(`Could not load image: ${image.src}`);
+        };
+        
+        // Start loading the image
+        tempImage.src = image.src;
+        
+        return container;
+      }
+
+      // Improved addStyles method to add better feedback states
+      addStyles() {
+        const styleElement = document.createElement('style');
+        styleElement.textContent = `
+          /* Archives styles */
+          #archives-container {
+            display: none;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            flex-direction: column;
+            gap: 40px;
+            padding: 20px;
+            overflow-y: auto;
+            max-height: calc(100vh - 40px);
+            position: relative;
+            z-index: 10;
+          }
+          
+          .album {
+            width: 100%;
+            margin-bottom: 60px;
+          }
+          
+          .album-title {
+            font-size: 24px;
+            margin-bottom: 20px;
+            font-weight: normal;
+            color: #fff;
+            text-align: right;
+          }
+          
+          .album-image {
+            width: 100%;
+            margin-bottom: 20px;
+            background-color: #ff0000;
+            aspect-ratio: 16/9;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: block;
+          }
+          
+          .album-image:hover {
+            opacity: 0.9;
+            transform: scale(1.01);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+          }
+          
+          .image-container {
+            position: relative;
+            width: 100%;
+            overflow: hidden;
+            border-radius: 4px;
+            background-color: #ff0000;
+          }
+          
+          /* Fullscreen image viewer */
+          .fullscreen-viewer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+          }
+          
+          .fullscreen-image {
+            max-width: 90%;
+            max-height: 90%;
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+          }
+          
+          .close-viewer {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: white;
+            font-size: 30px;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 50%;
+            transition: background 0.3s ease;
+          }
+          
+          .close-viewer:hover {
+            background: rgba(60, 60, 60, 0.8);
+          }
+          
+          /* Loading indicators */
+          .loading-indicator,
+          .album-loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: white;
+            font-size: 18px;
+            text-align: center;
+          }
+          
+          .album-loading {
+            background-color: #ff0000;
+            border-radius: 4px;
+            min-height: 300px;
+          }
+        `;
+        
+        document.head.appendChild(styleElement);
+      }
+
+      // Add this method to handle refreshing the gallery content
+      refreshGallery() {
+        // Clear the current albums
+        this.albums = [];
+        
+        // Show loading state
+        if (this.archivesContainer.style.display === 'flex') {
+          this.renderArchives(); // This will show the loading indicator
         }
+        
+        // Fetch albums again
+        this.loadArchives();
       }
     }
-  }
     //Canvas code
     document.addEventListener('DOMContentLoaded', () => {
       // Elements
