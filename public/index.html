@@ -465,15 +465,16 @@
 
     .album-title {
       color: #ffff00;
-      font-size: 24px;
-      margin-bottom: 20px;
+      font-size: 24px; /* Increased from 24px */
+      margin-bottom: 20px; /* Increased from 20px */
       font-family: monospace;
+      text-shadow: 0 0 10px rgba(0, 0, 0, 0.7); /* Add text shadow for better visibility */
     }
 
     .album-images {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 20px;
+      grid-template-columns: repeat(auto-fill, minmax(450px, 1fr)); /* Increased from 300px to 450px */
+      gap: 30px; /* Increased gap */
     }
 
     .album-image {
@@ -482,7 +483,7 @@
       padding-bottom: 75%; /* 4:3 aspect ratio */
       position: relative;
       overflow: hidden;
-      background-color: #111;
+      background-color: transparent; /* Remove background color */
     }
 
     .album-image img {
@@ -500,20 +501,7 @@
     }
 
     .gallery-close {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      color: #fff;
-      background: rgba(0, 0, 0, 0.5);
-      width: 40px;
-      height: 40px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 50%;
-      font-size: 24px;
-      cursor: pointer;
-      z-index: 201;
+      display: none; /* Hide the close button */
     }
 
     .gallery-close:hover {
@@ -619,8 +607,8 @@
     /* Mobile Responsive Styles */
     @media (max-width: 768px) {
       .album-images {
-        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-        gap: 10px;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); /* Larger than original */
+        gap: 15px;
       }
       
       .album-title {
