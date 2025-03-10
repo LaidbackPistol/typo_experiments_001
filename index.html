@@ -400,47 +400,15 @@
       transform: translateX(5px);
     }
     
-    /* Push other items away when one is active */
-    .menu-item.active ~ li {
+    /* Push items away from active item */
+    li.active-item ~ li {
       transform: translateY(8px);
     }
     
-    li:not(.contains-active) + li.contains-active ~ li {
+    li:not(.active-item) + li.active-item ~ li {
       transform: translateY(8px);
     }
     
-    li.contains-active {
-      z-index: 5;
-    }
-    
-    li:not(.contains-active):not(:hover) {
-      z-index: 1;
-    }
-    
-    /* Deselect button style */
-    .deselect-button {
-      position: absolute;
-      left: -20px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: #ffff00;
-      font-size: 14px;
-      opacity: 0;
-      transition: all 0.3s ease;
-      background: none;
-      border: none;
-      cursor: pointer;
-      font-family: monospace;
-    }
-    
-    li.contains-active .deselect-button {
-      opacity: 0.7;
-    }
-    
-    .deselect-button:hover {
-      opacity: 1 !important;
-    }
-
     /* Media query for responsive design */
     @media (max-width: 768px) {
       .menu-container {
@@ -460,21 +428,14 @@
         transform: translateY(-5px);
       }
       
-      .menu-item.active ~ li {
+      li.active-item ~ li {
         transform: translateX(8px);
       }
       
-      li:not(.contains-active) + li.contains-active ~ li {
+      li:not(.active-item) + li.active-item ~ li {
         transform: translateX(8px);
-      }
-      
-      .deselect-button {
-        left: 50%;
-        top: -18px;
-        transform: translateX(-50%);
       }
     }
-
   </style>
 </head>
 <body>
@@ -488,10 +449,10 @@
   <div class="menu-container">
     <nav class="main-menu">
       <ul>
-        <li><button class="deselect-button">×</button><a href="#" class="menu-item">events</a></li>
-        <li><button class="deselect-button">×</button><a href="#" class="menu-item">mixes</a></li>
-        <li><button class="deselect-button">×</button><a href="#" class="menu-item">archives</a></li>
-        <li><button class="deselect-button">×</button><a href="#" class="menu-item">contact</a></li>
+        <li><a href="#" class="menu-item">events</a></li>
+        <li><a href="#" class="menu-item">mixes</a></li>
+        <li><a href="#" class="menu-item">archives</a></li>
+        <li><a href="#" class="menu-item">contact</a></li>
       </ul>
     </nav>
   </div>
@@ -1804,56 +1765,54 @@ const customPreset = ${presetStr};
       animate();
 
       document.addEventListener('DOMContentLoaded', () => {
+        setupMenu();
+      });
+
+      // In case the DOM is already loaded when this script runs
+      if (document.readyState === 'interactive' || document.readyState === 'complete') {
+        setupMenu();
+      }
+
+      function setupMenu() {
         const menuItems = document.querySelectorAll('.menu-item');
-        const deselectButtons = document.querySelectorAll('.deselect-button');
         
         // Menu item click handler
         menuItems.forEach(item => {
           item.addEventListener('click', (e) => {
             e.preventDefault();
             
-            // Remove active class from all items
-            menuItems.forEach(i => {
-              i.classList.remove('active');
-              i.parentElement.classList.remove('contains-active');
-            });
+            const clickedItem = e.target;
+            const parentLi = clickedItem.parentElement;
             
-            // Add active class to clicked item
-            e.target.classList.add('active');
-            e.target.parentElement.classList.add('contains-active');
-            
-            // Simple feedback animation
-            const originalColor = e.target.style.color;
-            e.target.style.color = '#ffffff';
-            
-            setTimeout(() => {
-              e.target.style.color = originalColor;
-            }, 200);
-            
-            // For future implementation: navigate to the respective page
-            console.log(`Selected: ${e.target.textContent}`);
-          });
-        });
-        
-        // Deselect button click handler
-        deselectButtons.forEach(button => {
-          button.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            // Find the parent li and remove active classes
-            const parentLi = e.target.parentElement;
-            const menuItem = parentLi.querySelector('.menu-item');
-            
-            if (menuItem.classList.contains('active')) {
-              menuItem.classList.remove('active');
-              parentLi.classList.remove('contains-active');
+            // Toggle active state (click again to deselect)
+            if (clickedItem.classList.contains('active')) {
+              // If already active, deactivate
+              clickedItem.classList.remove('active');
+              parentLi.classList.remove('active-item');
+            } else {
+              // First, remove active class from all items
+              menuItems.forEach(i => {
+                i.classList.remove('active');
+                i.parentElement.classList.remove('active-item');
+              });
+              
+              // Then, add active class to clicked item
+              clickedItem.classList.add('active');
+              parentLi.classList.add('active-item');
             }
             
-            console.log(`Deselected: ${menuItem.textContent}`);
+            // Simple feedback animation
+            const originalColor = window.getComputedStyle(clickedItem).color;
+            clickedItem.style.color = '#ffffff';
+            
+            setTimeout(() => {
+              clickedItem.style.color = '';
+            }, 200);
+            
+            console.log(`Toggled: ${clickedItem.textContent}`);
           });
         });
-      });
+      }
     });
   </script>
 </body>
