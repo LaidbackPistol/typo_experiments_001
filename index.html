@@ -1764,7 +1764,6 @@ const customPreset = ${presetStr};
       // Start animation
       animate();
 
-      // Wait for DOM to be fully loaded
       document.addEventListener('DOMContentLoaded', () => {
         setupMenu();
         // Check if URL has a hash and select the corresponding menu item
@@ -1825,6 +1824,14 @@ const customPreset = ${presetStr};
       
       // Check URL hash on page load and set the active menu item
       function checkUrlHash() {
+        // First, clear all active states
+        const allMenuItems = document.querySelectorAll('.menu-item');
+        allMenuItems.forEach(item => {
+          item.classList.remove('active');
+          item.parentElement.classList.remove('active-item');
+        });
+        
+        // Then, if there's a hash, find and activate the corresponding menu item
         if (window.location.hash) {
           const section = window.location.hash.substring(1); // Remove the # character
           const menuItem = document.querySelector(`.menu-item[data-section="${section}"]`);
@@ -1838,6 +1845,9 @@ const customPreset = ${presetStr};
       
       // Listen for back/forward browser navigation
       window.addEventListener('popstate', checkUrlHash);
+      
+      // Also listen for hash changes directly (for manual URL edits)
+      window.addEventListener('hashchange', checkUrlHash);
     });
   </script>
 </body>
