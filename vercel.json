@@ -8,10 +8,6 @@
       {
         "src": "public/**",
         "use": "@vercel/static"
-      },
-      {
-        "src": "archive_assets/**",
-        "use": "@vercel/static"
       }
     ],
     "routes": [
@@ -21,7 +17,7 @@
       },
       {
         "src": "/archive_assets/(.*)",
-        "dest": "/archive_assets/$1"
+        "dest": "/public/archive_assets/$1"
       },
       {
         "src": "/(.*)",

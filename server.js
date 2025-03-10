@@ -8,11 +8,13 @@ const port = process.env.PORT || 3000;
 app.use(express.static('public'));
 
 // Serve files from archive_assets directory
-app.use('/archive_assets', express.static('archive_assets'));
+// Change this to look inside the public folder
+app.use('/archive_assets', express.static(path.join(__dirname, 'public', 'archive_assets')));
 
 // API endpoint to get all archive albums
 app.get('/api/archives', (req, res) => {
-  const archivePath = path.join(__dirname, 'archive_assets');
+  // Update the path to look in public/archive_assets
+  const archivePath = path.join(__dirname, 'public', 'archive_assets');
   
   // Check if archive_assets directory exists
   if (!fs.existsSync(archivePath)) {
