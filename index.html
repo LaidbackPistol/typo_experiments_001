@@ -580,6 +580,447 @@
   <div class="notification" id="notification"></div>
 
   <script>
+    //Image display code
+    class ImageGallery {
+    constructor() {
+      this.galleryPanel = null;
+      this.currentAlbum = null;
+      this.albums = [];
+      this.loadedImages = new Map(); // For memory management
+      this.maxLoadedImages = 50;     // Maximum number of images to keep in memory
+    }
+
+    // Initialize the gallery
+    async initialize() {
+      this.createGalleryUI();
+      await this.loadAlbumIndex();
+      this.renderAlbumList();
+      
+      // Add gallery toggle button to the existing UI
+      const toggleBtn = document.createElement('div');
+      toggleBtn.className = 'toggle-gallery-panel';
+      toggleBtn.textContent = 'G';
+      toggleBtn.style.top = '70px'; // Position below preset button
+      document.body.appendChild(toggleBtn);
+      
+      toggleBtn.addEventListener('click', () => {
+        this.galleryPanel.classList.toggle('open');
+      });
+    }
+
+    // Create the gallery UI elements
+    createGalleryUI() {
+      // Create gallery panel
+      this.galleryPanel = document.createElement('div');
+      this.galleryPanel.className = 'gallery-panel';
+      
+      // Add heading
+      const heading = document.createElement('h3');
+      heading.textContent = 'Image Gallery';
+      this.galleryPanel.appendChild(heading);
+      
+      // Create album list container
+      const albumList = document.createElement('div');
+      albumList.className = 'album-list';
+      albumList.id = 'album-list';
+      this.galleryPanel.appendChild(albumList);
+      
+      // Create image gallery view
+      const galleryView = document.createElement('div');
+      galleryView.className = 'gallery-view';
+      galleryView.id = 'gallery-view';
+      this.galleryPanel.appendChild(galleryView);
+      
+      // Back button for gallery navigation
+      const backBtn = document.createElement('button');
+      backBtn.className = 'gallery-back-btn';
+      backBtn.textContent = '← Back to Albums';
+      backBtn.style.display = 'none';
+      backBtn.addEventListener('click', () => {
+        galleryView.innerHTML = '';
+        galleryView.style.display = 'none';
+        albumList.style.display = 'flex';
+        backBtn.style.display = 'none';
+        this.currentAlbum = null;
+      });
+      this.galleryPanel.insertBefore(backBtn, galleryView);
+      
+      // Add to body
+      document.body.appendChild(this.galleryPanel);
+      
+      // Add CSS for the gallery
+      this.addGalleryStyles();
+    }
+
+    // Add necessary CSS styles for the gallery
+    addGalleryStyles() {
+      const styleElement = document.createElement('style');
+      styleElement.textContent = `
+        .gallery-panel {
+          position: fixed;
+          top: 80px;
+          right: 20px;
+          background: rgba(0, 0, 0, 0.7);
+          backdrop-filter: blur(5px);
+          padding: 15px;
+          border-radius: 8px;
+          z-index: 99;
+          width: 320px;
+          max-height: 80vh;
+          overflow-y: auto;
+          transform: translateX(350px);
+          transition: transform 0.3s ease;
+          display: flex;
+          flex-direction: column;
+        }
+        
+        .gallery-panel.open {
+          transform: translateX(0);
+        }
+        
+        .gallery-panel h3 {
+          margin-bottom: 15px;
+          font-size: 16px;
+          color: #fff;
+        }
+        
+        .album-list {
+          display: flex;
+          flex-direction: column;
+          gap: 15px;
+          overflow-y: auto;
+          max-height: 60vh;
+        }
+        
+        .album-item {
+          border-radius: 8px;
+          overflow: hidden;
+          position: relative;
+          cursor: pointer;
+          transition: transform 0.2s;
+          border: 1px solid #333;
+        }
+        
+        .album-item:hover {
+          transform: translateY(-3px);
+        }
+        
+        .album-thumbnail {
+          width: 100%;
+          height: 140px;
+          object-fit: cover;
+          display: block;
+        }
+        
+        .album-title {
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          background: rgba(0, 0, 0, 0.7);
+          color: white;
+          padding: 8px;
+          font-size: 14px;
+        }
+        
+        .gallery-view {
+          display: none;
+          flex-direction: column;
+          gap: 10px;
+          max-height: 60vh;
+          overflow-y: auto;
+        }
+        
+        .gallery-image-container {
+          position: relative;
+        }
+        
+        .gallery-image {
+          width: 100%;
+          border-radius: 4px;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+        
+        .gallery-image:hover {
+          transform: scale(1.02);
+        }
+        
+        .gallery-back-btn {
+          margin-bottom: 10px;
+          background: rgba(30, 30, 30, 0.8);
+          color: #fff;
+          border: 1px solid #555;
+          padding: 8px;
+          border-radius: 4px;
+          cursor: pointer;
+          display: none;
+        }
+        
+        .gallery-back-btn:hover {
+          background: rgba(60, 60, 60, 0.8);
+        }
+        
+        .toggle-gallery-panel {
+          position: fixed;
+          top: 70px;
+          right: 20px;
+          background: rgba(0, 0, 0, 0.7);
+          color: white;
+          width: 36px;
+          height: 36px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          z-index: 101;
+          border: 1px solid #444;
+          font-weight: bold;
+          font-size: 18px;
+        }
+        
+        .toggle-gallery-panel:hover {
+          background: rgba(50, 50, 50, 0.7);
+        }
+        
+        .fullscreen-view {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0, 0, 0, 0.9);
+          z-index: 1000;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        
+        .fullscreen-image {
+          max-width: 90%;
+          max-height: 90%;
+          object-fit: contain;
+        }
+        
+        .fullscreen-close {
+          position: absolute;
+          top: 20px;
+          right: 20px;
+          color: white;
+          background: rgba(0, 0, 0, 0.5);
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          font-size: 20px;
+          border: 1px solid #444;
+        }
+      `;
+      document.head.appendChild(styleElement);
+    }
+
+    // Load the album index from the server
+    async loadAlbumIndex() {
+      try {
+        const response = await fetch('/api/gallery/albums');
+        this.albums = await response.json();
+      } catch (error) {
+        console.error('Error loading albums:', error);
+        // Fallback to demo data if server request fails
+        this.albums = [
+          {
+            id: 'cafe-de-france',
+            name: 'Cafe de France 27/03/24',
+            thumbnail: '/archive_assets/Cafe de France 27-03-24/thumbnail.jpg',
+            path: '/archive_assets/Cafe de France 27-03-24/'
+          },
+          {
+            id: 'typography-workshop',
+            name: 'Typography Workshop 15/04/24',
+            thumbnail: '/archive_assets/Typography Workshop 15-04-24/thumbnail.jpg',
+            path: '/archive_assets/Typography Workshop 15-04-24/'
+          }
+        ];
+      }
+    }
+
+    // Render the album list
+    renderAlbumList() {
+      const albumList = document.getElementById('album-list');
+      albumList.innerHTML = '';
+      
+      this.albums.forEach(album => {
+        const albumElement = document.createElement('div');
+        albumElement.className = 'album-item';
+        albumElement.dataset.albumId = album.id;
+        
+        // Create thumbnail
+        const thumbnail = document.createElement('img');
+        thumbnail.className = 'album-thumbnail';
+        thumbnail.src = album.thumbnail || 'placeholder.jpg';
+        thumbnail.alt = album.name;
+        albumElement.appendChild(thumbnail);
+        
+        // Create title
+        const title = document.createElement('div');
+        title.className = 'album-title';
+        title.textContent = album.name;
+        albumElement.appendChild(title);
+        
+        // Add click handler
+        albumElement.addEventListener('click', () => {
+          this.openAlbum(album);
+        });
+        
+        albumList.appendChild(albumElement);
+      });
+    }
+
+    // Open an album and display its images
+    async openAlbum(album) {
+      this.currentAlbum = album;
+      const albumList = document.getElementById('album-list');
+      const galleryView = document.getElementById('gallery-view');
+      const backBtn = document.querySelector('.gallery-back-btn');
+      
+      // Hide album list, show gallery view
+      albumList.style.display = 'none';
+      galleryView.style.display = 'flex';
+      backBtn.style.display = 'block';
+      
+      // Clear gallery view
+      galleryView.innerHTML = '';
+      
+      // Load images for this album
+      try {
+        let images;
+        try {
+          const response = await fetch(`/api/gallery/album/${album.id}`);
+          images = await response.json();
+        } catch (error) {
+          // Fallback to demo data
+          console.error('Error loading album images:', error);
+          images = [
+            { src: `${album.path}image1.jpg`, alt: 'Image 1' },
+            { src: `${album.path}image2.jpg`, alt: 'Image 2' },
+            { src: `${album.path}image3.jpg`, alt: 'Image 3' }
+          ];
+        }
+        
+        // Render images with lazy loading
+        this.renderAlbumImages(images, galleryView);
+      } catch (error) {
+        console.error('Error rendering album:', error);
+        galleryView.innerHTML = '<p style="color: white;">Error loading images.</p>';
+      }
+    }
+
+    // Render images for an album with lazy loading
+    renderAlbumImages(images, container) {
+      // Create intersection observer for lazy loading
+      const observer = new IntersectionObserver(
+        (entries, observer) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              const img = entry.target;
+              const src = img.dataset.src;
+              if (src) {
+                img.src = src;
+                img.removeAttribute('data-src');
+                this.loadedImages.set(src, img);
+                this.manageImageMemory();
+              }
+              observer.unobserve(img);
+            }
+          });
+        },
+        { rootMargin: '100px' }
+      );
+      
+      // Create image elements
+      images.forEach((image, index) => {
+        const imageContainer = document.createElement('div');
+        imageContainer.className = 'gallery-image-container';
+        
+        const img = document.createElement('img');
+        img.className = 'gallery-image';
+        img.alt = image.alt || `Image ${index + 1}`;
+        
+        // Use lazy loading for images not in view
+        img.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1"%3E%3C/svg%3E'; // Tiny placeholder
+        img.dataset.src = image.src;
+        
+        // Add click handler for fullscreen view
+        img.addEventListener('click', () => {
+          this.showFullscreen(image.src);
+        });
+        
+        imageContainer.appendChild(img);
+        container.appendChild(imageContainer);
+        
+        // Observe for lazy loading
+        observer.observe(img);
+      });
+    }
+
+    // Show an image in fullscreen view
+    showFullscreen(imageSrc) {
+      const fullscreenView = document.createElement('div');
+      fullscreenView.className = 'fullscreen-view';
+      
+      const img = document.createElement('img');
+      img.className = 'fullscreen-image';
+      img.src = imageSrc;
+      
+      const closeBtn = document.createElement('div');
+      closeBtn.className = 'fullscreen-close';
+      closeBtn.innerHTML = '&times;';
+      closeBtn.addEventListener('click', () => {
+        document.body.removeChild(fullscreenView);
+      });
+      
+      fullscreenView.appendChild(img);
+      fullscreenView.appendChild(closeBtn);
+      document.body.appendChild(fullscreenView);
+      
+      // Close on click outside image
+      fullscreenView.addEventListener('click', (e) => {
+        if (e.target === fullscreenView) {
+          document.body.removeChild(fullscreenView);
+        }
+      });
+    }
+
+    // Free memory by limiting the number of loaded images
+    manageImageMemory() {
+      if (this.loadedImages.size > this.maxLoadedImages) {
+        // Remove oldest images when we exceed the limit
+        const imagesToRemove = this.loadedImages.size - this.maxLoadedImages;
+        let count = 0;
+        
+        for (const [key, value] of this.loadedImages) {
+          if (count >= imagesToRemove) break;
+          
+          // Check if the image is not currently visible
+          const rect = value.getBoundingClientRect();
+          const isVisible = rect.top < window.innerHeight && rect.bottom >= 0;
+          
+          if (!isVisible) {
+            // Replace with placeholder and prepare for lazy loading again
+            value.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1"%3E%3C/svg%3E';
+            value.dataset.src = key;
+            this.loadedImages.delete(key);
+            count++;
+          }
+        }
+      }
+    }
+  }
+    //Canvas code
     document.addEventListener('DOMContentLoaded', () => {
       // Elements
       const canvas = document.getElementById('typography-canvas');
@@ -1763,6 +2204,9 @@ const customPreset = ${presetStr};
       
       // Start animation
       animate();
+
+      const gallery = new ImageGallery();
+      gallery.initialize();
 
       document.addEventListener('DOMContentLoaded', () => {
         setupMenu();
