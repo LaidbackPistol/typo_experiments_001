@@ -356,6 +356,51 @@
       font-size: 14px;
       opacity: 0.8;
     }
+
+    .menu-container {
+      position: fixed;
+      left: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 100;
+    }
+
+    .main-menu ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .menu-item {
+      color: #ffff00; /* Yellow text color */
+      font-size: 18px;
+      text-decoration: none;
+      transition: opacity 0.3s ease;
+      font-family: monospace;
+      opacity: 0.9;
+    }
+
+    .menu-item:hover {
+      opacity: 0.6;
+      cursor: pointer;
+    }
+
+    /* Media query for responsive design */
+    @media (max-width: 768px) {
+      .menu-container {
+        top: auto;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+
+      .main-menu ul {
+        flex-direction: row;
+        justify-content: center;
+        gap: 15px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -365,6 +410,16 @@
   </div>
   <div class="text-input">
     <input type="text" id="text-content" placeholder="Type something..." value="EN5EMBLE">
+  </div>
+  <div class="menu-container">
+    <nav class="main-menu">
+      <ul>
+        <li><a href="#" class="menu-item">events</a></li>
+        <li><a href="#" class="menu-item">mixes</a></li>
+        <li><a href="#" class="menu-item">archives</a></li>
+        <li><a href="#" class="menu-item">contact</a></li>
+      </ul>
+    </nav>
   </div>
   <div class="toggle-controls-panel">C</div>
   <div class="controls">
@@ -1673,6 +1728,24 @@ const customPreset = ${presetStr};
       
       // Start animation
       animate();
+
+      // Menu item click handler
+      document.querySelectorAll('.menu-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+          e.preventDefault();
+          
+          // Simple feedback animation
+          const originalColor = e.target.style.color;
+          e.target.style.color = '#ffffff';
+          
+          setTimeout(() => {
+            e.target.style.color = originalColor;
+          }, 200);
+          
+          // For future implementation: navigate to the respective page
+          console.log(`Clicked on: ${e.target.textContent}`);
+        });
+      });
     });
   </script>
 </body>
