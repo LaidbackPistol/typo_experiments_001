@@ -443,11 +443,11 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background-color: rgba(0, 0, 0, 0.95);
+      background-color: transparent; /* Fully transparent instead of rgba(0, 0, 0, 0.95) */
       z-index: 200;
       overflow-y: auto;
       display: none;
-      padding: 80px 20px 20px 20px;
+      padding: 60px 20px 20px 20px;
     }
 
     .archive-gallery.active {
@@ -457,10 +457,12 @@
     .gallery-container {
       max-width: 1200px;
       margin: 0 auto;
+      background-color: transparent;
     }
 
     .album {
       margin-bottom: 80px;
+      background-color: transparent;
     }
 
     .album-title {
@@ -473,17 +475,18 @@
 
     .album-images {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(450px, 1fr)); /* Increased from 300px to 450px */
-      gap: 30px; /* Increased gap */
+      grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
+      gap: 30px;
+      background-color: transparent;
     }
 
     .album-image {
       width: 100%;
       height: 0;
-      padding-bottom: 75%; /* 4:3 aspect ratio */
+      padding-bottom: 75%;
       position: relative;
       overflow: hidden;
-      background-color: transparent; /* Remove background color */
+      background-color: transparent;
     }
 
     .album-image img {
@@ -494,14 +497,11 @@
       height: 100%;
       object-fit: cover;
       transition: transform 0.3s ease;
+      border: 1px solid rgba(255, 255, 255, 0.2); /* Subtle border to define image boundaries */
     }
 
     .album-image:hover img {
       transform: scale(1.05);
-    }
-
-    .gallery-close {
-      display: none; /* Hide the close button */
     }
 
     .gallery-close:hover {
@@ -631,7 +631,6 @@
     <div class="gallery-container">
       <!-- Albums will be loaded here dynamically -->
     </div>
-    <div class="gallery-close">×</div>
   </div>
   <!-- Fullscreen Image Viewer -->
   <div id="fullscreen-viewer" class="fullscreen-viewer">
