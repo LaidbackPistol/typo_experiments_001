@@ -2005,6 +2005,7 @@
 
       function setupMenu() {
         const menuItems = document.querySelectorAll('.menu-item');
+        const archiveGallery = document.getElementById('archive-gallery');
         
         // Menu item click handler
         menuItems.forEach(item => {
@@ -2014,6 +2015,12 @@
             const clickedItem = e.target;
             const parentLi = clickedItem.parentElement;
             const section = clickedItem.getAttribute('data-section');
+            
+            // Check if we're clicking on a menu item that's not "archives"
+            // If so, make sure the archive gallery is closed
+            if (section !== 'archives' && archiveGallery.classList.contains('active')) {
+              archiveGallery.classList.remove('active');
+            }
             
             // Toggle active state or update URL
             if (clickedItem.classList.contains('active')) {
@@ -2058,6 +2065,8 @@
       
       // Check URL hash on page load and set the active menu item
       function checkUrlHash() {
+        const archiveGallery = document.getElementById('archive-gallery');
+        
         // First, clear all active states
         const allMenuItems = document.querySelectorAll('.menu-item');
         allMenuItems.forEach(item => {
@@ -2070,6 +2079,11 @@
           const section = window.location.hash.substring(1); // Remove the # character
           const menuItem = document.querySelector(`.menu-item[data-section="${section}"]`);
           
+          // Close the archive gallery if we're not on the archives section
+          if (section !== 'archives' && archiveGallery.classList.contains('active')) {
+            archiveGallery.classList.remove('active');
+          }
+          
           if (menuItem) {
             menuItem.classList.add('active');
             menuItem.parentElement.classList.add('active-item');
@@ -2080,6 +2094,11 @@
         } else {
           // If no hash, apply the default "Unsure" preset
           applyPresetByName("Unsure");
+          
+          // Also ensure gallery is closed when there's no hash
+          if (archiveGallery.classList.contains('active')) {
+            archiveGallery.classList.remove('active');
+          }
         }
       }
       
