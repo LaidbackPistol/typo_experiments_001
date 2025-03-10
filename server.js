@@ -7,6 +7,9 @@ const port = process.env.PORT || 3000;
 // Serve static files from the public directory
 app.use(express.static('public'));
 
+// Serve files from archive_assets directory
+app.use('/archive_assets', express.static('archive_assets'));
+
 // API endpoint to get all archive albums
 app.get('/api/archives', (req, res) => {
   const archivePath = path.join(__dirname, 'archive_assets');
@@ -48,7 +51,18 @@ app.get('/api/archives', (req, res) => {
   }
 });
 
-// Start the server
-app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
-});
+// For Vercel, we need to export the Express app
+if (process.env.VERCEL) {
+  // Handle all other routes by redirecting to index.html for SPA behavior
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  });
+  
+  // Export the Express app for Vercel serverless deployment
+  module.exports = app;
+} else {
+  // Start the server normally in development
+  app.listen(port, () => {
+    console.log(`Server running at http://localhost:${port}`);
+  });
+}
