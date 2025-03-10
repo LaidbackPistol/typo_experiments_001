@@ -436,12 +436,225 @@
         transform: translateX(8px);
       }
     }
+
+    .archive-gallery {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.95);
+      z-index: 200;
+      overflow-y: auto;
+      display: none;
+      padding: 80px 20px 20px 20px;
+    }
+
+    .archive-gallery.active {
+      display: block;
+    }
+
+    .gallery-container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .album {
+      margin-bottom: 80px;
+    }
+
+    .album-title {
+      color: #ffff00;
+      font-size: 24px;
+      margin-bottom: 20px;
+      font-family: monospace;
+    }
+
+    .album-images {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+    }
+
+    .album-image {
+      width: 100%;
+      height: 0;
+      padding-bottom: 75%; /* 4:3 aspect ratio */
+      position: relative;
+      overflow: hidden;
+      background-color: #111;
+    }
+
+    .album-image img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s ease;
+    }
+
+    .album-image:hover img {
+      transform: scale(1.05);
+    }
+
+    .gallery-close {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      color: #fff;
+      background: rgba(0, 0, 0, 0.5);
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      font-size: 24px;
+      cursor: pointer;
+      z-index: 201;
+    }
+
+    .gallery-close:hover {
+      background: rgba(50, 50, 50, 0.7);
+    }
+
+    /* Fullscreen Viewer Styles */
+    .fullscreen-viewer {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.95);
+      z-index: 300;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .fullscreen-viewer.active {
+      display: flex;
+    }
+
+    .viewer-controls {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      padding: 20px;
+      box-sizing: border-box;
+      z-index: 301;
+    }
+
+    .viewer-controls button {
+      background: rgba(0, 0, 0, 0.5);
+      color: white;
+      border: none;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      font-size: 24px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.3s ease;
+    }
+
+    .viewer-controls button:hover {
+      background: rgba(50, 50, 50, 0.7);
+    }
+
+    .close-button {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+    }
+
+    .prev-button, .next-button {
+      position: fixed;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    .prev-button {
+      left: 20px;
+    }
+
+    .next-button {
+      right: 20px;
+    }
+
+    .viewer-image-container {
+      width: 90%;
+      height: 90%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .viewer-image {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      transition: opacity 0.3s ease;
+    }
+
+    .image-caption {
+      position: absolute;
+      bottom: 20px;
+      left: 0;
+      width: 100%;
+      text-align: center;
+      color: white;
+      padding: 10px;
+      background: rgba(0, 0, 0, 0.5);
+      font-family: monospace;
+    }
+
+    /* Mobile Responsive Styles */
+    @media (max-width: 768px) {
+      .album-images {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 10px;
+      }
+      
+      .album-title {
+        font-size: 18px;
+      }
+      
+      .archive-gallery {
+        padding: 60px 10px 10px 10px;
+      }
+    }
   </style>
 </head>
 <body>
   <div id="canvas-container">
     <canvas id="feedback-canvas"></canvas>
     <canvas id="typography-canvas"></canvas>
+  </div>
+  <!-- Archive gallery -->
+  <div id="archive-gallery" class="archive-gallery">
+    <div class="gallery-container">
+      <!-- Albums will be loaded here dynamically -->
+    </div>
+    <div class="gallery-close">×</div>
+  </div>
+  <!-- Fullscreen Image Viewer -->
+  <div id="fullscreen-viewer" class="fullscreen-viewer">
+    <div class="viewer-controls">
+      <button class="prev-button">&lt;</button>
+      <button class="next-button">&gt;</button>
+      <button class="close-button">×</button>
+    </div>
+    <div class="viewer-image-container">
+      <img class="viewer-image" src="" alt="">
+    </div>
   </div>
   <div class="text-input">
     <input type="text" id="text-content" placeholder="Type something..." value="EN5EMBLE">
@@ -712,6 +925,21 @@
 
       // Variables for feedback processing
       let frameCount = 0;
+
+      // Archive Gallery Variables
+      const archiveMenuItem = document.querySelector('.menu-item[data-section="archives"]');
+      const archiveGallery = document.getElementById('archive-gallery');
+      const galleryContainer = archiveGallery.querySelector('.gallery-container');
+      const closeButton = archiveGallery.querySelector('.gallery-close');
+
+      // Fullscreen Viewer Variables
+      const fullscreenViewer = document.getElementById('fullscreen-viewer');
+      const prevButton = fullscreenViewer.querySelector('.prev-button');
+      const nextButton = fullscreenViewer.querySelector('.next-button');
+      const closeViewerButton = fullscreenViewer.querySelector('.close-button');
+      const viewerImage = fullscreenViewer.querySelector('.viewer-image');
+      let currentImageIndex = 0;
+      let currentGalleryImages = [];
 
       const fontSystem = {
         // Maps display names to actual CSS font families
@@ -1923,6 +2151,212 @@ const customPreset = ${presetStr};
       // Also listen for hash changes directly (for manual URL edits)
       window.addEventListener('hashchange', checkUrlHash);
     });
+
+    // Close gallery when clicking the close button
+    closeButton.addEventListener('click', () => {
+      archiveGallery.classList.remove('active');
+    });
+
+    // Modify the existing menu click handler for archives
+    archiveMenuItem.addEventListener('click', (e) => {
+      // If archives section becomes active, show the gallery
+      if (archiveMenuItem.classList.contains('active')) {
+        loadArchiveContent();
+        archiveGallery.classList.add('active');
+      } else {
+        archiveGallery.classList.remove('active');
+      }
+    });
+
+    // Function to load archive content from the server
+    async function loadArchiveContent() {
+      try {
+        // Show loading state
+        galleryContainer.innerHTML = '<div style="color: white; text-align: center; padding: 50px;">Loading archives...</div>';
+        
+        // Fetch albums from the server
+        const response = await fetch('/api/archives');
+        const data = await response.json();
+        
+        // Clear loading message
+        galleryContainer.innerHTML = '';
+        
+        if (!data.albums || data.albums.length === 0) {
+          galleryContainer.innerHTML = '<div style="color: white; text-align: center; padding: 50px;">No archives found. Add folders to the archive_assets directory.</div>';
+          return;
+        }
+        
+        // Create and append album elements
+        data.albums.forEach(album => {
+          const albumElement = createAlbumElement(album);
+          galleryContainer.appendChild(albumElement);
+        });
+        
+        // Enable image lazy loading
+        setupLazyLoading();
+        
+        // Setup click events for the images
+        setupImageClickEvents();
+      } catch (error) {
+        console.error('Error loading archives:', error);
+        galleryContainer.innerHTML = '<div style="color: white; text-align: center; padding: 50px;">Error loading archives. Please try again later.</div>';
+      }
+    }
+
+    // Function to create an album element
+    function createAlbumElement(album) {
+      const albumElement = document.createElement('div');
+      albumElement.className = 'album';
+      
+      const titleElement = document.createElement('h2');
+      titleElement.className = 'album-title';
+      titleElement.textContent = album.title;
+      albumElement.appendChild(titleElement);
+      
+      const imagesContainer = document.createElement('div');
+      imagesContainer.className = 'album-images';
+      
+      album.images.forEach(image => {
+        const imageContainer = document.createElement('div');
+        imageContainer.className = 'album-image';
+        
+        const img = document.createElement('img');
+        img.setAttribute('data-src', image.src); // Use data-src for lazy loading
+        img.alt = image.alt;
+        // Add a placeholder until the image loads
+        img.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1"%3E%3C/svg%3E';
+        
+        imageContainer.appendChild(img);
+        imagesContainer.appendChild(imageContainer);
+      });
+      
+      albumElement.appendChild(imagesContainer);
+      return albumElement;
+    }
+
+    // Function to setup lazy loading for images
+    function setupLazyLoading() {
+      // Use Intersection Observer API for modern browsers
+      if ('IntersectionObserver' in window) {
+        const lazyImageObserver = new IntersectionObserver(entries => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              const lazyImage = entry.target;
+              const src = lazyImage.getAttribute('data-src');
+              
+              if (src) {
+                lazyImage.src = src;
+                lazyImage.removeAttribute('data-src');
+              }
+              
+              lazyImageObserver.unobserve(lazyImage);
+            }
+          });
+        });
+        
+        // Observe all lazy images
+        const lazyImages = document.querySelectorAll('img[data-src]');
+        lazyImages.forEach(img => lazyImageObserver.observe(img));
+      } else {
+        // Fallback for browsers that don't support Intersection Observer
+        // Just load all images immediately
+        const lazyImages = document.querySelectorAll('img[data-src]');
+        lazyImages.forEach(img => {
+          img.src = img.getAttribute('data-src');
+          img.removeAttribute('data-src');
+        });
+      }
+    }
+
+    // Function to set up click events for opening the fullscreen viewer
+    function setupImageClickEvents() {
+      document.querySelectorAll('.album-image').forEach((imageContainer) => {
+        imageContainer.addEventListener('click', (e) => {
+          // Find which album this image belongs to
+          const albumElement = e.currentTarget.closest('.album');
+          const allImages = albumElement.querySelectorAll('.album-image img');
+          
+          // Collect image data
+          currentGalleryImages = Array.from(allImages).map(img => ({
+            src: img.getAttribute('data-src') || img.src,
+            alt: img.alt
+          }));
+          
+          // Set current index
+          currentImageIndex = Array.from(albumElement.querySelectorAll('.album-image')).indexOf(e.currentTarget);
+          
+          // Update and show viewer
+          updateViewerImage();
+          fullscreenViewer.classList.add('active');
+        });
+      });
+    }
+
+    // Fullscreen Viewer Functions
+    // Close viewer
+    closeViewerButton.addEventListener('click', () => {
+      fullscreenViewer.classList.remove('active');
+    });
+
+    // Previous image
+    prevButton.addEventListener('click', () => {
+      if (currentGalleryImages.length === 0) return;
+      
+      currentImageIndex = (currentImageIndex - 1 + currentGalleryImages.length) % currentGalleryImages.length;
+      updateViewerImage();
+    });
+
+    // Next image
+    nextButton.addEventListener('click', () => {
+      if (currentGalleryImages.length === 0) return;
+      
+      currentImageIndex = (currentImageIndex + 1) % currentGalleryImages.length;
+      updateViewerImage();
+    });
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (!fullscreenViewer.classList.contains('active')) return;
+      
+      if (e.key === 'Escape') {
+        fullscreenViewer.classList.remove('active');
+      } else if (e.key === 'ArrowLeft') {
+        prevButton.click();
+      } else if (e.key === 'ArrowRight') {
+        nextButton.click();
+      }
+    });
+
+    // Update the displayed image in the fullscreen viewer
+    function updateViewerImage() {
+      if (currentGalleryImages.length === 0 || currentImageIndex < 0 || currentImageIndex >= currentGalleryImages.length) {
+        return;
+      }
+      
+      const imageData = currentGalleryImages[currentImageIndex];
+      viewerImage.src = imageData.src;
+      viewerImage.alt = imageData.alt || '';
+      
+      // Optional: Show image caption
+      let caption = fullscreenViewer.querySelector('.image-caption');
+      if (imageData.alt) {
+        if (!caption) {
+          caption = document.createElement('div');
+          caption.className = 'image-caption';
+          fullscreenViewer.appendChild(caption);
+        }
+        caption.textContent = imageData.alt;
+        caption.style.display = 'block';
+      } else if (caption) {
+        caption.style.display = 'none';
+      }
+    }
+
+    // Check if archives is already active on page load
+    if (archiveMenuItem.classList.contains('active')) {
+      loadArchiveContent();
+      archiveGallery.classList.add('active');
+    }
   </script>
 </body>
 </html>
