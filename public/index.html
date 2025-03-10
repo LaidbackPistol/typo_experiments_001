@@ -443,43 +443,52 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background-color: transparent; /* Fully transparent instead of rgba(0, 0, 0, 0.95) */
+      background-color: transparent;
       z-index: 200;
       overflow-y: auto;
       display: none;
       padding: 60px 20px 20px 20px;
+      pointer-events: none; /* Make the entire gallery click-through by default */
     }
 
     .archive-gallery.active {
       display: block;
     }
 
+    /* Gallery container */
     .gallery-container {
       max-width: 1200px;
       margin: 0 auto;
       background-color: transparent;
     }
 
+    /* Album styling - restore pointer events */
     .album {
       margin-bottom: 80px;
       background-color: transparent;
+      pointer-events: auto; /* Re-enable pointer events for album elements */
     }
 
+    /* Album title */
     .album-title {
       color: #ffff00;
-      font-size: 24px; /* Increased from 24px */
-      margin-bottom: 20px; /* Increased from 20px */
+      font-size: 28px;
+      margin-bottom: 30px;
       font-family: monospace;
-      text-shadow: 0 0 10px rgba(0, 0, 0, 0.7); /* Add text shadow for better visibility */
+      text-shadow: 0 0 10px rgba(0, 0, 0, 0.8), 0 0 20px rgba(0, 0, 0, 0.8);
+      pointer-events: auto; /* Ensure title is clickable */
     }
 
+    /* Album images grid */
     .album-images {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
       gap: 30px;
       background-color: transparent;
+      pointer-events: auto; /* Ensure images are clickable */
     }
 
+    /* Individual image containers */
     .album-image {
       width: 100%;
       height: 0;
@@ -487,6 +496,7 @@
       position: relative;
       overflow: hidden;
       background-color: transparent;
+      pointer-events: auto; /* Ensure image containers are clickable */
     }
 
     .album-image img {
@@ -607,7 +617,7 @@
     /* Mobile Responsive Styles */
     @media (max-width: 768px) {
       .album-images {
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); /* Larger than original */
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
         gap: 15px;
       }
       
@@ -616,7 +626,10 @@
       }
       
       .archive-gallery {
-        padding: 60px 10px 10px 10px;
+        padding: 60px 10px 70px 10px; /* Add bigger bottom padding (70px) to make room for menu */
+        height: calc(100% - 60px); /* Reduce height to leave space for menu */
+        bottom: 60px; /* Position above the menu bar */
+        max-height: calc(100% - 60px); /* Set max height to ensure visibility of menu */
       }
     }
   </style>
