@@ -1764,7 +1764,6 @@ const customPreset = ${presetStr};
       // Start animation
       animate();
 
-      // Wait for DOM to be fully loaded
       document.addEventListener('DOMContentLoaded', () => {
         setupMenu();
         // Check if URL has a hash and select the corresponding menu item
@@ -1796,8 +1795,9 @@ const customPreset = ${presetStr};
               parentLi.classList.remove('active-item');
               history.pushState(null, '', window.location.pathname); // Remove hash from URL
               
-              // Apply default preset when deselecting
+              // Apply default preset when deselecting and set default text
               applyPresetByName("Unsure");
+              updateCanvasText("EN5EMBLE");
             } else {
               // First, remove active class from all items
               menuItems.forEach(i => {
@@ -1812,7 +1812,7 @@ const customPreset = ${presetStr};
               // Update URL without navigation - using History API
               history.pushState(null, '', `#${section}`);
               
-              // Apply corresponding preset
+              // Apply corresponding preset and text
               applyPresetForSection(section);
             }
             
@@ -1858,16 +1858,44 @@ const customPreset = ${presetStr};
       
       // Function to apply a preset based on the selected section
       function applyPresetForSection(section) {
-        // Map sections to preset names
-        const presetMap = {
-          "events": "Beacon of truth",
-          "mixes": "Skeud",
-          "archives": "Arabesque",
-          "contact": "Wall"
+        // Map sections to preset names and corresponding text
+        const sectionMap = {
+          "events": {
+            preset: "Beacon of truth",
+            text: "EVENTS EN5EMBLE"
+          },
+          "mixes": {
+            preset: "Skeud",
+            text: "MIXxxxxxES"
+          },
+          "archives": {
+            preset: "Arabesque",
+            text: "EN5EMBLE"
+          },
+          "contact": {
+            preset: "Wall",
+            text: "@EN5EMBLE"
+          }
         };
         
-        const presetName = presetMap[section] || "Unsure"; // Default to "Unsure" if not found
-        applyPresetByName(presetName);
+        const mapping = sectionMap[section] || { preset: "Unsure", text: "EN5EMBLE" };
+        
+        // Apply the preset
+        applyPresetByName(mapping.preset);
+        
+        // Update the text
+        updateCanvasText(mapping.text);
+      }
+      
+      // Function to update the canvas text
+      function updateCanvasText(newText) {
+        const textInput = document.getElementById('text-content');
+        if (textInput) {
+          textInput.value = newText;
+          // Trigger the input event to update the canvas
+          const event = new Event('input', { bubbles: true });
+          textInput.dispatchEvent(event);
+        }
       }
       
       // Function to find and apply a preset by name
