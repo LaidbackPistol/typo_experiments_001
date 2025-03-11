@@ -824,6 +824,26 @@
         transform: translateY(0) rotate(var(--rotation));
       }
     }
+
+    @media (min-width: 769px) {
+      /* Menu overlap prevention - add padding on left side */
+      .archive-gallery {
+        padding-left: 200px; /* Make space for the menu */
+        padding-right: 20px; /* Default right padding */
+        box-sizing: border-box;
+      }
+      
+      /* Adjust the gallery container to use full available width */
+      .archive-gallery .gallery-container {
+        max-width: 100%; /* Use full width */
+        margin-left: 0;
+      }
+      
+      /* Optional: Add a bit more spacing between gallery items on desktop */
+      .album-images {
+        gap: 10px; /* Increased gap for better visual spacing on desktop */
+      }
+    }
     
     /* Increase menu typography size on PC only */
     .menu-item {
@@ -1545,7 +1565,7 @@
             name: "006",
             settings: {
             fontSize: 94,
-            duplications: 2,
+            duplications: 7,
             blur: 5,
             rotationSpeed: 5,
             distortion: 500,
