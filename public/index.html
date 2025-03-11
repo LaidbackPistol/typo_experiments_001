@@ -652,69 +652,25 @@
     }
     
     /* Mix container */
+    /* Reset for mobile to make sure mixes display correctly */
     .mix-container {
       margin-bottom: 30px;
       padding: 0;
-      pointer-events: auto; /* Re-enable pointer events for player elements */
+      pointer-events: auto;
       max-width: 800px;
       margin-left: auto;
       margin-right: auto;
       background-color: transparent;
       border: none;
+      opacity: 1;
     }
-    
-    /* Mix title */
-    .mix-title {
-      color: #ffff00;
-      font-size: 24px;
-      margin-bottom: 10px;
-      font-family: monospace;
-      text-shadow: 0 0 10px rgba(0, 0, 0, 0.8), 0 0 20px rgba(0, 0, 0, 0.8);
-    }
-    
-    /* Mix metadata */
-    .mix-metadata {
-      margin-bottom: 10px;
-      font-family: monospace;
-      color: #ffff00;
-      opacity: 0.9;
-      text-align: left;
-      font-size: 14px;
-    }
-    
-    /* Mix description */
-    .mix-description {
-      margin-bottom: 20px;
-      font-family: monospace;
-      color: #ffffff;
-      line-height: 1.5;
-    }
-    
-    /* Embed container */
+
     .soundcloud-embed {
       width: 100%;
       margin-bottom: 10px;
       background-color: transparent;
       padding: 0;
       border-radius: 0;
-    }
-    
-    /* Mobile Responsive Styles */
-    @media (max-width: 768px) {
-      .mixes-gallery {
-        padding: 60px 10px 70px 10px;
-        height: calc(100% - 64px);
-        bottom: 64px;
-        max-height: calc(100% - 64px);
-      }
-      
-      .mix-container {
-        padding: 15px;
-      }
-      
-      .mix-title {
-        font-size: 20px;
-      }
     }
 
     /* Desktop-only playful layout (screens larger than 768px) */
@@ -2290,20 +2246,41 @@
         });
       }
 
+      window.addEventListener('resize', function() {
+        // If we resize to mobile, remove any desktop styling
+        if (window.innerWidth < 768) {
+          const containers = document.querySelectorAll('.mix-container');
+          containers.forEach(container => {
+            container.style.transform = '';
+            container.style.animation = '';
+            container.style.opacity = '1';
+          });
+        }
+      });
+
       // Function to create a mix element with Soundcloud embed
       function createMixElement(mix, index) {
         const mixElement = document.createElement('div');
         mixElement.className = 'mix-container';
         
-        // Add random rotation variable for animation
-        const randomRotation = (Math.random() * 2 - 1) * 1.5; // Between -1.5 and 1.5 degrees
-        mixElement.style.setProperty('--rotation', `${randomRotation}deg`);
+        // Only add special effects for desktop
+        if (window.innerWidth >= 768) {
+          // Add random rotation variable for animation
+          const randomRotation = (Math.random() * 2 - 1) * 1.5; // Between -1.5 and 1.5 degrees
+          mixElement.style.setProperty('--rotation', `${randomRotation}deg`);
+          
+          // Add animation with delay based on index
+          mixElement.style.animation = `fadeSlideIn 0.5s ease forwards ${index * 0.15}s`;
+          mixElement.style.opacity = '0'; // Start invisible for animation
+        }
         
-        // Add animation with delay based on index
-        mixElement.style.animation = `fadeSlideIn 0.5s ease forwards ${index * 0.15}s`;
-        mixElement.style.opacity = '0'; // Start invisible for animation
+        // Add title element
+        const titleElement = document.createElement('h2');
+        titleElement.className = 'mix-title';
+        titleElement.textContent = mix.title || 'Untitled Mix';
+        mixElement.appendChild(titleElement);
         
-        // Only create metadata element (artist and date)
+        // Create metadata element (artist and date)
         const metadataElement = document.createElement('div');
         metadataElement.className = 'mix-metadata';
         
@@ -2315,13 +2292,7 @@
           day: 'numeric'
         });
         
-        // Add title element (it was missing in the original code!)
-        const titleElement = document.createElement('h2');
-        titleElement.className = 'mix-title';
-        titleElement.textContent = mix.title || 'Untitled Mix';
-        mixElement.appendChild(titleElement);
-        
-        // Show only artist and date
+        // Show artist and date
         metadataElement.textContent = `${mix.artist} • ${formattedDate}`;
         mixElement.appendChild(metadataElement);
         
@@ -2340,7 +2311,7 @@
           iframe.scrolling = 'no';
           iframe.frameBorder = 'no';
           iframe.allow = 'autoplay';
-            
+          
           if (mix.soundcloudId) {
             iframe.src = `https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/${mix.soundcloudId}&color=%23ffff00&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false&visual=true`;
           } else if (mix.soundcloudUrl) {
@@ -2354,7 +2325,7 @@
         mixElement.appendChild(embedContainer);
         
         return mixElement;
-      } 
+      }
 
       // Check if mixxs is already active on page load
       if (mixxsMenuItem && mixxsMenuItem.classList.contains('active')) {
