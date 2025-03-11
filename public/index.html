@@ -587,6 +587,115 @@
         }
     }
 
+    /* Gallery container */
+    .gallery-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background-color: transparent;
+    }
+
+    /* Album styling - restore pointer events */
+    .album {
+      margin-bottom: 80px;
+      background-color: transparent;
+      pointer-events: auto; /* Re-enable pointer events for album elements */
+    }
+
+    /* Album title */
+    .album-title {
+      color: #ffff00;
+      font-size: 18px;
+      margin-bottom: 4px;
+      font-family: monospace;
+      text-shadow: 0 0 10px rgba(0, 0, 0, 0.8), 0 0 20px rgba(0, 0, 0, 0.8);
+      pointer-events: auto; /* Ensure title is clickable */
+    }
+
+    /* Album images - playful layout */
+    .album-images {
+      display: flex;
+      flex-wrap: wrap;
+      position: relative;
+      margin: 10px -15px;
+      padding: 20px 0;
+      background-color: transparent;
+      pointer-events: auto;
+    }
+
+    /* Individual image containers */
+    .album-image {
+      position: relative;
+      margin: -10px;  /* Negative margin for overlap */
+      padding: 5px;
+      background-color: transparent;
+      pointer-events: auto;
+      width: auto;
+      height: auto;
+      transition: all 0.3s ease;
+      z-index: 1;
+      transform-origin: center;
+    }
+
+    .album-image:hover {
+      z-index: 10;
+      transform: scale(1.08) rotate(0deg) !important;
+    }
+
+    .album-image img {
+      max-width: 750px;  /* Increased from 350px */
+      max-height: 600px; /* Increased from 280px */
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      transition: all 0.3s ease;
+      border: none;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+    }
+
+    /* Mobile Responsive Styles */
+    @media (max-width: 768px) {
+        .album-images {
+          grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+          gap: 0px;
+        }
+        
+        .album-title {
+          font-size: 18px;
+        }
+
+        .album-image {
+          margin: -5px;
+        }
+        
+        .album-image img {
+          max-width: 180px;
+          max-height: 180px;
+        }
+        
+        .archive-gallery {
+          padding: 60px 10px 70px 10px; /* Add bigger bottom padding (70px) to make room for menu */
+          height: calc(100% - 64px); /* Reduce height to leave space for menu */
+          bottom: 64px; /* Position above the menu bar */
+          max-height: calc(100% - 64px); /* Set max height to ensure visibility of menu */
+        }
+    }
+
+    /* Desktop overlap prevention - add padding on left side */
+    @media (min-width: 769px) {
+        /* Menu overlap prevention - add padding on left side */
+        .archive-gallery {
+          padding-left: 200px; /* Make space for the menu */
+          padding-right: 20px; /* Default right padding */
+          box-sizing: border-box;
+        }
+        
+        /* Adjust the gallery container to use full available width */
+        .archive-gallery .gallery-container {
+          max-width: 100%; /* Use full width */
+          margin-left: 0;
+        }
+    }
+
     .gallery-close:hover {
       background: rgba(50, 50, 50, 0.7);
     }
@@ -3063,6 +3172,8 @@
           const response = await fetch('/api/archives');
           const data = await response.json();
           
+          console.log("Archive API response:", data); // Debug log for mobile
+          
           // Clear loading message
           galleryContainer.innerHTML = '';
           
@@ -3073,23 +3184,67 @@
           
           // Create and append album elements
           data.albums.forEach(album => {
+            console.log(`Creating album: ${album.title} with ${album.images.length} images`); // Debug log
             const albumElement = createAlbumElement(album);
             galleryContainer.appendChild(albumElement);
           });
           
-          // Enable image lazy loading
-          setupLazyLoading();
+          // Add visible styles to ensure images can be seen on mobile
+          const style = document.createElement('style');
+          style.id = 'mobileArchiveFix';
+          style.textContent = `
+            @media (max-width: 768px) {
+              .album-image {
+                display: inline-block !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+                position: relative !important;
+                transform: none !important;
+                margin: 4px !important;
+              }
+              .album-images {
+                display: flex !important;
+                flex-wrap: wrap !important;
+                justify-content: center !important;
+              }
+              .album-image img {
+                display: block !important;
+                width: auto !important;
+                height: auto !important;
+                max-width: 90vw !important;
+                max-height: 200px !important;
+                position: static !important;
+              }
+            }
+          `;
+          document.head.appendChild(style);
           
-          // Setup click events for the images
+          // Force immediate image loading on mobile
+          if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+            document.querySelectorAll('img[data-src]').forEach(img => {
+              console.log("Loading mobile image:", img.getAttribute('data-src')); // Debug log
+              img.src = img.getAttribute('data-src');
+              img.removeAttribute('data-src');
+              img.style.display = 'block';
+              img.style.opacity = '1';
+              img.style.visibility = 'visible';
+            });
+          } else {
+            // Desktop uses normal lazy loading
+            setupLazyLoading();
+          }
+          
+          // Setup click events
           setupImageClickEvents();
           setupImageHoverEffects();
         } catch (error) {
           console.error('Error loading archives:', error);
-          galleryContainer.innerHTML = '<div style="color: white; text-align: center; padding: 50px;">Error loading archives. Please try again later.</div>';
+          galleryContainer.innerHTML = `<div style="color: white; text-align: center; padding: 50px;">
+            Error loading archives: ${error.message || 'Unknown error'}
+          </div>`;
         }
       }
 
-      // Function to create an album element
       // Function to create an album element
       function createAlbumElement(album) {
         const albumElement = document.createElement('div');
@@ -3103,25 +3258,47 @@
         const imagesContainer = document.createElement('div');
         imagesContainer.className = 'album-images';
         
+        // On mobile, use a simpler layout
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        
         album.images.forEach((image, index) => {
           const imageContainer = document.createElement('div');
           imageContainer.className = 'album-image';
           
-          // Add random rotation between -8 and 8 degrees
-          const randomRotation = (Math.random() * 16 - 8).toFixed(1);
-          imageContainer.style.transform = `rotate(${randomRotation}deg)`;
-          
-          // Random z-index for natural layering
-          imageContainer.style.zIndex = Math.floor(Math.random() * 5) + 1;
-          
-          // Store original z-index for later reference
-          imageContainer.dataset.zIndex = imageContainer.style.zIndex;
+          if (!isMobile) {
+            // Only apply fancy effects on desktop
+            // Add random rotation between -8 and 8 degrees
+            const randomRotation = (Math.random() * 16 - 8).toFixed(1);
+            imageContainer.style.transform = `rotate(${randomRotation}deg)`;
+            
+            // Random z-index for natural layering
+            imageContainer.style.zIndex = Math.floor(Math.random() * 5) + 1;
+            
+            // Store original z-index for later reference
+            imageContainer.dataset.zIndex = imageContainer.style.zIndex;
+          } else {
+            // Simpler mobile version
+            imageContainer.style.transform = "none";
+            imageContainer.style.display = "inline-block";
+            imageContainer.style.margin = "4px";
+          }
           
           const img = document.createElement('img');
-          img.setAttribute('data-src', image.src); // Use data-src for lazy loading
-          img.alt = image.alt;
-          // Add a placeholder until the image loads
-          img.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1"%3E%3C/svg%3E';
+          img.alt = image.alt || 'Gallery image';
+          
+          // For mobile, load immediately
+          if (isMobile) {
+            img.src = image.src;
+            img.style.display = 'block';
+            img.style.maxWidth = '90vw';
+            img.style.maxHeight = '200px';
+            img.style.width = 'auto';
+            img.style.height = 'auto';
+          } else {
+            // Desktop lazy loading
+            img.setAttribute('data-src', image.src);
+            img.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1"%3E%3C/svg%3E';
+          }
           
           imageContainer.appendChild(img);
           imagesContainer.appendChild(imageContainer);
