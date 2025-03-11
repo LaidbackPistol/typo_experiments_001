@@ -639,12 +639,12 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background-color: rgba(0, 0, 0, 0.5);
+      background-color: transparent; /* Changed from rgba(0,0,0,0.5) to transparent */
       z-index: 200;
       overflow-y: auto;
       display: none;
       padding: 60px 20px 20px 20px;
-      pointer-events: auto;
+      pointer-events: none; /* This makes it click-through by default */
     }
     
     .mixes-gallery.active {
@@ -655,7 +655,7 @@
     .mix-container {
       margin-bottom: 30px;
       padding: 0;
-      pointer-events: auto;
+      pointer-events: auto; /* Re-enable pointer events for player elements */
       max-width: 800px;
       margin-left: auto;
       margin-right: auto;
@@ -2223,6 +2223,7 @@
       function setupMenu() {
         const menuItems = document.querySelectorAll('.menu-item');
         const archiveGallery = document.getElementById('archive-gallery');
+        const mixesGallery = document.getElementById('mixes-gallery'); // Add this line
         
         // Menu item click handler
         menuItems.forEach(item => {
@@ -2233,10 +2234,14 @@
             const parentLi = clickedItem.parentElement;
             const section = clickedItem.getAttribute('data-section');
             
-            // Check if we're clicking on a menu item that's not "archives"
-            // If so, make sure the archive gallery is closed
+            // Check if we're clicking on a menu item that's not "archives" or "mixxs"
+            // If so, make sure both galleries are closed
             if (section !== 'archives' && archiveGallery.classList.contains('active')) {
               archiveGallery.classList.remove('active');
+            }
+            
+            if (section !== 'mixxs' && mixesGallery.classList.contains('active')) {
+              mixesGallery.classList.remove('active');
             }
             
             // Toggle active state or update URL
@@ -2283,6 +2288,7 @@
       // Check URL hash on page load and set the active menu item
       function checkUrlHash() {
         const archiveGallery = document.getElementById('archive-gallery');
+        const mixesGallery = document.getElementById('mixes-gallery'); // Add this line
         
         // First, clear all active states
         const allMenuItems = document.querySelectorAll('.menu-item');
@@ -2301,6 +2307,11 @@
             archiveGallery.classList.remove('active');
           }
           
+          // Close the mixes gallery if we're not on the mixxs section
+          if (section !== 'mixxs' && mixesGallery.classList.contains('active')) {
+            mixesGallery.classList.remove('active');
+          }
+          
           if (menuItem) {
             menuItem.classList.add('active');
             menuItem.parentElement.classList.add('active-item');
@@ -2312,12 +2323,16 @@
           // If no hash, apply the default "Unsure" preset
           applyPresetByName("Unsure");
           
-          // Also ensure gallery is closed when there's no hash
+          // Also ensure galleries are closed when there's no hash
           if (archiveGallery.classList.contains('active')) {
             archiveGallery.classList.remove('active');
           }
+          
+          if (mixesGallery.classList.contains('active')) {
+            mixesGallery.classList.remove('active');
+          }
         }
-      }
+      } 
       
       // Function to apply a preset based on the selected section
       function applyPresetForSection(section) {
@@ -2381,7 +2396,14 @@
       }
       
       // Listen for back/forward browser navigation
-      window.addEventListener('popstate', checkUrlHash);
+      window.addEventListener('popstate', () => {
+        checkUrlHash();
+        
+        // Check if the current hash isn't mixxs, and if so, hide the mixes gallery
+        if (window.location.hash !== '#mixxs' && document.getElementById('mixes-gallery').classList.contains('active')) {
+          document.getElementById('mixes-gallery').classList.remove('active');
+        }
+      });
       
       // Also listen for hash changes directly (for manual URL edits)
       window.addEventListener('hashchange', checkUrlHash);
