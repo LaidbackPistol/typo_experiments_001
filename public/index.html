@@ -1822,6 +1822,75 @@
         }, 2000);
       }
 
+      function isAnyMenuItemActive() {
+        const activeMenuItems = document.querySelectorAll('.menu-item.active');
+        return activeMenuItems.length > 0;
+      }
+
+      // Function to check if click is on the canvas area
+      function isCanvasAreaClick(element) {
+        // Consider clicks only on the canvas elements or the direct canvas container
+        const canvasContainer = document.getElementById('canvas-container');
+        const typographyCanvas = document.getElementById('typography-canvas');
+        const feedbackCanvas = document.getElementById('feedback-canvas');
+        
+        // Check if the click is directly on the canvas or its container
+        if (element === typographyCanvas || 
+            element === feedbackCanvas || 
+            element === canvasContainer) {
+          return true;
+        }
+        
+        // Also consider clicks on the body that aren't on any specific UI element
+        // This is a fallback in case canvas containers are restructured
+        if (element === document.body) {
+          return true;
+        }
+        
+        return false;
+      }
+
+      // Function to pick a random preset from 001-011 + Unsure
+      function getRandomPreset() {
+        // Create an array with all preset names including "Unsure"
+        const presetNames = ["Unsure"];
+        
+        // Add numbered presets from 001 to 011
+        const numberedPresets = builtinPresets
+          .filter(preset => /^0\d{2}$/.test(preset.name)) // Filter presets with names like "001", "002", etc.
+          .map(preset => preset.name);
+        
+        presetNames.push(...numberedPresets);
+        
+        // If no numbered presets found, fall back to finding by index in the built-in presets
+        if (numberedPresets.length === 0) {
+          for (let i = 7; i <= 17; i++) { // Approximate indices based on the preset list
+            if (builtinPresets[i] && builtinPresets[i].name) {
+              presetNames.push(builtinPresets[i].name);
+            }
+          }
+        }
+        
+        // Pick a random preset name from the array
+        const randomIndex = Math.floor(Math.random() * presetNames.length);
+        return presetNames[randomIndex];
+      }
+
+      document.addEventListener('click', (event) => {
+        // Only proceed if no menu item is active
+        if (!isAnyMenuItemActive()) {
+          // Check if the click is on the canvas area
+          if (isCanvasAreaClick(event.target)) {
+            // Get and apply a random preset
+            const randomPreset = getRandomPreset();
+            applyPresetByName(randomPreset);
+            
+            // Update the text back to default if it's been changed
+            updateCanvasText("EN5EMBLE");
+          }
+        }
+      });
+
       // Apply feedback effect
       function applyFeedback() {
         // Skip frames for performance if needed
