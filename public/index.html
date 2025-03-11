@@ -503,22 +503,27 @@
 
     /* Album images grid */
     .album-images {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
-      gap: 4px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0; /* Remove gap */
       background-color: transparent;
-      pointer-events: auto; /* Ensure images are clickable */
+      pointer-events: auto;
+      position: relative;
+      padding: 20px 0; /* Add vertical padding to accommodate tilted images */
+      margin: 0 -8px; /* Negative margin to allow images to extend slightly outside */
     }
 
-    /* Individual image containers */
+    /* Updated Individual image containers */
     .album-image {
-      width: 100%;
-      height: 0;
-      padding-bottom: 75%;
       position: relative;
-      overflow: hidden;
-      background-color: transparent;
-      pointer-events: auto; /* Ensure image containers are clickable */
+      width: auto;
+      height: auto;
+      flex: 0 0 auto;
+      margin: 0;
+      transform-origin: center;
+      transition: transform 0.3s ease, z-index 0.1s;
+      z-index: 1;
+      pointer-events: auto;
     }
 
     .album-image img {
@@ -534,6 +539,63 @@
 
     .album-image:hover img {
       transform: scale(1.05);
+    }
+
+    @media (min-width: 769px) {
+      .album-image {
+        width: calc(25% - 16px); /* 4 images per row with some adjustable space */
+        margin: -8px; /* Creates overlap */
+        padding: 8px; /* Creates space for the image to rotate without clipping */
+      }
+    }
+
+    /* Apply random rotation to each image */
+    .album-image:nth-child(5n+1) { transform: rotate(-2deg); }
+    .album-image:nth-child(5n+2) { transform: rotate(1.5deg); }
+    .album-image:nth-child(5n+3) { transform: rotate(-1deg); }
+    .album-image:nth-child(5n+4) { transform: rotate(2deg); }
+    .album-image:nth-child(5n+5) { transform: rotate(-0.5deg); }
+
+    /* Image itself - maintain aspect ratio */
+    .album-image img {
+      display: block;
+      width: 100%;
+      height: auto; /* Auto height maintains aspect ratio */
+      object-fit: contain; /* Ensure no cropping */
+      object-position: center;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.2); /* Add subtle shadow */
+      border: 2px solid rgba(255, 255, 255, 0.8); /* White border for polaroid effect */
+      background-color: #111; /* Dark background for transparent images */
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    /* Bring forward and enhance on hover */
+    .album-image:hover {
+      z-index: 10;
+      transform: scale(1.03) rotate(0deg) !important; /* Override random rotation */
+    }
+
+    .album-image:hover img {
+      box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+    }
+
+    /* Mobile layout - single column with less dramatic effects */
+    @media (max-width: 768px) {
+      .album-images {
+        padding: 10px 0;
+      }
+      
+      .album-image {
+        width: calc(50% - 10px);
+        margin: -5px;
+        padding: 5px;
+      }
+      
+      .album-image:nth-child(5n+1) { transform: rotate(-1deg); }
+      .album-image:nth-child(5n+2) { transform: rotate(1deg); }
+      .album-image:nth-child(5n+3) { transform: rotate(-0.5deg); }
+      .album-image:nth-child(5n+4) { transform: rotate(0.8deg); }
+      .album-image:nth-child(5n+5) { transform: rotate(-0.8deg); }
     }
 
     .gallery-close:hover {
@@ -3041,18 +3103,61 @@
         const imagesContainer = document.createElement('div');
         imagesContainer.className = 'album-images';
         
-        album.images.forEach(image => {
+        // Get a random value between min and max (used for variation)
+        const getRandomValue = (min, max) => {
+          return Math.random() * (max - min) + min;
+        };
+        
+        // Add some randomness to the rotation and positioning for a more playful look
+        album.images.forEach((image, index) => {
           const imageContainer = document.createElement('div');
           imageContainer.className = 'album-image';
           
+          // Add slight random rotation (removed from CSS to do it programmatically)
+          const rotation = getRandomValue(-2.5, 2.5);
+          imageContainer.style.transform = `rotate(${rotation}deg)`;
+          
+          // Store the original rotation for hover effect reversion
+          imageContainer.dataset.originalRotation = rotation;
+          
           const img = document.createElement('img');
-          img.setAttribute('data-src', image.src); // Use data-src for lazy loading
+          img.setAttribute('data-src', image.src); // For lazy loading
           img.alt = image.alt;
-          // Add a placeholder until the image loads
+          
+          // Add placeholder until the image loads
           img.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1"%3E%3C/svg%3E';
+          
+          // Random z-index for overlapping effect (50-100 range to stay above base content)
+          const zIndex = Math.floor(getRandomValue(50, 100));
+          imageContainer.style.zIndex = zIndex;
           
           imageContainer.appendChild(img);
           imagesContainer.appendChild(imageContainer);
+        });
+        
+        // Add hover effect (bringing the hovered image forward)
+        imagesContainer.addEventListener('mouseover', (e) => {
+          if (e.target.tagName === 'IMG') {
+            const container = e.target.closest('.album-image');
+            if (container) {
+              container.style.zIndex = 1000; // Bring to front
+              container.style.transform = 'scale(1.03) rotate(0deg)'; // Stand straight and slightly larger
+            }
+          }
+        });
+        
+        imagesContainer.addEventListener('mouseout', (e) => {
+          if (e.target.tagName === 'IMG') {
+            const container = e.target.closest('.album-image');
+            if (container) {
+              // Reset z-index and return to original rotation
+              setTimeout(() => {
+                container.style.zIndex = container.dataset.zIndex || '';
+                const originalRotation = container.dataset.originalRotation || 0;
+                container.style.transform = `rotate(${originalRotation}deg)`;
+              }, 50);
+            }
+          }
         });
         
         albumElement.appendChild(imagesContainer);
@@ -3061,7 +3166,6 @@
 
       // Function to setup lazy loading for images
       function setupLazyLoading() {
-        // Use Intersection Observer API for modern browsers
         if ('IntersectionObserver' in window) {
           const lazyImageObserver = new IntersectionObserver(entries => {
             entries.forEach(entry => {
@@ -3070,21 +3174,30 @@
                 const src = lazyImage.getAttribute('data-src');
                 
                 if (src) {
+                  // Create fade-in effect
+                  lazyImage.style.opacity = '0';
                   lazyImage.src = src;
-                  lazyImage.removeAttribute('data-src');
+                  
+                  // Smooth fade in once loaded
+                  lazyImage.onload = () => {
+                    lazyImage.style.transition = 'opacity 0.5s ease';
+                    lazyImage.style.opacity = '1';
+                    lazyImage.removeAttribute('data-src');
+                  };
                 }
                 
                 lazyImageObserver.unobserve(lazyImage);
               }
             });
+          }, {
+            rootMargin: '100px' // Start loading when within 100px of viewport
           });
           
           // Observe all lazy images
           const lazyImages = document.querySelectorAll('img[data-src]');
           lazyImages.forEach(img => lazyImageObserver.observe(img));
         } else {
-          // Fallback for browsers that don't support Intersection Observer
-          // Just load all images immediately
+          // Fallback for browsers without IntersectionObserver
           const lazyImages = document.querySelectorAll('img[data-src]');
           lazyImages.forEach(img => {
             img.src = img.getAttribute('data-src');
