@@ -502,35 +502,48 @@
     }
 
     /* Album images grid */
-    /* Album images container - improved layout */
+    /* Album images container - improved layout for desktop only */
     .album-images {
       display: flex;
       flex-wrap: wrap;
       background-color: transparent;
       position: relative;
-      padding: 30px 15px; /* Added more padding to accommodate tilts */
-      margin: 0;
-      width: 100%;
-      box-sizing: border-box;
+      padding: 20px 0; /* Keep original padding */
+      margin: 0 -8px; /* Keep original margin */
+      gap: 0; /* Remove gap */
       pointer-events: auto;
     }
 
-    /* Individual image containers - reduced overlap */
+    /* Individual image containers - basic settings */
     .album-image {
       position: relative;
       flex: 0 0 auto;
-      margin: 15px; /* Positive margin creates spacing instead of negative overlapping */
       transform-origin: center;
-      transition: all 0.3s ease;
+      transition: transform 0.3s ease, z-index 0.1s;
       z-index: 1;
       pointer-events: auto;
-      box-sizing: border-box;
     }
 
-    /* Desktop version: balanced layout */
+    /* Image itself - natural aspect ratio */
+    .album-image img {
+      display: block;
+      position: relative; /* Changed from absolute positioning */
+      top: auto;
+      left: auto;
+      width: 100%;
+      height: auto; /* Maintain aspect ratio */
+      object-fit: contain; /* Ensure no cropping */
+      box-shadow: 0 3px 10px rgba(0,0,0,0.2); /* Keep original shadow */
+      border: 2px solid rgba(255, 255, 255, 0.8);
+      background-color: #111;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    /* Desktop version only: intelligent layout */
     @media (min-width: 769px) {
       .album-image {
         width: calc(25% - 30px); /* 4 per row with spacing */
+        margin: 15px; /* Positive margin creates spacing */
       }
       
       /* Smarter layout with slight staggering */
@@ -554,32 +567,49 @@
         transform: translateY(0px) rotate(-0.5deg);
       }
       
-      /* Menu overlap prevention - add padding on left side */
+      /* Menu overlap prevention - keep your original settings */
       .archive-gallery {
-        padding-left: 200px;
-        padding-right: 20px;
+        padding-left: 200px; /* Make space for the menu */
+        padding-right: 20px; /* Default right padding */
         box-sizing: border-box;
       }
       
       .archive-gallery .gallery-container {
-        max-width: 100%;
+        max-width: 100%; /* Use full width */
         margin-left: 0;
       }
     }
 
-    /* Image itself - natural aspect ratio */
-    .album-image img {
-      display: block;
-      position: relative; /* Changed from absolute positioning */
-      top: auto;
-      left: auto;
-      width: 100%;
-      height: auto; /* Maintain aspect ratio */
-      object-fit: contain; /* Ensure no cropping */
-      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-      border: 2px solid rgba(255, 255, 255, 0.8);
-      background-color: #111;
-      transition: all 0.3s ease;
+    /* IMPORTANT: Keep your original mobile layout settings unchanged */
+    @media (max-width: 768px) {
+      .album-images {
+        padding: 10px 0;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 0px;
+      }
+      
+      .album-image {
+        width: calc(50% - 10px);
+        margin: -5px;
+        padding: 5px;
+      }
+      
+      .album-image:nth-child(5n+1) { transform: rotate(-1deg); }
+      .album-image:nth-child(5n+2) { transform: rotate(1deg); }
+      .album-image:nth-child(5n+3) { transform: rotate(-0.5deg); }
+      .album-image:nth-child(5n+4) { transform: rotate(0.8deg); }
+      .album-image:nth-child(5n+5) { transform: rotate(-0.8deg); }
+      
+      .album-title {
+        font-size: 18px;
+      }
+      
+      .archive-gallery {
+        padding: 60px 10px 70px 10px; /* Add bigger bottom padding (70px) to make room for menu */
+        height: calc(100% - 64px); /* Reduce height to leave space for menu */
+        bottom: 64px; /* Position above the menu bar */
+        max-height: calc(100% - 64px); /* Set max height to ensure visibility of menu */
+      }
     }
 
     /* Hover effects */
@@ -589,45 +619,27 @@
     }
 
     .album-image:hover img {
-      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-      transform: none; /* Override the previous scale transform */
+      box-shadow: 0 8px 20px rgba(0,0,0,0.4);
     }
 
-    /* Mobile layout */
-    @media (max-width: 768px) {
-      .album-images {
-        padding: 15px 5px;
+    /* Optional animation for desktop only */
+    @media (min-width: 769px) {
+      @keyframes fadeSlideIn {
+        from {
+          opacity: 0;
+          transform: translateY(15px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(var(--y-offset, 0)) rotate(var(--rotation, 0deg));
+        }
       }
-      
+
       .album-image {
-        width: calc(50% - 20px);
-        margin: 10px;
-      }
-      
-      /* Less dramatic tilting for mobile */
-      .album-image:nth-child(5n+1) { transform: rotate(-0.8deg); }
-      .album-image:nth-child(5n+2) { transform: rotate(0.8deg); }
-      .album-image:nth-child(5n+3) { transform: rotate(-0.4deg); }
-      .album-image:nth-child(5n+4) { transform: rotate(0.5deg); }
-      .album-image:nth-child(5n+5) { transform: rotate(-0.3deg); }
-    }
-
-    /* Add this new staggered appearance animation */
-    @keyframes fadeSlideIn {
-      from {
+        animation: fadeSlideIn 0.5s ease forwards;
+        animation-delay: calc(var(--i, 0) * 0.05s);
         opacity: 0;
-        transform: translateY(15px);
       }
-      to {
-        opacity: 1;
-        transform: translateY(var(--y-offset, 0)) rotate(var(--rotation, 0deg));
-      }
-    }
-
-    .album-image {
-      animation: fadeSlideIn 0.5s ease forwards;
-      animation-delay: calc(var(--i, 0) * 0.05s);
-      opacity: 0;
     }
 
     .gallery-close:hover {
@@ -3139,48 +3151,17 @@
         const imagesContainer = document.createElement('div');
         imagesContainer.className = 'album-images';
         
-        // Create a smarter image layout that maintains original aspect ratios
-        // and positions images in a visually appealing way
         album.images.forEach((image, index) => {
           const imageContainer = document.createElement('div');
           imageContainer.className = 'album-image';
           
-          // Set animation delay for staggered appearance
-          imageContainer.style.setProperty('--i', index);
+          // Only on desktop, set animation delay and index property
+          if (window.innerWidth >= 769) {
+            imageContainer.style.setProperty('--i', index);
+            // Set z-index based on position
+            imageContainer.style.zIndex = 10 + index;
+          }
           
-          // We'll preload the image to determine its aspect ratio
-          // and use this information for smarter layout
-          const tempImg = new Image();
-          tempImg.onload = function() {
-            // Determine if image is portrait or landscape
-            const isPortrait = tempImg.height > tempImg.width;
-            const aspectRatio = tempImg.width / tempImg.height;
-            
-            // Set a custom data attribute for aspect ratio information
-            imageContainer.dataset.aspectRatio = aspectRatio.toFixed(2);
-            
-            // Add class based on orientation for potential CSS targeting
-            if (isPortrait) {
-              imageContainer.classList.add('portrait');
-            } else {
-              imageContainer.classList.add('landscape');
-            }
-            
-            // Position wider images with more emphasis
-            if (aspectRatio > 1.5 && window.innerWidth > 768) {
-              // Very wide image, give it more space and less vertical shift
-              imageContainer.style.width = "calc(33.33% - 30px)";
-              imageContainer.style.setProperty('--y-offset', '0px');
-            } else if (isPortrait && aspectRatio < 0.7 && window.innerWidth > 768) {
-              // Very tall image, make narrower
-              imageContainer.style.width = "calc(20% - 30px)";
-            }
-          };
-          
-          // Set source for aspect ratio detection
-          tempImg.src = image.src;
-          
-          // Create the visible image element
           const img = document.createElement('img');
           img.setAttribute('data-src', image.src); // For lazy loading
           img.alt = image.alt || '';
@@ -3188,34 +3169,8 @@
           // Add placeholder until the image loads
           img.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1"%3E%3C/svg%3E';
           
-          // Intelligent z-index that creates a natural layering
-          // Items further to the right and bottom get higher z-index
-          const row = Math.floor(index / 4); // Assume 4 items per row on desktop
-          const col = index % 4;
-          
-          // Create a base z-index that generally increases as we move down and right
-          // This creates a more natural overlapping effect (newest items on top)
-          const baseZIndex = 10 + (row * 4) + col;
-          imageContainer.style.zIndex = baseZIndex;
-          imageContainer.dataset.zIndex = baseZIndex;
-          
           imageContainer.appendChild(img);
           imagesContainer.appendChild(imageContainer);
-        });
-  
-        // Enhanced hover behavior that respects the smart positioning
-        const containers = imagesContainer.querySelectorAll('.album-image');
-        containers.forEach(container => {
-          container.addEventListener('mouseenter', () => {
-            container.style.zIndex = 1000; // Bring to front
-          });
-          
-          container.addEventListener('mouseleave', () => {
-            // Small delay to make transition smoother
-            setTimeout(() => {
-              container.style.zIndex = container.dataset.zIndex || '1';
-            }, 300);
-          });
         });
         
         albumElement.appendChild(imagesContainer);
