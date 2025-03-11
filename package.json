@@ -1,7 +1,7 @@
 {
-    "name": "ensemble-typography",
+    "name": "ensemble-collectif",
     "version": "1.0.0",
-    "description": "Interactive typography experiment with archive gallery",
+    "description": "EN5EMBLE est un collectif de gens qui mixx",
     "main": "server.js",
     "scripts": {
       "start": "node server.js",
