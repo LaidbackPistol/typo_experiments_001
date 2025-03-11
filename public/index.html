@@ -380,7 +380,7 @@
 
     .menu-item {
       color: #ffff00; /* Yellow text color */
-      font-size: 18px;
+      font-size: 22px; /* Increased from 18px */
       text-decoration: none;
       transition: all 0.4s ease;
       font-family: monospace;
@@ -388,16 +388,17 @@
       display: inline-block;
     }
 
-    .menu-item:hover {
-      opacity: 0.6;
-      cursor: pointer;
-    }
-    
+    /* Increase size for active menu items on desktop */
     .menu-item.active {
-      font-size: 24px;
+      font-size: 28px; /* Increased from 24px */
       font-weight: bold;
       opacity: 1;
       transform: translateX(5px);
+    }
+
+    .menu-item:hover {
+      opacity: 0.6;
+      cursor: pointer;
     }
     
     /* Push items away from active item */
@@ -423,9 +424,14 @@
         justify-content: center;
         gap: 15px;
       }
+
+      .menu-item {
+        font-size: 18px; /* Original size for mobile */
+        transform: translateY(-5px);
+      }
       
       .menu-item.active {
-        transform: translateY(-5px);
+        font-size: 24px; /* Original size for mobile */
       }
       
       li.active-item ~ li {
