@@ -1828,6 +1828,12 @@
       }
 
       // Function to check if click is on the canvas area
+      function isAnyMenuItemActive() {
+        const activeMenuItems = document.querySelectorAll('.menu-item.active');
+        return activeMenuItems.length > 0;
+      }
+
+      // Function to check if click is on the canvas area
       function isCanvasAreaClick(element) {
         // Consider clicks only on the canvas elements or the direct canvas container
         const canvasContainer = document.getElementById('canvas-container');
@@ -1850,6 +1856,9 @@
         return false;
       }
 
+      // Variable to track the last applied random preset
+      let lastAppliedRandomPreset = "Unsure"; // Start with the default
+
       // Function to pick a random preset from 001-011 + Unsure
       function getRandomPreset() {
         // Create an array with all preset names including "Unsure"
@@ -1871,11 +1880,19 @@
           }
         }
         
-        // Pick a random preset name from the array
-        const randomIndex = Math.floor(Math.random() * presetNames.length);
-        return presetNames[randomIndex];
+        // Filter out the last applied preset to prevent repetition
+        const availablePresets = presetNames.filter(name => name !== lastAppliedRandomPreset);
+        
+        // If somehow all presets were filtered out (shouldn't happen unless there's only one preset), 
+        // use the full list again
+        const presetsToChooseFrom = availablePresets.length > 0 ? availablePresets : presetNames;
+        
+        // Pick a random preset name from the filtered array
+        const randomIndex = Math.floor(Math.random() * presetsToChooseFrom.length);
+        return presetsToChooseFrom[randomIndex];
       }
 
+      // Add click event listener to the document
       document.addEventListener('click', (event) => {
         // Only proceed if no menu item is active
         if (!isAnyMenuItemActive()) {
@@ -1887,6 +1904,9 @@
             
             // Update the text back to default if it's been changed
             updateCanvasText("EN5EMBLE");
+            
+            // Remember this preset to avoid repeating it next time
+            lastAppliedRandomPreset = randomPreset;
           }
         }
       });
