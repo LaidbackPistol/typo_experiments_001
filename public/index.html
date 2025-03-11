@@ -716,6 +716,95 @@
         font-size: 20px;
       }
     }
+
+    /* Desktop-only playful layout (screens larger than 768px) */
+    @media (min-width: 769px) {
+      /* Create a scattered, slightly irregular grid for mix containers */
+      .mixes-gallery .gallery-container {
+        display: grid;
+        grid-template-columns: repeat(12, 1fr);
+        grid-auto-rows: minmax(100px, auto);
+        gap: 20px;
+        max-width: 100%;
+        padding: 20px;
+      }
+      
+      /* Make mix containers take varying widths across the grid */
+      .mix-container {
+        grid-column: span 12;
+        max-width: none;
+        margin: 0;
+        position: relative;
+        transform-origin: center;
+        transition: transform 0.3s ease-out, opacity 0.3s ease;
+      }
+      
+      /* Assign different placements for alternating mixes */
+      .mix-container:nth-child(4n+1) {
+        grid-column: 1 / span 10;
+        transform: rotate(-1deg);
+      }
+      
+      .mix-container:nth-child(4n+2) {
+        grid-column: 3 / span 10;
+        transform: rotate(1deg);
+      }
+      
+      .mix-container:nth-child(4n+3) {
+        grid-column: 2 / span 10;
+        transform: rotate(0.5deg);
+      }
+      
+      .mix-container:nth-child(4n+4) {
+        grid-column: 1 / span 10;
+        transform: rotate(-0.5deg);
+      }
+      
+      /* Add hover effects */
+      .mix-container:hover {
+        transform: scale(1.02) rotate(0);
+        z-index: 10;
+      }
+      
+      /* Add animation for staggered appearance */
+      @keyframes fadeSlideIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px) rotate(0deg);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0) rotate(var(--rotation));
+        }
+      }
+      
+      /* Make soundcloud embeds more visually interesting */
+      .soundcloud-embed {
+        filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.3));
+        transition: all 0.3s ease;
+        transform-origin: center;
+      }
+      
+      .mix-container:hover .soundcloud-embed {
+        filter: drop-shadow(0 8px 25px rgba(0, 0, 0, 0.4));
+      }
+      
+      /* Enhance mix titles */
+      .mix-title {
+        transform: translateY(0);
+        transition: transform 0.2s ease;
+        text-shadow: 0 0 15px rgba(0, 0, 0, 0.6);
+      }
+      
+      .mix-container:hover .mix-title {
+        transform: translateY(-5px);
+      }
+      
+      /* Add subtle parallax effect on mouse move */
+      .mixes-gallery {
+        perspective: 1000px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -2151,21 +2240,68 @@
             return;
           }
           
-          // Create and append mix elements
-          data.mixes.forEach(mix => {
-            const mixElement = createMixElement(mix);
+          // Create and append mix elements with index
+          data.mixes.forEach((mix, index) => {
+            const mixElement = createMixElement(mix, index);
             mixesContainer.appendChild(mixElement);
           });
+          
+          // Add parallax effect for desktop only
+          if (window.innerWidth >= 768) {
+            setupParallaxEffect();
+          }
         } catch (error) {
           console.error('Error loading mixes:', error);
           mixesContainer.innerHTML = '<div style="color: white; text-align: center; padding: 50px;">Error loading mixes. Please try again later.</div>';
         }
       }
 
+      function setupParallaxEffect() {
+        const mixesGallery = document.getElementById('mixes-gallery');
+        
+        mixesGallery.addEventListener('mousemove', (e) => {
+          // Only apply on desktop
+          if (window.innerWidth < 768) return;
+          
+          const containers = document.querySelectorAll('.mix-container');
+          const mouseX = e.clientX / window.innerWidth - 0.5; // -0.5 to 0.5
+          const mouseY = e.clientY / window.innerHeight - 0.5; // -0.5 to 0.5
+          
+          containers.forEach((container, index) => {
+            // Calculate a different intensity for each container
+            const intensity = 10 + (index % 3) * 5; // Varies between 10, 15, 20
+            
+            // Apply transform based on mouse position
+            container.style.transform = `
+              translateX(${mouseX * intensity}px) 
+              translateY(${mouseY * intensity}px)
+              rotate(${container.style.getPropertyValue('--rotation') || '0deg'})
+            `;
+          });
+        });
+        
+        // Reset positions when mouse leaves
+        mixesGallery.addEventListener('mouseleave', () => {
+          const containers = document.querySelectorAll('.mix-container');
+          
+          containers.forEach((container) => {
+            container.style.transform = `rotate(${container.style.getPropertyValue('--rotation') || '0deg'})`;
+          });
+        });
+      }
+
       // Function to create a mix element with Soundcloud embed
-      function createMixElement(mix) {
+      function createMixElement(mix, index) {
         const mixElement = document.createElement('div');
         mixElement.className = 'mix-container';
+        
+        // Add random rotation variable for animation
+        const randomRotation = (Math.random() * 2 - 1) * 1.5; // Between -1.5 and 1.5 degrees
+        mixElement.style.setProperty('--rotation', `${randomRotation}deg`);
+        
+        // Add animation with delay based on index
+        mixElement.style.animation = `fadeSlideIn 0.5s ease forwards ${index * 0.15}s`;
+        mixElement.style.opacity = '0'; // Start invisible for animation
         
         // Only create metadata element (artist and date)
         const metadataElement = document.createElement('div');
@@ -2178,6 +2314,12 @@
           month: 'short',
           day: 'numeric'
         });
+        
+        // Add title element (it was missing in the original code!)
+        const titleElement = document.createElement('h2');
+        titleElement.className = 'mix-title';
+        titleElement.textContent = mix.title || 'Untitled Mix';
+        mixElement.appendChild(titleElement);
         
         // Show only artist and date
         metadataElement.textContent = `${mix.artist} • ${formattedDate}`;
@@ -2198,7 +2340,7 @@
           iframe.scrolling = 'no';
           iframe.frameBorder = 'no';
           iframe.allow = 'autoplay';
-          
+            
           if (mix.soundcloudId) {
             iframe.src = `https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/${mix.soundcloudId}&color=%23ffff00&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false&visual=true`;
           } else if (mix.soundcloudUrl) {
