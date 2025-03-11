@@ -842,42 +842,70 @@
       }
       
       /* Archive Gallery - Mobile */
+      .album {
+        margin-bottom: 20px;
+        text-align: center;
+      }
+      
+      /* Update album images for mobile - wider with significant overlap */
       .album-images {
         display: flex;
         flex-wrap: wrap;
         justify-content: center;
-        margin: 5px -10px; /* Increased negative margin for container */
-        gap: 0px;
+        align-items: center;
+        margin: 10px auto;
+        padding: 0;
+        /* Remove any grid settings that might cause spacing */
+        grid-template-columns: unset;
+        gap: 0;
       }
       
       .album-title {
         font-size: 18px;
+        margin-bottom: 10px;
       }
 
       .album-image {
-        margin: -8px; /* Increased negative margin for more overlap */
+        margin: -15px; /* Much more aggressive negative margin for overlap */
+        padding: 0; /* Remove any padding */
+        width: auto;
+        height: auto;
+        display: inline-block;
+        position: relative;
         transform: rotate(0deg) !important; /* Reset any rotations initially */
         transition: all 0.3s ease;
+        z-index: 1; /* Default z-index */
       }
       
       /* Random rotation for each image */
-      .album-image:nth-child(odd) {
-        transform: rotate(-2deg) !important;
+      .album-image:nth-child(3n+1) {
+        transform: rotate(-3deg) !important;
       }
       
-      .album-image:nth-child(even) {
-        transform: rotate(2deg) !important;
+      .album-image:nth-child(3n+2) {
+        transform: rotate(3deg) !important;
+      }
+      
+      .album-image:nth-child(3n+3) {
+        transform: rotate(1deg) !important;
       }
       
       .album-image:hover {
-        z-index: 10;
-        transform: scale(1.05) rotate(0deg) !important;
+        z-index: 20 !important; /* Much higher z-index on hover */
+        transform: scale(1.08) rotate(0deg) !important;
       }
       
       .album-image img {
-        max-width: 260px; /* Increased from 180px */
-        max-height: 220px; /* Increased from 180px */
+        max-width: 300px; /* Significantly increased from 260px */
+        max-height: 280px; /* Significantly increased from 220px */
+        width: auto;
+        height: auto;
+        display: block;
         box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+        object-fit: contain;
+        border: 0;
+        padding: 0;
+        margin: 0;
       }
       
       .archive-gallery {
