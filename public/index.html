@@ -1985,8 +1985,8 @@
       }
       
       // Function to apply settings from a preset
-      function applySettings(settings) {
-        // Save previous values for interpolation
+      function applySettings(settings, instant = false) {
+        // Save previous values for interpolation (still needed even for instant)
         prevFontSize = fontSize;
         prevDuplications = duplications;
         prevBlur = blur;
@@ -2008,16 +2008,48 @@
         effectTypeControl.value = settings.effectType;
         fontTypeControl.value = fontSystem.getCompatibleFontName(settings.fontType);
         
-        // Set target values for interpolation
-        targetFontSize = settings.fontSize;
-        targetDuplications = settings.duplications;
-        targetBlur = settings.blur;
-        targetRotationSpeed = settings.rotationSpeed;
-        targetDistortion = settings.distortion;
-        targetPrimaryColor = settings.primaryColor;
-        targetSecondaryColor = settings.secondaryColor;
-        targetEffectType = settings.effectType;
-        targetFontType = settings.fontType;
+        // For instant transitions, apply values directly
+        if (instant) {
+          // Skip interpolation and apply values immediately
+          fontSize = settings.fontSize;
+          duplications = settings.duplications;
+          blur = settings.blur;
+          rotationSpeed = settings.rotationSpeed;
+          distortion = settings.distortion;
+          primaryColor = settings.primaryColor;
+          secondaryColor = settings.secondaryColor;
+          effectType = settings.effectType;
+          fontType = settings.fontType;
+          
+          // Still set target values (for consistency)
+          targetFontSize = settings.fontSize;
+          targetDuplications = settings.duplications;
+          targetBlur = settings.blur;
+          targetRotationSpeed = settings.rotationSpeed;
+          targetDistortion = settings.distortion;
+          targetPrimaryColor = settings.primaryColor;
+          targetSecondaryColor = settings.secondaryColor;
+          targetEffectType = settings.effectType;
+          targetFontType = settings.fontType;
+          
+          // Don't start interpolation
+          isInterpolating = false;
+        } else {
+          // Original behavior: set target values for interpolation
+          targetFontSize = settings.fontSize;
+          targetDuplications = settings.duplications;
+          targetBlur = settings.blur;
+          targetRotationSpeed = settings.rotationSpeed;
+          targetDistortion = settings.distortion;
+          targetPrimaryColor = settings.primaryColor;
+          targetSecondaryColor = settings.secondaryColor;
+          targetEffectType = settings.effectType;
+          targetFontType = settings.fontType;
+          
+          // Start interpolation
+          isInterpolating = true;
+          interpolationStartTime = Date.now();
+        }
 
         // Apply feedback settings if they exist in the preset
         if (settings.feedbackEnabled !== undefined) {
@@ -2053,10 +2085,6 @@
         if (feedbackCanvas && feedbackCtx) {
           feedbackCtx.clearRect(0, 0, feedbackCanvas.width, feedbackCanvas.height);
         }
-
-        // Start interpolation
-        isInterpolating = true;
-        interpolationStartTime = Date.now();
       }
       
       // Animation function
@@ -2822,7 +2850,7 @@
       // Check URL hash on page load and set the active menu item
       function checkUrlHash() {
         const archiveGallery = document.getElementById('archive-gallery');
-        const mixesGallery = document.getElementById('mixes-gallery'); // Add this line
+        const mixesGallery = document.getElementById('mixes-gallery'); 
         
         // First, clear all active states
         const allMenuItems = document.querySelectorAll('.menu-item');
@@ -2850,12 +2878,12 @@
             menuItem.classList.add('active');
             menuItem.parentElement.classList.add('active-item');
             
-            // Apply the corresponding preset
+            // Apply the corresponding preset with instant transitions
             applyPresetForSection(section);
           }
         } else {
-          // If no hash, apply the default "Unsure" preset
-          applyPresetByName("Unsure");
+          // If no hash, apply the default "Unsure" preset with instant transitions
+          applyPresetByName("Unsure", true);
           
           // Also ensure galleries are closed when there's no hash
           if (archiveGallery.classList.contains('active')) {
@@ -2866,7 +2894,7 @@
             mixesGallery.classList.remove('active');
           }
         }
-      } 
+      }
       
       // Function to apply a preset based on the selected section
       function applyPresetForSection(section) {
@@ -2892,8 +2920,8 @@
         
         const mapping = sectionMap[section] || { preset: "Unsure", text: "EN5EMBLE" };
         
-        // Apply the preset
-        applyPresetByName(mapping.preset);
+        // Apply the preset WITH instant=true to skip transition
+        applyPresetByName(mapping.preset, true);
         
         // Update the text
         updateCanvasText(mapping.text);
@@ -2911,7 +2939,7 @@
       }
       
       // Function to find and apply a preset by name
-      function applyPresetByName(presetName) {
+      function applyPresetByName(presetName, instant = false) {
         // First check built-in presets
         let preset = builtinPresets.find(p => p.name === presetName);
         
@@ -2920,10 +2948,10 @@
           preset = userPresets.find(p => p.name === presetName);
         }
         
-        // If preset found, apply it
+        // If preset found, apply it with the instant flag
         if (preset) {
-          console.log(`Applying preset: ${presetName}`);
-          applySettings(preset.settings);
+          console.log(`Applying preset: ${presetName}${instant ? ' (instant)' : ''}`);
+          applySettings(preset.settings, instant);
         } else {
           console.warn(`Preset not found: ${presetName}`);
         }
