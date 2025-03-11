@@ -639,20 +639,19 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background-color: transparent; /* Changed from rgba(0,0,0,0.5) to transparent */
+      background-color: transparent;
       z-index: 200;
       overflow-y: auto;
       display: none;
       padding: 60px 20px 20px 20px;
       pointer-events: none; /* This makes it click-through by default */
     }
-    
+
     .mixes-gallery.active {
       display: block;
     }
-    
-    /* Mix container */
-    /* Reset for mobile to make sure mixes display correctly */
+
+    /* Mix container - base styles for all screen sizes */
     .mix-container {
       margin-bottom: 30px;
       padding: 0;
@@ -673,19 +672,27 @@
       border-radius: 0;
     }
 
-    /* Desktop-only playful layout (screens larger than 768px) */
+    /* Desktop-only layout (screens larger than 768px) */
     @media (min-width: 769px) {
-      /* Create a scattered, slightly irregular grid for mix containers */
+      /* Menu overlap prevention */
+      .mixes-gallery {
+        padding-left: 200px; /* Make space for the menu */
+        box-sizing: border-box;
+        perspective: 1000px; /* For parallax effect */
+      }
+      
+      /* Adjust the gallery container */
       .mixes-gallery .gallery-container {
         display: grid;
         grid-template-columns: repeat(12, 1fr);
         grid-auto-rows: minmax(100px, auto);
         gap: 20px;
-        max-width: 100%;
         padding: 20px;
+        max-width: calc(100% - 180px);
+        margin-left: 0;
       }
       
-      /* Make mix containers take varying widths across the grid */
+      /* Mix container desktop styles */
       .mix-container {
         grid-column: span 12;
         max-width: none;
@@ -693,45 +700,35 @@
         position: relative;
         transform-origin: center;
         transition: transform 0.3s ease-out, opacity 0.3s ease;
+        width: 100%;
+        box-sizing: border-box;
       }
       
-      /* Assign different placements for alternating mixes */
+      /* Assign different placements for alternating mixes - final values */
       .mix-container:nth-child(4n+1) {
-        grid-column: 1 / span 10;
+        grid-column: 1 / span 9;
         transform: rotate(-1deg);
       }
       
       .mix-container:nth-child(4n+2) {
-        grid-column: 3 / span 10;
+        grid-column: 2 / span 9;
         transform: rotate(1deg);
       }
       
       .mix-container:nth-child(4n+3) {
-        grid-column: 2 / span 10;
+        grid-column: 1 / span 9;
         transform: rotate(0.5deg);
       }
       
       .mix-container:nth-child(4n+4) {
-        grid-column: 1 / span 10;
+        grid-column: 2 / span 9;
         transform: rotate(-0.5deg);
       }
       
-      /* Add hover effects */
+      /* Hover effects */
       .mix-container:hover {
         transform: scale(1.02) rotate(0);
         z-index: 10;
-      }
-      
-      /* Add animation for staggered appearance */
-      @keyframes fadeSlideIn {
-        from {
-          opacity: 0;
-          transform: translateY(20px) rotate(0deg);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0) rotate(var(--rotation));
-        }
       }
       
       /* Make soundcloud embeds more visually interesting */
@@ -739,6 +736,10 @@
         filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.3));
         transition: all 0.3s ease;
         transform-origin: center;
+      }
+      
+      .soundcloud-embed iframe {
+        max-width: 100%;
       }
       
       .mix-container:hover .soundcloud-embed {
@@ -755,10 +756,17 @@
       .mix-container:hover .mix-title {
         transform: translateY(-5px);
       }
-      
-      /* Add subtle parallax effect on mouse move */
-      .mixes-gallery {
-        perspective: 1000px;
+    }
+
+    /* Animation for staggered appearance */
+    @keyframes fadeSlideIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px) rotate(0deg);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) rotate(var(--rotation));
       }
     }
   </style>
