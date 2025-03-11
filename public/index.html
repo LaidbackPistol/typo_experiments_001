@@ -843,7 +843,10 @@
       
       /* Archive Gallery - Mobile */
       .album-images {
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin: 5px -10px; /* Increased negative margin for container */
         gap: 0px;
       }
       
@@ -852,12 +855,29 @@
       }
 
       .album-image {
-        margin: -5px;
+        margin: -8px; /* Increased negative margin for more overlap */
+        transform: rotate(0deg) !important; /* Reset any rotations initially */
+        transition: all 0.3s ease;
+      }
+      
+      /* Random rotation for each image */
+      .album-image:nth-child(odd) {
+        transform: rotate(-2deg) !important;
+      }
+      
+      .album-image:nth-child(even) {
+        transform: rotate(2deg) !important;
+      }
+      
+      .album-image:hover {
+        z-index: 10;
+        transform: scale(1.05) rotate(0deg) !important;
       }
       
       .album-image img {
-        max-width: 180px;
-        max-height: 180px;
+        max-width: 260px; /* Increased from 180px */
+        max-height: 220px; /* Increased from 180px */
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
       }
       
       .archive-gallery {
