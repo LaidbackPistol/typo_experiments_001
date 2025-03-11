@@ -412,6 +412,7 @@
     
     /* Media query for responsive design */
     @media (max-width: 768px) {
+      /* Keep all menu items on the same baseline */
       .menu-container {
         top: auto;
         bottom: 20px;
@@ -423,23 +424,38 @@
         flex-direction: row;
         justify-content: center;
         gap: 15px;
+        align-items: baseline; /* Important: align items by their baseline */
       }
 
       .menu-item {
-        font-size: 18px; /* Original size for mobile */
-        transform: translateY(-5px);
+        font-size: 18px;
+        transform: translateY(0); /* Remove vertical shift */
+        position: relative; /* For z-index control */
+        display: inline-block;
+        line-height: 1.2; /* Consistent line height */
+        vertical-align: baseline; /* Keep text aligned at baseline */
       }
       
       .menu-item.active {
-        font-size: 24px; /* Original size for mobile */
+        font-size: 24px;
+        transform: translateX(0); /* No position change, just size */
+        z-index: 5; /* Keep active item on top */
       }
       
+      /* Change how siblings are moved to avoid vertical shift */
       li.active-item ~ li {
         transform: translateX(8px);
+        transform-origin: left center; /* Keep transform centered vertically */
       }
       
       li:not(.active-item) + li.active-item ~ li {
         transform: translateX(8px);
+        transform-origin: left center; /* Keep transform centered vertically */
+      }
+      
+      /* Add margin adjustment to compensate for font size change */
+      li.active-item {
+        margin-bottom: 0; /* Prevent margin from affecting layout */
       }
     }
 
