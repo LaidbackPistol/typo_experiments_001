@@ -625,8 +625,8 @@
       font-family: monospace; /* To match your menu style */
     }
 
-    /* Mobile Responsive Styles */
-    @media (max-width: 768px) {
+  /* Mobile Responsive Styles */
+  @media (max-width: 768px) {
       .album-images {
         grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
         gap: 0px;
@@ -641,6 +641,31 @@
         height: calc(100% - 64px); /* Reduce height to leave space for menu */
         bottom: 64px; /* Position above the menu bar */
         max-height: calc(100% - 64px); /* Set max height to ensure visibility of menu */
+      }
+      
+      /* Add mobile fixes for mixes gallery to match archives */
+      .mixes-gallery {
+        padding: 60px 10px 70px 10px; /* Add bigger bottom padding (70px) to make room for menu */
+        height: calc(100% - 64px); /* Reduce height to leave space for menu */
+        bottom: 64px; /* Position above the menu bar */
+        max-height: calc(100% - 64px); /* Set max height to ensure visibility of menu */
+        box-sizing: border-box; /* Ensure padding is included in height calculation */
+      }
+      
+      /* Improve padding and spacing for mix containers on mobile */
+      .mix-container {
+        margin-bottom: 40px; /* Increase space between mixes */
+        padding-bottom: 10px; /* Add some padding at bottom */
+      }
+      
+      /* Ensure the last mix doesn't get cut off */
+      .mix-container:last-child {
+        margin-bottom: 80px; /* Extra space at the end of the list */
+      }
+      
+      /* Ensure Soundcloud embeds are fully visible */
+      .soundcloud-embed {
+        margin-bottom: 15px;
       }
     }
 
@@ -763,6 +788,8 @@
         transform: translateY(0);
         transition: transform 0.2s ease;
         text-shadow: 0 0 15px rgba(0, 0, 0, 0.6);
+        color: #ffff00; /* Same yellow as your menu items */
+        font-family: monospace; /* To match your menu style */
       }
       
       .mix-container:hover .mix-title {
@@ -779,6 +806,35 @@
       to {
         opacity: 1;
         transform: translateY(0) rotate(var(--rotation));
+      }
+    }
+    
+    /* Increase menu typography size on PC only */
+    .menu-item {
+      color: #ffff00; /* Yellow text color */
+      font-size: 22px; /* Increased from 18px */
+      text-decoration: none;
+      transition: all 0.4s ease;
+      font-family: monospace;
+      opacity: 0.9;
+      display: inline-block;
+    }
+
+    .menu-item.active {
+      font-size: 28px; /* Increased from 24px */
+      font-weight: bold;
+      opacity: 1;
+      transform: translateX(5px);
+    }
+
+    /* Keep original sizes on mobile */
+    @media (max-width: 768px) {
+      .menu-item {
+        font-size: 18px; /* Original size for mobile */
+      }
+      
+      .menu-item.active {
+        font-size: 24px; /* Original size for mobile */
       }
     }
   </style>
