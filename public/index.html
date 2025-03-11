@@ -459,7 +459,9 @@
       }
     }
 
-    /* Make sure the archive gallery expands properly on mobile */
+   /* ==========================================
+      ARCHIVE GALLERY - MAIN STYLES
+      ========================================== */
     .archive-gallery {
       position: fixed;
       top: 0;
@@ -543,164 +545,56 @@
       box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
     }
 
-    /* Mobile Responsive Styles */
-    @media (max-width: 768px) {
-        .album-images {
-          grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-          gap: 0px;
-        }
-        
-        .album-title {
-          font-size: 18px;
-        }
-
-        .album-image {
-          margin: -5px;
-        }
-        
-        .album-image img {
-          max-width: 180px;
-          max-height: 180px;
-        }
-        
-        .archive-gallery {
-          padding: 60px 10px 70px 10px; /* Add bigger bottom padding (70px) to make room for menu */
-          height: calc(100% - 64px); /* Reduce height to leave space for menu */
-          bottom: 64px; /* Position above the menu bar */
-          max-height: calc(100% - 64px); /* Set max height to ensure visibility of menu */
-        }
-    }
-
-    /* Desktop overlap prevention - add padding on left side */
-    @media (min-width: 769px) {
-        /* Menu overlap prevention - add padding on left side */
-        .archive-gallery {
-          padding-left: 200px; /* Make space for the menu */
-          padding-right: 20px; /* Default right padding */
-          box-sizing: border-box;
-        }
-        
-        /* Adjust the gallery container to use full available width */
-        .archive-gallery .gallery-container {
-          max-width: 100%; /* Use full width */
-          margin-left: 0;
-        }
-    }
-
-    /* Gallery container */
-    .gallery-container {
-      max-width: 1200px;
-      margin: 0 auto;
+    /* ==========================================
+      MIXES GALLERY - MAIN STYLES
+      ========================================== */
+    .mixes-gallery {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
       background-color: transparent;
+      z-index: 200;
+      overflow-y: auto;
+      display: none;
+      padding: 60px 20px 20px 20px;
+      pointer-events: none; /* This makes it click-through by default */
     }
 
-    /* Album styling - restore pointer events */
-    .album {
-      margin-bottom: 80px;
-      background-color: transparent;
-      pointer-events: auto; /* Re-enable pointer events for album elements */
+    .mixes-gallery.active {
+      display: block;
     }
 
-    /* Album title */
-    .album-title {
-      color: #ffff00;
-      font-size: 18px;
-      margin-bottom: 4px;
-      font-family: monospace;
-      text-shadow: 0 0 10px rgba(0, 0, 0, 0.8), 0 0 20px rgba(0, 0, 0, 0.8);
-      pointer-events: auto; /* Ensure title is clickable */
-    }
-
-    /* Album images - playful layout */
-    .album-images {
-      display: flex;
-      flex-wrap: wrap;
-      position: relative;
-      margin: 10px -15px;
-      padding: 20px 0;
-      background-color: transparent;
+    /* Mix container - base styles for all screen sizes */
+    .mix-container {
+      margin-bottom: 30px;
+      padding: 0;
       pointer-events: auto;
-    }
-
-    /* Individual image containers */
-    .album-image {
-      position: relative;
-      margin: -10px;  /* Negative margin for overlap */
-      padding: 5px;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
       background-color: transparent;
-      pointer-events: auto;
-      width: auto;
-      height: auto;
-      transition: all 0.3s ease;
-      z-index: 1;
-      transform-origin: center;
-    }
-
-    .album-image:hover {
-      z-index: 10;
-      transform: scale(1.08) rotate(0deg) !important;
-    }
-
-    .album-image img {
-      max-width: 750px;  /* Increased from 350px */
-      max-height: 600px; /* Increased from 280px */
-      width: auto;
-      height: auto;
-      object-fit: contain;
-      transition: all 0.3s ease;
       border: none;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+      opacity: 1;
     }
 
-    /* Mobile Responsive Styles */
-    @media (max-width: 768px) {
-        .album-images {
-          grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-          gap: 0px;
-        }
-        
-        .album-title {
-          font-size: 18px;
-        }
-
-        .album-image {
-          margin: -5px;
-        }
-        
-        .album-image img {
-          max-width: 180px;
-          max-height: 180px;
-        }
-        
-        .archive-gallery {
-          padding: 60px 10px 70px 10px; /* Add bigger bottom padding (70px) to make room for menu */
-          height: calc(100% - 64px); /* Reduce height to leave space for menu */
-          bottom: 64px; /* Position above the menu bar */
-          max-height: calc(100% - 64px); /* Set max height to ensure visibility of menu */
-        }
+    .soundcloud-embed {
+      width: 100%;
+      margin-bottom: 10px;
+      background-color: transparent;
+      padding: 0;
+      border-radius: 0;
     }
 
-    /* Desktop overlap prevention - add padding on left side */
-    @media (min-width: 769px) {
-        /* Menu overlap prevention - add padding on left side */
-        .archive-gallery {
-          padding-left: 200px; /* Make space for the menu */
-          padding-right: 20px; /* Default right padding */
-          box-sizing: border-box;
-        }
-        
-        /* Adjust the gallery container to use full available width */
-        .archive-gallery .gallery-container {
-          max-width: 100%; /* Use full width */
-          margin-left: 0;
-        }
+    .mix-title {
+      color: #ffff00; /* Same yellow as your menu items */
+      font-family: monospace; /* To match your menu style */
     }
 
-    .gallery-close:hover {
-      background: rgba(50, 50, 50, 0.7);
-    }
-
-    /* Fullscreen Viewer Styles */
+    /* ==========================================
+      FULLSCREEN VIEWER
+      ========================================== */
     .fullscreen-viewer {
       position: fixed;
       top: 0;
@@ -796,106 +690,61 @@
       font-family: monospace;
     }
 
-    .mix-title {
-      color: #ffff00; /* Same yellow as your menu items */
-      font-family: monospace; /* To match your menu style */
+    /* ==========================================
+      MENU TYPOGRAPHY
+      ========================================== */
+    .menu-item {
+      color: #ffff00; /* Yellow text color */
+      font-size: 22px; /* Increased from 18px */
+      text-decoration: none;
+      transition: all 0.4s ease;
+      font-family: monospace;
+      opacity: 0.9;
+      display: inline-block;
     }
 
-  /* Mobile Responsive Styles */
-  @media (max-width: 768px) {
-      .album-images {
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-        gap: 0px;
-      }
-      
-      .album-title {
-        font-size: 18px;
-      }
-
-      .album-image {
-        margin: -5px;
-      }
-      
-      .album-image img {
-        max-width: 180px;
-        max-height: 180px;
-      }
-      
-      .archive-gallery {
-        padding: 60px 10px 70px 10px; /* Add bigger bottom padding (70px) to make room for menu */
-        height: calc(100% - 64px); /* Reduce height to leave space for menu */
-        bottom: 64px; /* Position above the menu bar */
-        max-height: calc(100% - 64px); /* Set max height to ensure visibility of menu */
-      }
-      
-      /* Add mobile fixes for mixes gallery to match archives */
-      .mixes-gallery {
-        padding: 60px 10px 70px 10px; /* Add bigger bottom padding (70px) to make room for menu */
-        height: calc(100% - 64px); /* Reduce height to leave space for menu */
-        bottom: 64px; /* Position above the menu bar */
-        max-height: calc(100% - 64px); /* Set max height to ensure visibility of menu */
-        box-sizing: border-box; /* Ensure padding is included in height calculation */
-      }
-      
-      /* Improve padding and spacing for mix containers on mobile */
-      .mix-container {
-        margin-bottom: 40px; /* Increase space between mixes */
-        padding-bottom: 10px; /* Add some padding at bottom */
-      }
-      
-      /* Ensure the last mix doesn't get cut off */
-      .mix-container:last-child {
-        margin-bottom: 80px; /* Extra space at the end of the list */
-      }
-      
-      /* Ensure Soundcloud embeds are fully visible */
-      .soundcloud-embed {
-        margin-bottom: 15px;
-      }
-    }
-
-    .mixes-gallery {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: transparent;
-      z-index: 200;
-      overflow-y: auto;
-      display: none;
-      padding: 60px 20px 20px 20px;
-      pointer-events: none; /* This makes it click-through by default */
-    }
-
-    .mixes-gallery.active {
-      display: block;
-    }
-
-    /* Mix container - base styles for all screen sizes */
-    .mix-container {
-      margin-bottom: 30px;
-      padding: 0;
-      pointer-events: auto;
-      max-width: 800px;
-      margin-left: auto;
-      margin-right: auto;
-      background-color: transparent;
-      border: none;
+    .menu-item.active {
+      font-size: 28px; /* Increased from 24px */
+      font-weight: bold;
       opacity: 1;
+      transform: translateX(5px);
     }
 
-    .soundcloud-embed {
-      width: 100%;
-      margin-bottom: 10px;
-      background-color: transparent;
-      padding: 0;
-      border-radius: 0;
+    /* ==========================================
+      ANIMATIONS
+      ========================================== */
+    @keyframes fadeSlideIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px) rotate(0deg);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) rotate(var(--rotation));
+      }
     }
 
-    /* Desktop-only layout (screens larger than 768px) */
+    /* ==========================================
+      DESKTOP STYLES (min-width: 769px)
+      ========================================== */
     @media (min-width: 769px) {
-      /* Menu overlap prevention - only add padding on left side */
+      /* Archive Gallery - Desktop */
+      .archive-gallery {
+        padding-left: 200px; /* Make space for the menu */
+        padding-right: 20px; /* Default right padding */
+        box-sizing: border-box;
+      }
+      
+      .archive-gallery .gallery-container {
+        max-width: 100%; /* Use full width */
+        margin-left: 0;
+      }
+      
+      .album-images {
+        gap: 10px; /* Increased gap for better visual spacing on desktop */
+      }
+      
+      /* Mixes Gallery - Desktop */
       .mixes-gallery {
         padding-left: 200px; /* Make space for the menu */
         padding-right: 20px; /* Default right padding */
@@ -903,7 +752,6 @@
         perspective: 1000px; /* For parallax effect */
       }
       
-      /* Adjust the gallery container to use full available width */
       .mixes-gallery .gallery-container {
         display: grid;
         grid-template-columns: repeat(12, 1fr);
@@ -973,8 +821,6 @@
         transform: translateY(0);
         transition: transform 0.2s ease;
         text-shadow: 0 0 15px rgba(0, 0, 0, 0.6);
-        color: #ffff00; /* Same yellow as your menu items */
-        font-family: monospace; /* To match your menu style */
       }
       
       .mix-container:hover .mix-title {
@@ -982,64 +828,68 @@
       }
     }
 
-    /* Animation for staggered appearance */
-    @keyframes fadeSlideIn {
-      from {
-        opacity: 0;
-        transform: translateY(20px) rotate(0deg);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0) rotate(var(--rotation));
-      }
-    }
-
-    @media (min-width: 769px) {
-      /* Menu overlap prevention - add padding on left side */
-      .archive-gallery {
-        padding-left: 200px; /* Make space for the menu */
-        padding-right: 20px; /* Default right padding */
-        box-sizing: border-box;
-      }
-      
-      /* Adjust the gallery container to use full available width */
-      .archive-gallery .gallery-container {
-        max-width: 100%; /* Use full width */
-        margin-left: 0;
-      }
-      
-      /* Optional: Add a bit more spacing between gallery items on desktop */
-      .album-images {
-        gap: 10px; /* Increased gap for better visual spacing on desktop */
-      }
-    }
-    
-    /* Increase menu typography size on PC only */
-    .menu-item {
-      color: #ffff00; /* Yellow text color */
-      font-size: 22px; /* Increased from 18px */
-      text-decoration: none;
-      transition: all 0.4s ease;
-      font-family: monospace;
-      opacity: 0.9;
-      display: inline-block;
-    }
-
-    .menu-item.active {
-      font-size: 28px; /* Increased from 24px */
-      font-weight: bold;
-      opacity: 1;
-      transform: translateX(5px);
-    }
-
-    /* Keep original sizes on mobile */
+    /* ==========================================
+      MOBILE STYLES (max-width: 768px)
+      ========================================== */
     @media (max-width: 768px) {
+      /* Menu Typography - Mobile */
       .menu-item {
         font-size: 18px; /* Original size for mobile */
       }
       
       .menu-item.active {
         font-size: 24px; /* Original size for mobile */
+      }
+      
+      /* Archive Gallery - Mobile */
+      .album-images {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 0px;
+      }
+      
+      .album-title {
+        font-size: 18px;
+      }
+
+      .album-image {
+        margin: -5px;
+      }
+      
+      .album-image img {
+        max-width: 180px;
+        max-height: 180px;
+      }
+      
+      .archive-gallery {
+        padding: 60px 10px 70px 10px; /* Add bigger bottom padding (70px) to make room for menu */
+        height: calc(100% - 64px); /* Reduce height to leave space for menu */
+        bottom: 64px; /* Position above the menu bar */
+        max-height: calc(100% - 64px); /* Set max height to ensure visibility of menu */
+      }
+      
+      /* Mixes Gallery - Mobile */
+      .mixes-gallery {
+        padding: 60px 10px 70px 10px; /* Add bigger bottom padding (70px) to make room for menu */
+        height: calc(100% - 64px); /* Reduce height to leave space for menu */
+        bottom: 64px; /* Position above the menu bar */
+        max-height: calc(100% - 64px); /* Set max height to ensure visibility of menu */
+        box-sizing: border-box; /* Ensure padding is included in height calculation */
+      }
+      
+      /* Improve padding and spacing for mix containers on mobile */
+      .mix-container {
+        margin-bottom: 40px; /* Increase space between mixes */
+        padding-bottom: 10px; /* Add some padding at bottom */
+      }
+      
+      /* Ensure the last mix doesn't get cut off */
+      .mix-container:last-child {
+        margin-bottom: 80px; /* Extra space at the end of the list */
+      }
+      
+      /* Ensure Soundcloud embeds are fully visible */
+      .soundcloud-embed {
+        margin-bottom: 15px;
       }
     }
   </style>
