@@ -502,144 +502,38 @@
     }
 
     /* Album images grid */
-    /* Album images container - improved layout for desktop only */
     .album-images {
-      display: flex;
-      flex-wrap: wrap;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
+      gap: 4px;
       background-color: transparent;
-      position: relative;
-      padding: 20px 0; /* Keep original padding */
-      margin: 0 -8px; /* Keep original margin */
-      gap: 0; /* Remove gap */
-      pointer-events: auto;
+      pointer-events: auto; /* Ensure images are clickable */
     }
 
-    /* Individual image containers - basic settings */
+    /* Individual image containers */
     .album-image {
-      position: relative;
-      flex: 0 0 auto;
-      transform-origin: center;
-      transition: transform 0.3s ease, z-index 0.1s;
-      z-index: 1;
-      pointer-events: auto;
-    }
-
-    /* Image itself - natural aspect ratio */
-    .album-image img {
-      display: block;
-      position: relative; /* Changed from absolute positioning */
-      top: auto;
-      left: auto;
       width: 100%;
-      height: auto; /* Maintain aspect ratio */
-      object-fit: contain; /* Ensure no cropping */
-      box-shadow: 0 3px 10px rgba(0,0,0,0.2); /* Keep original shadow */
-      border: 2px solid rgba(255, 255, 255, 0.8);
-      background-color: #111;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      height: 0;
+      padding-bottom: 75%;
+      position: relative;
+      overflow: hidden;
+      background-color: transparent;
+      pointer-events: auto; /* Ensure image containers are clickable */
     }
 
-    /* Desktop version only: intelligent layout */
-    @media (min-width: 769px) {
-      .album-image {
-        width: calc(25% - 30px); /* 4 per row with spacing */
-        margin: 15px; /* Positive margin creates spacing */
-      }
-      
-      /* Smarter layout with slight staggering */
-      .album-image:nth-child(5n+1) {
-        transform: translateY(-8px) rotate(-1.5deg);
-      }
-      
-      .album-image:nth-child(5n+2) {
-        transform: translateY(8px) rotate(1deg);
-      }
-      
-      .album-image:nth-child(5n+3) {
-        transform: translateY(-4px) rotate(-0.8deg);
-      }
-      
-      .album-image:nth-child(5n+4) {
-        transform: translateY(12px) rotate(1.5deg);
-      }
-      
-      .album-image:nth-child(5n+5) {
-        transform: translateY(0px) rotate(-0.5deg);
-      }
-      
-      /* Menu overlap prevention - keep your original settings */
-      .archive-gallery {
-        padding-left: 200px; /* Make space for the menu */
-        padding-right: 20px; /* Default right padding */
-        box-sizing: border-box;
-      }
-      
-      .archive-gallery .gallery-container {
-        max-width: 100%; /* Use full width */
-        margin-left: 0;
-      }
-    }
-
-    /* IMPORTANT: Keep your original mobile layout settings unchanged */
-    @media (max-width: 768px) {
-      .album-images {
-        padding: 10px 0;
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-        gap: 0px;
-      }
-      
-      .album-image {
-        width: calc(50% - 10px);
-        margin: -5px;
-        padding: 5px;
-      }
-      
-      .album-image:nth-child(5n+1) { transform: rotate(-1deg); }
-      .album-image:nth-child(5n+2) { transform: rotate(1deg); }
-      .album-image:nth-child(5n+3) { transform: rotate(-0.5deg); }
-      .album-image:nth-child(5n+4) { transform: rotate(0.8deg); }
-      .album-image:nth-child(5n+5) { transform: rotate(-0.8deg); }
-      
-      .album-title {
-        font-size: 18px;
-      }
-      
-      .archive-gallery {
-        padding: 60px 10px 70px 10px; /* Add bigger bottom padding (70px) to make room for menu */
-        height: calc(100% - 64px); /* Reduce height to leave space for menu */
-        bottom: 64px; /* Position above the menu bar */
-        max-height: calc(100% - 64px); /* Set max height to ensure visibility of menu */
-      }
-    }
-
-    /* Hover effects */
-    .album-image:hover {
-      z-index: 100; /* Bring way forward */
-      transform: scale(1.05) rotate(0deg) !important; /* Straighten and enlarge */
+    .album-image img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s ease;
+      border: 1px solid rgba(255, 255, 255, 0.2); /* Subtle border to define image boundaries */
     }
 
     .album-image:hover img {
-      box-shadow: 0 8px 20px rgba(0,0,0,0.4);
-    }
-
-    /* Optional animation for desktop only */
-    @media (min-width: 769px) {
-      @keyframes fadeSlideIn {
-        from {
-          opacity: 0;
-          transform: translateY(15px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(var(--y-offset, 0)) rotate(var(--rotation, 0deg));
-        }
-      }
-
-      .album-image {
-        animation: fadeSlideIn 0.5s ease forwards;
-        animation-delay: calc(var(--i, 0) * 0.05s);
-        opacity: 0;
-      }
+      transform: scale(1.05);
     }
 
     .gallery-close:hover {
@@ -3100,11 +2994,10 @@
       }
 
       // Function to load archive content from the server
-      // Function to load archive content from the server
       async function loadArchiveContent() {
         try {
           // Show loading state
-          galleryContainer.innerHTML = '<div style="color: white; text-align: center; padding: 50px;">Fetching archives...</div>';
+          galleryContainer.innerHTML = '<div style="color: white; text-align: center; padding: 50px;">Loading archives...</div>';
           
           // Fetch albums from the server
           const response = await fetch('/api/archives');
@@ -3129,9 +3022,6 @@
           
           // Setup click events for the images
           setupImageClickEvents();
-          
-          // NEW: Optimize the layout after images have loaded
-          optimizeGalleryLayout();
         } catch (error) {
           console.error('Error loading archives:', error);
           galleryContainer.innerHTML = '<div style="color: white; text-align: center; padding: 50px;">Error loading archives. Please try again later.</div>';
@@ -3151,22 +3041,14 @@
         const imagesContainer = document.createElement('div');
         imagesContainer.className = 'album-images';
         
-        album.images.forEach((image, index) => {
+        album.images.forEach(image => {
           const imageContainer = document.createElement('div');
           imageContainer.className = 'album-image';
           
-          // Only on desktop, set animation delay and index property
-          if (window.innerWidth >= 769) {
-            imageContainer.style.setProperty('--i', index);
-            // Set z-index based on position
-            imageContainer.style.zIndex = 10 + index;
-          }
-          
           const img = document.createElement('img');
-          img.setAttribute('data-src', image.src); // For lazy loading
-          img.alt = image.alt || '';
-          
-          // Add placeholder until the image loads
+          img.setAttribute('data-src', image.src); // Use data-src for lazy loading
+          img.alt = image.alt;
+          // Add a placeholder until the image loads
           img.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1"%3E%3C/svg%3E';
           
           imageContainer.appendChild(img);
@@ -3179,6 +3061,7 @@
 
       // Function to setup lazy loading for images
       function setupLazyLoading() {
+        // Use Intersection Observer API for modern browsers
         if ('IntersectionObserver' in window) {
           const lazyImageObserver = new IntersectionObserver(entries => {
             entries.forEach(entry => {
@@ -3187,84 +3070,27 @@
                 const src = lazyImage.getAttribute('data-src');
                 
                 if (src) {
-                  // Create fade-in effect
-                  lazyImage.style.opacity = '0';
                   lazyImage.src = src;
-                  
-                  // Smooth fade in once loaded
-                  lazyImage.onload = () => {
-                    lazyImage.style.transition = 'opacity 0.5s ease';
-                    lazyImage.style.opacity = '1';
-                    lazyImage.removeAttribute('data-src');
-                    
-                    // Optional: adjust positioning based on loaded content
-                    const container = lazyImage.closest('.album-image');
-                    if (container) {
-                      // Fine-tune position once we know the true dimensions
-                      const aspectRatio = lazyImage.width / lazyImage.height;
-                      container.dataset.aspectRatio = aspectRatio.toFixed(2);
-                    }
-                  };
+                  lazyImage.removeAttribute('data-src');
                 }
                 
                 lazyImageObserver.unobserve(lazyImage);
               }
             });
-          }, {
-            rootMargin: '100px', // Start loading when within 100px of viewport
-            threshold: 0.1
           });
           
           // Observe all lazy images
           const lazyImages = document.querySelectorAll('img[data-src]');
           lazyImages.forEach(img => lazyImageObserver.observe(img));
         } else {
-          // Fallback for browsers without IntersectionObserver
+          // Fallback for browsers that don't support Intersection Observer
+          // Just load all images immediately
           const lazyImages = document.querySelectorAll('img[data-src]');
           lazyImages.forEach(img => {
             img.src = img.getAttribute('data-src');
             img.removeAttribute('data-src');
           });
         }
-      }
-
-      function optimizeGalleryLayout() {
-        const albums = document.querySelectorAll('.album');
-        
-        albums.forEach(album => {
-          const images = album.querySelectorAll('.album-image');
-          
-          // Wait a bit to make sure images have loaded
-          setTimeout(() => {
-            // Apply small random adjustments to positions to avoid rigid look
-            images.forEach((imgContainer, i) => {
-              // Create slight variations in vertical offset from base positions
-              // to make the layout feel more organic
-              const yVariation = Math.random() * 10 - 5; // -5px to +5px
-              
-              // Get original transform information
-              const style = window.getComputedStyle(imgContainer);
-              const transform = style.transform || style.webkitTransform;
-              
-              // Extract current rotation if present
-              let rotation = 0;
-              if (transform !== 'none') {
-                const match = transform.match(/rotate\(([^)]+)\)/);
-                if (match && match[1]) {
-                  rotation = parseFloat(match[1]);
-                }
-              }
-              
-              // Apply a custom transform that includes the y-variation and original rotation
-              // This maintains the rotation while adjusting vertical position
-              const row = Math.floor(i / 4);
-              const baseOffset = row % 2 === 0 ? -5 : 5;
-              const finalOffset = baseOffset + yVariation;
-              
-              imgContainer.style.transform = `translateY(${finalOffset}px) rotate(${rotation}deg)`;
-            });
-          }, 1000); // Wait 1 second after gallery creation
-        });
       }
 
       // Function to set up click events for opening the fullscreen viewer
