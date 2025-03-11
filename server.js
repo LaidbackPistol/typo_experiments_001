@@ -53,6 +53,27 @@ app.get('/api/archives', (req, res) => {
   }
 });
 
+// NEW API endpoint to get all mixes
+app.get('/api/mixes', (req, res) => {
+  const mixesPath = path.join(__dirname, 'public', 'mixes.json');
+  
+  // Check if mixes.json file exists
+  if (!fs.existsSync(mixesPath)) {
+    return res.json({ mixes: [] });
+  }
+  
+  try {
+    // Read the mixes JSON file
+    const mixesData = fs.readFileSync(mixesPath, 'utf8');
+    const mixes = JSON.parse(mixesData);
+    
+    res.json(mixes);
+  } catch (error) {
+    console.error('Error reading mixes data:', error);
+    res.status(500).json({ error: 'Failed to read mixes data' });
+  }
+});
+
 // For Vercel, we need to export the Express app
 if (process.env.VERCEL) {
   // Handle all other routes by redirecting to index.html for SPA behavior
