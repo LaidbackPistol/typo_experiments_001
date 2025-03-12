@@ -34,12 +34,12 @@
       z-index: -1; /* Default: behind everything */
     }
 
-    /* When fullscreen viewer is active, we'll change this via JavaScript */
-    .fullscreen-viewer.active + #canvas-container {
+    /* NEW RULE: When fullscreen viewer is active, move canvas up in z-index */
+    .fullscreen-viewer.active ~ #canvas-container {
       z-index: 290 !important; /* Just below the fullscreen viewer */
     }
 
-    /* When the fullscreen viewer is active, hide other page elements */
+    /* NEW RULE: When the fullscreen viewer is active, hide other page elements */
     .fullscreen-viewer.active ~ .archive-gallery {
       visibility: hidden;
     }
@@ -604,9 +604,9 @@
     }
 
     /* ==========================================
-      FULLSCREEN VIEWER
+      FULLSCREEN VIEWER - UPDATED
       ========================================== */
-      .fullscreen-viewer {
+    .fullscreen-viewer {
       position: fixed;
       top: 0;
       left: 0;
