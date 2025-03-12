@@ -605,25 +605,48 @@
 
     /* ==========================================
       FULLSCREEN VIEWER - UPDATED
-      ========================================== */
-    .fullscreen-viewer {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: transparent; /* Completely transparent background */
-      z-index: 300; /* Very high z-index to be on top */
-      display: none;
-      align-items: center;
-      justify-content: center;
+    ========================================== */
+      .fullscreen-viewer {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: transparent; /* Completely transparent background */
+        z-index: 300;
+        display: none;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .fullscreen-viewer.active {
+        display: flex;
+      }
+
+      /* When fullscreen viewer is active, move canvas container up in the stacking order */
+    .fullscreen-viewer.active ~ #canvas-container,
+    body.fullscreen-mode #canvas-container {
+      z-index: 290 !important; /* Just below the fullscreen viewer */
     }
 
-    .fullscreen-viewer.active {
-      display: flex;
+    /* When in fullscreen mode, hide UI elements except for the viewer */
+    body.fullscreen-mode .menu-container,
+    body.fullscreen-mode .text-input,
+    body.fullscreen-mode .controls,
+    body.fullscreen-mode .toggle-controls-panel,
+    body.fullscreen-mode .preset-panel,
+    body.fullscreen-mode .toggle-preset-panel,
+    body.fullscreen-mode .archive-gallery,
+    body.fullscreen-mode .mixes-gallery {
+      visibility: hidden !important;
     }
 
-    /* Enhance the viewer controls for better visibility against the animated background */
+    /* Make sure the fullscreen viewer is always visible */
+    body.fullscreen-mode .fullscreen-viewer {
+      visibility: visible !important;
+    }
+
+    /* Viewer controls styling for better visibility */
     .viewer-controls {
       position: absolute;
       top: 0;
@@ -633,7 +656,7 @@
       justify-content: space-between;
       padding: 20px;
       box-sizing: border-box;
-      z-index: 301; /* Slightly higher than the viewer */
+      z-index: 301; /* Above the viewer */
     }
 
     .viewer-controls button {
@@ -684,7 +707,7 @@
       align-items: center;
       justify-content: center;
       position: relative;
-      z-index: 300; /* Same as the viewer */
+      z-index: 300;
     }
 
     .viewer-image {
@@ -708,7 +731,7 @@
       font-family: monospace;
       border-radius: 4px;
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-      z-index: 301; /* Ensure it's above the image */
+      z-index: 301; /* Above the image */
     }
 
     /* ==========================================
@@ -3387,311 +3410,149 @@
         archiveGallery.classList.add('active');
       }
     });
-  </script>
- <!-- Add this script at the very end of your HTML file, right before the closing </body> tag -->
-<script>
-  // Self-executing function to avoid conflicts
-  (function() {
-    console.log("Persistent fullscreen implementation starting");
-    
-    // Get references to key elements
-    const typographyCanvas = document.getElementById('typography-canvas');
-    const feedbackCanvas = document.getElementById('feedback-canvas');
-    const canvasContainer = document.getElementById('canvas-container');
-    const fullscreenViewer = document.getElementById('fullscreen-viewer');
-    const viewerImageContainer = fullscreenViewer.querySelector('.viewer-image-container');
-    const archiveGallery = document.getElementById('archive-gallery');
-    
-    // Flag to track whether our handlers have been applied
-    let handlersApplied = false;
-    
-    // Custom function to open the fullscreen viewer
-    function openFullscreenViewer(imageSrc, imageAlt, currentIndex, allImages) {
-      console.log("Opening fullscreen viewer with canvas backdrop");
-      
-      // Set the viewer image
+
+    function setupFullscreenViewer() {
+      // Cache DOM elements
+      const body = document.body;
+      const fullscreenViewer = document.getElementById('fullscreen-viewer');
+      const archiveGallery = document.getElementById('archive-gallery');
       const viewerImage = fullscreenViewer.querySelector('.viewer-image');
-      viewerImage.src = imageSrc;
-      viewerImage.alt = imageAlt || '';
-      
-      // Handle image caption
-      let caption = fullscreenViewer.querySelector('.image-caption');
-      if (imageAlt) {
-        if (!caption) {
-          // Create caption if it doesn't exist
-          caption = document.createElement('div');
-          caption.className = 'image-caption';
-          viewerImageContainer.appendChild(caption);
-        }
-        caption.textContent = imageAlt;
-        caption.style.display = 'block';
-      } else if (caption) {
-        caption.style.display = 'none';
-      }
-      
-      // Store gallery data for navigation
-      window.currentGalleryImages = allImages;
-      window.currentImageIndex = currentIndex;
-      
-      // Hide the archive gallery
-      if (archiveGallery) {
-        archiveGallery.style.display = 'none';
-      }
-      
-      // Hide all other page UI elements
-      document.querySelectorAll('.menu-container, .text-input, .controls, .toggle-controls-panel, .preset-panel, .toggle-preset-panel, .mixes-gallery')
-        .forEach(el => {
-          el.style.visibility = 'hidden';
-        });
-      
-      // Make sure the canvas container is directly behind the fullscreen viewer
-      canvasContainer.style.zIndex = '299';
-      
-      // Show the fullscreen viewer
-      fullscreenViewer.classList.add('active');
-      fullscreenViewer.style.backgroundColor = 'transparent';
-    }
-    
-    // Function to close the fullscreen viewer
-    function closeFullscreenViewer() {
-      console.log("Closing fullscreen viewer");
-      
-      // Hide the fullscreen viewer
-      fullscreenViewer.classList.remove('active');
-      
-      // Reset the canvas container z-index
-      canvasContainer.style.zIndex = '-1';
-      
-      // Show the archive gallery again
-      if (archiveGallery) {
-        archiveGallery.style.display = '';
-      }
-      
-      // Show all other page UI elements
-      document.querySelectorAll('.menu-container, .text-input, .controls, .toggle-controls-panel, .preset-panel, .toggle-preset-panel, .mixes-gallery')
-        .forEach(el => {
-          el.style.visibility = '';
-        });
-    }
-    
-    // Use event delegation for album image clicks
-    function handleAlbumImageClick(e) {
-      // Find if we clicked on an album image
-      let target = e.target;
-      let imageContainer = null;
-      
-      // Walk up the DOM to find the album-image container
-      while (target && target !== document) {
-        if (target.classList && target.classList.contains('album-image')) {
-          imageContainer = target;
-          break;
-        }
-        target = target.parentNode;
-      }
-      
-      // If we didn't find an album-image, ignore this click
-      if (!imageContainer) return;
-      
-      // Prevent default handling and stop propagation
-      e.preventDefault();
-      e.stopPropagation();
-      
-      const albumElement = imageContainer.closest('.album');
-      if (!albumElement) {
-        console.error("Could not find parent album element");
-        return;
-      }
-      
-      const thisImg = imageContainer.querySelector('img');
-      if (!thisImg) {
-        console.error("No image found in container");
-        return;
-      }
-      
-      // Get all images in this album
-      const allImagesElements = albumElement.querySelectorAll('.album-image img');
-      
-      // Get image source, either from data-src (for lazy loaded images) or src
-      const imgSrc = thisImg.getAttribute('data-src') || thisImg.src;
-      const imgAlt = thisImg.alt || '';
-      
-      // Collect all images for navigation
-      const allImages = Array.from(allImagesElements).map(img => ({
-        src: img.getAttribute('data-src') || img.src,
-        alt: img.alt || ''
-      }));
-      
-      // Find the index of the current image
-      const currentIndex = Array.from(albumElement.querySelectorAll('.album-image')).indexOf(imageContainer);
-      
-      // Open the fullscreen viewer with this image and all images for navigation
-      openFullscreenViewer(imgSrc, imgAlt, currentIndex, allImages);
-    }
-    
-    // Monitor changes to the 'archives' menu item to detect when we return to the archives section
-    function monitorArchivesSection() {
-      // Find the archives menu item
-      const archivesMenuItem = document.querySelector('.menu-item[data-section="archives"]');
-      
-      if (archivesMenuItem) {
-        // Create a MutationObserver to watch for class changes
-        const observer = new MutationObserver(mutations => {
-          mutations.forEach(mutation => {
-            if (mutation.attributeName === 'class') {
-              // If the archives section becomes active, ensure our handlers are set up
-              if (archivesMenuItem.classList.contains('active')) {
-                console.log("Archives section activated - ensuring handlers are set up");
-                setupFullscreenHandlers();
-              }
-            }
-          });
-        });
-        
-        // Start observing class changes on the archives menu item
-        observer.observe(archivesMenuItem, { attributes: true });
-      }
-    }
-    
-    // Also monitor the archive gallery for changes
-    function monitorArchiveGallery() {
-      if (archiveGallery) {
-        // Create a MutationObserver to watch for content changes
-        const observer = new MutationObserver(mutations => {
-          // If the archive gallery content changes, ensure our handlers are set up
-          console.log("Archive gallery content changed - ensuring handlers are set up");
-          setupFullscreenHandlers();
-        });
-        
-        // Start observing the archive gallery for content changes
-        observer.observe(archiveGallery, { 
-          childList: true, 
-          subtree: true 
-        });
-      }
-    }
-    
-    // Set up handlers for the fullscreen viewer
-    function setupFullscreenHandlers() {
-      // Set up event delegation for album image clicks
-      document.removeEventListener('click', handleAlbumImageClick); // Remove to avoid duplicates
-      document.addEventListener('click', handleAlbumImageClick);
-      
-      // Set up close button handler
+      const viewerImageContainer = fullscreenViewer.querySelector('.viewer-image-container');
       const closeButton = fullscreenViewer.querySelector('.close-button');
-      if (closeButton) {
-        closeButton.onclick = closeFullscreenViewer;
-      }
-      
-      // Set up navigation buttons
       const prevButton = fullscreenViewer.querySelector('.prev-button');
-      if (prevButton) {
-        prevButton.onclick = () => {
-          if (!window.currentGalleryImages || !window.currentGalleryImages.length) return;
-          
-          window.currentImageIndex = (window.currentImageIndex - 1 + window.currentGalleryImages.length) % window.currentGalleryImages.length;
-          const currentImage = window.currentGalleryImages[window.currentImageIndex];
-          
-          const viewerImage = fullscreenViewer.querySelector('.viewer-image');
-          viewerImage.src = currentImage.src;
-          viewerImage.alt = currentImage.alt || '';
-          
-          // Update caption
-          const caption = fullscreenViewer.querySelector('.image-caption');
-          if (caption) {
-            if (currentImage.alt) {
-              caption.textContent = currentImage.alt;
-              caption.style.display = 'block';
-            } else {
-              caption.style.display = 'none';
-            }
-          }
-        };
-      }
-      
       const nextButton = fullscreenViewer.querySelector('.next-button');
-      if (nextButton) {
-        nextButton.onclick = () => {
-          if (!window.currentGalleryImages || !window.currentGalleryImages.length) return;
-          
-          window.currentImageIndex = (window.currentImageIndex + 1) % window.currentGalleryImages.length;
-          const currentImage = window.currentGalleryImages[window.currentImageIndex];
-          
-          const viewerImage = fullscreenViewer.querySelector('.viewer-image');
-          viewerImage.src = currentImage.src;
-          viewerImage.alt = currentImage.alt || '';
-          
-          // Update caption
-          const caption = fullscreenViewer.querySelector('.image-caption');
-          if (caption) {
-            if (currentImage.alt) {
-              caption.textContent = currentImage.alt;
-              caption.style.display = 'block';
-            } else {
-              caption.style.display = 'none';
-            }
+      
+      // Shared gallery state
+      let currentGalleryImages = [];
+      let currentImageIndex = 0;
+      
+      // Open fullscreen viewer with the specified image
+      function openViewer(imageSrc, imageAlt, index, allImages) {
+        // Set image properties
+        viewerImage.src = imageSrc;
+        viewerImage.alt = imageAlt || '';
+        
+        // Set navigation state
+        currentGalleryImages = allImages;
+        currentImageIndex = index;
+        
+        // Update caption
+        updateCaption(imageAlt);
+        
+        // Add fullscreen mode class to body for CSS targeting
+        body.classList.add('fullscreen-mode');
+        
+        // Show viewer
+        fullscreenViewer.classList.add('active');
+      }
+      
+      // Close the fullscreen viewer
+      function closeViewer() {
+        fullscreenViewer.classList.remove('active');
+        body.classList.remove('fullscreen-mode');
+      }
+      
+      // Update or create the image caption
+      function updateCaption(text) {
+        let caption = fullscreenViewer.querySelector('.image-caption');
+        
+        if (text) {
+          if (!caption) {
+            caption = document.createElement('div');
+            caption.className = 'image-caption';
+            viewerImageContainer.appendChild(caption);
           }
-        };
+          caption.textContent = text;
+          caption.style.display = 'block';
+        } else if (caption) {
+          caption.style.display = 'none';
+        }
       }
       
-      // Mark that handlers have been applied
-      handlersApplied = true;
+      // Navigate to previous image
+      function showPreviousImage() {
+        if (!currentGalleryImages.length) return;
+        
+        currentImageIndex = (currentImageIndex - 1 + currentGalleryImages.length) % currentGalleryImages.length;
+        const image = currentGalleryImages[currentImageIndex];
+        
+        viewerImage.src = image.src;
+        viewerImage.alt = image.alt || '';
+        updateCaption(image.alt);
+      }
+      
+      // Navigate to next image
+      function showNextImage() {
+        if (!currentGalleryImages.length) return;
+        
+        currentImageIndex = (currentImageIndex + 1) % currentGalleryImages.length;
+        const image = currentGalleryImages[currentImageIndex];
+        
+        viewerImage.src = image.src;
+        viewerImage.alt = image.alt || '';
+        updateCaption(image.alt);
+      }
+      
+      // Event delegation for album image clicks
+      archiveGallery.addEventListener('click', function(e) {
+        // Find if we clicked on an album image
+        let target = e.target;
+        
+        // Walk up the DOM to find the album-image container
+        while (target && target !== this) {
+          if (target.classList && target.classList.contains('album-image')) {
+            e.preventDefault();
+            
+            const albumElement = target.closest('.album');
+            const thisImg = target.querySelector('img');
+            
+            if (!thisImg || !albumElement) return;
+            
+            // Get image source (either from data-src or src)
+            const imgSrc = thisImg.getAttribute('data-src') || thisImg.src;
+            const imgAlt = thisImg.alt || '';
+            
+            // Get all images in this album for navigation
+            const allImagesElements = albumElement.querySelectorAll('.album-image img');
+            const allImages = Array.from(allImagesElements).map(img => ({
+              src: img.getAttribute('data-src') || img.src,
+              alt: img.alt || ''
+            }));
+            
+            // Find the index of the current image
+            const index = Array.from(albumElement.querySelectorAll('.album-image')).indexOf(target);
+            
+            // Open viewer with this image
+            openViewer(imgSrc, imgAlt, index, allImages);
+            return;
+          }
+          target = target.parentNode;
+        }
+      });
+      
+      // Add click handlers for navigation buttons
+      closeButton.addEventListener('click', closeViewer);
+      prevButton.addEventListener('click', showPreviousImage);
+      nextButton.addEventListener('click', showNextImage);
+      
+      // Keyboard navigation
+      document.addEventListener('keydown', function(e) {
+        if (!fullscreenViewer.classList.contains('active')) return;
+        
+        if (e.key === 'Escape') {
+          closeViewer();
+        } else if (e.key === 'ArrowLeft') {
+          showPreviousImage();
+        } else if (e.key === 'ArrowRight') {
+          showNextImage();
+        }
+      });
     }
-    
-    // Add CSS for the caption
-    const style = document.createElement('style');
-    style.textContent = `
-      .image-caption {
-        position: absolute;
-        bottom: 20px;
-        left: 0;
-        width: 100%;
-        text-align: center;
-        color: white;
-        padding: 10px;
-        background: rgba(0, 0, 0, 0.7);
-        font-family: monospace;
-        border-radius: 4px;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-        z-index: 301;
-      }
-    `;
-    document.head.appendChild(style);
-    
-    // Handle keyboard controls
-    document.addEventListener('keydown', e => {
-      if (!fullscreenViewer.classList.contains('active')) return;
-      
-      if (e.key === 'Escape') {
-        closeFullscreenViewer();
-      } else if (e.key === 'ArrowLeft') {
-        const prevButton = fullscreenViewer.querySelector('.prev-button');
-        if (prevButton) prevButton.click();
-      } else if (e.key === 'ArrowRight') {
-        const nextButton = fullscreenViewer.querySelector('.next-button');
-        if (nextButton) nextButton.click();
-      }
+
+    // Initialize when DOM is ready
+    document.addEventListener('DOMContentLoaded', function() {
+      setupFullscreenViewer();
     });
-    
-    // Make sure the fullscreen viewer background is transparent
-    fullscreenViewer.style.backgroundColor = 'transparent';
-    
-    // Set up the initial handlers
-    setupFullscreenHandlers();
-    
-    // Set up observers to monitor for changes
-    monitorArchivesSection();
-    monitorArchiveGallery();
-    
-    // Also periodically check if we need to reapply handlers
-    setInterval(() => {
-      if (archiveGallery && archiveGallery.classList.contains('active') && !handlersApplied) {
-        console.log("Periodic check - ensuring handlers are set up");
-        setupFullscreenHandlers();
-      }
-    }, 2000);
-    
-    console.log("Persistent fullscreen implementation completed");
-  })();
   </script>
 </body>
 </html>
