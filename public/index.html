@@ -1186,6 +1186,95 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
+      // Design Mode Control - toggle between design tools and production view
+      let designMode = localStorage.getItem('designMode') !== 'false'; // Default to true unless explicitly set to false
+
+      // Function to toggle design mode
+      function toggleDesignMode() {
+        designMode = !designMode;
+        
+        // Save setting to localStorage
+        localStorage.setItem('designMode', designMode);
+        
+        // Update UI elements visibility
+        updateDesignModeUI();
+        
+        // Show notification
+        showNotification(designMode ? 'Design Mode Activated' : 'Production Mode Activated');
+      }
+
+      // Function to update UI based on current mode
+      function updateDesignModeUI() {
+        // Elements to hide in production mode
+        const designElements = [
+          document.querySelector('.toggle-preset-panel'),       // P button
+          document.querySelector('.preset-panel'),              // Presets panel
+          document.querySelector('.toggle-controls-panel'),     // C button
+          document.querySelector('.controls'),                  // Controls panel 
+          document.querySelector('.text-input')                 // Text input field
+        ];
+        
+        // Hide/show design elements based on current mode
+        designElements.forEach(el => {
+          if (el) {
+            el.style.display = designMode ? '' : 'none';
+          }
+        });
+        
+        // Update the body class for potential CSS styling
+        if (designMode) {
+          document.body.classList.add('design-mode');
+          document.body.classList.remove('production-mode');
+        } else {
+          document.body.classList.add('production-mode');
+          document.body.classList.remove('design-mode');
+        }
+      }
+
+      // Add keyboard shortcut (Ctrl+Shift+D) to toggle design mode
+      document.addEventListener('keydown', (e) => {
+        if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'd') {
+          toggleDesignMode();
+          e.preventDefault(); // Prevent browser's default action
+        }
+      });
+
+      // Create a tiny hidden button in the corner for touch devices
+      function createDesignModeToggleButton() {
+        const toggleButton = document.createElement('div');
+        toggleButton.id = 'design-mode-toggle';
+        toggleButton.style.cssText = `
+          position: fixed;
+          bottom: 5px;
+          left: 5px;
+          width: 15px;
+          height: 15px;
+          background-color: rgba(0, 0, 0, 0.3);
+          border-radius: 50%;
+          z-index: 9999;
+          cursor: pointer;
+          opacity: 0.3;
+        `;
+        
+        toggleButton.addEventListener('click', (e) => {
+          // Require triple click to toggle (to prevent accidental activation)
+          if (e.detail === 3) {
+            toggleDesignMode();
+          }
+        });
+        
+        document.body.appendChild(toggleButton);
+      }
+
+      // Initialize design mode
+      function initDesignMode() {
+        createDesignModeToggleButton();
+        updateDesignModeUI();
+      }
+
+      // Call initialization function immediately
+      initDesignMode();
+
       // Elements
       const canvas = document.getElementById('typography-canvas');
       const ctx = canvas.getContext('2d');
