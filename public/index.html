@@ -3389,95 +3389,173 @@
     });
   
     // This code properly implements the fullscreen viewer with only the typography canvas in the background
+  </script>
 
-    // This code properly implements the fullscreen viewer with only the typography canvas in the background
-    document.addEventListener('DOMContentLoaded', () => {
-      // Get reference to key elements
-      const fullscreenViewer = document.getElementById('fullscreen-viewer');
-      const canvasContainer = document.getElementById('canvas-container');
-      const archiveGallery = document.getElementById('archive-gallery');
-      const typographyCanvas = document.getElementById('typography-canvas');
-      const feedbackCanvas = document.getElementById('feedback-canvas');
+<script>
+  // Self-executing function to avoid conflicts
+  (function() {
+    console.log("Fullscreen fix script running");
+    
+    // Override the setupImageClickEvents function
+    const originalSetupImageClickEvents = window.setupImageClickEvents;
+    
+    window.setupImageClickEvents = function() {
+      console.log("Setting up enhanced image click events");
       
-      // Original handling functions
-      const originalSetupImageClickEvents = setupImageClickEvents;
-      
-      // Override the image click setup function
-      window.setupImageClickEvents = function() {
-        document.querySelectorAll('.album-image').forEach((imageContainer) => {
-          imageContainer.addEventListener('click', (e) => {
-            // Find which album this image belongs to
-            const albumElement = e.currentTarget.closest('.album');
-            const allImages = albumElement.querySelectorAll('.album-image img');
-            
-            // Collect image data
-            currentGalleryImages = Array.from(allImages).map(img => ({
-              src: img.getAttribute('data-src') || img.src,
-              alt: img.alt
-            }));
-            
-            // Set current index
-            currentImageIndex = Array.from(albumElement.querySelectorAll('.album-image')).indexOf(e.currentTarget);
-            
-            // Update and show viewer
-            updateViewerImage();
-            
-            // Show fullscreen viewer
-            fullscreenViewer.classList.add('active');
-            
-            // Show only the typography canvas behind the viewer
-            if (canvasContainer) {
-              // Move the canvas container to be directly behind the fullscreen viewer
-              canvasContainer.style.zIndex = "290";
-              
-              // Make sure the feedback and typography canvases are visible
-              if (typographyCanvas) typographyCanvas.style.zIndex = "0";
-              if (feedbackCanvas) feedbackCanvas.style.zIndex = "-1";
-            }
-            
-            // Hide the archive gallery content but keep the viewer visible
-            if (archiveGallery) {
-              archiveGallery.style.visibility = "hidden";
-            }
-          });
-        });
-      };
-      
-      // Handle fullscreen viewer closing
-      const closeViewerButton = fullscreenViewer.querySelector('.close-button');
-      if (closeViewerButton) {
-        closeViewerButton.addEventListener('click', () => {
-          closeFullscreenViewer();
-        });
-      }
-      
-      // Also handle ESC key
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && fullscreenViewer.classList.contains('active')) {
-          closeFullscreenViewer();
-        }
-      });
-      
-      // Function to close the fullscreen viewer and restore normal display
-      function closeFullscreenViewer() {
-        fullscreenViewer.classList.remove('active');
-        
-        // Reset the z-index of canvas container
-        if (canvasContainer) {
-          canvasContainer.style.zIndex = "-1";
-        }
-        
-        // Make archive gallery visible again
-        if (archiveGallery) {
-          archiveGallery.style.visibility = "visible";
-        }
-      }
-      
-      // If the original setupImageClickEvents function exists, call it
-      if (originalSetupImageClickEvents && typeof originalSetupImageClickEvents === 'function') {
+      // Call original if it exists
+      if (typeof originalSetupImageClickEvents === 'function') {
         originalSetupImageClickEvents();
       }
+      
+      // Apply our enhanced version
+      document.querySelectorAll('.album-image').forEach(imageContainer => {
+        // Remove any existing click handlers (clone and replace element)
+        const newContainer = imageContainer.cloneNode(true);
+        imageContainer.parentNode.replaceChild(newContainer, imageContainer);
+        
+        // Add our click handler
+        newContainer.addEventListener('click', e => {
+          e.stopPropagation(); // Prevent any parent handlers from executing
+          
+          const albumElement = newContainer.closest('.album');
+          const allImages = albumElement.querySelectorAll('.album-image img');
+          
+          // Update currentGalleryImages global
+          window.currentGalleryImages = Array.from(allImages).map(img => ({
+            src: img.getAttribute('data-src') || img.src,
+            alt: img.alt
+          }));
+          
+          // Set currentImageIndex global
+          window.currentImageIndex = Array.from(albumElement.querySelectorAll('.album-image')).indexOf(newContainer);
+          
+          // Show the image in the fullscreen viewer
+          const viewer = document.getElementById('fullscreen-viewer');
+          const viewerImage = viewer.querySelector('.viewer-image');
+          
+          // Set the source to the current image
+          const currentImage = window.currentGalleryImages[window.currentImageIndex];
+          viewerImage.src = currentImage.src;
+          viewerImage.alt = currentImage.alt || '';
+          
+          // Add our special class to hide UI elements
+          document.body.classList.add('fullscreen-mode-active');
+          
+          // Show the viewer
+          viewer.classList.add('active');
+          
+          // Make the canvas visible
+          document.getElementById('canvas-container').style.zIndex = "290";
+        });
+      });
+    };
+    
+    // Add our custom CSS
+    const style = document.createElement('style');
+    style.textContent = `
+      /* Hide all UI elements when in fullscreen mode */
+      body.fullscreen-mode-active .menu-container,
+      body.fullscreen-mode-active .text-input,
+      body.fullscreen-mode-active .controls,
+      body.fullscreen-mode-active .toggle-controls-panel,
+      body.fullscreen-mode-active .preset-panel,
+      body.fullscreen-mode-active .toggle-preset-panel,
+      body.fullscreen-mode-active .archive-gallery > *:not(.fullscreen-viewer),
+      body.fullscreen-mode-active .mixes-gallery,
+      body.fullscreen-mode-active .notification {
+        display: none !important;
+      }
+      
+      /* Make fullscreen viewer background transparent */
+      #fullscreen-viewer {
+        background-color: transparent !important;
+      }
+      
+      /* Ensure image stands out */
+      #fullscreen-viewer .viewer-image {
+        box-shadow: 0 0 30px rgba(0, 0, 0, 0.7) !important;
+        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+      }
+    `;
+    document.head.appendChild(style);
+    
+    // Handle closing the fullscreen viewer
+    const closeFullscreenViewer = () => {
+      document.body.classList.remove('fullscreen-mode-active');
+      document.getElementById('fullscreen-viewer').classList.remove('active');
+      document.getElementById('canvas-container').style.zIndex = "-1";
+    };
+    
+    // Add event handlers for close button and ESC key
+    const fullscreenViewer = document.getElementById('fullscreen-viewer');
+    if (fullscreenViewer) {
+      const closeButton = fullscreenViewer.querySelector('.close-button');
+      if (closeButton) {
+        // Remove any existing click handlers
+        const newCloseButton = closeButton.cloneNode(true);
+        closeButton.parentNode.replaceChild(newCloseButton, closeButton);
+        
+        // Add our close handler
+        newCloseButton.addEventListener('click', closeFullscreenViewer);
+      }
+    }
+    
+    // Add ESC key handler
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && document.body.classList.contains('fullscreen-mode-active')) {
+        closeFullscreenViewer();
+      }
     });
+    
+    // Also handle prev/next buttons
+    const prevButton = fullscreenViewer.querySelector('.prev-button');
+    const nextButton = fullscreenViewer.querySelector('.next-button');
+    
+    if (prevButton) {
+      const newPrevButton = prevButton.cloneNode(true);
+      prevButton.parentNode.replaceChild(newPrevButton, prevButton);
+      
+      newPrevButton.addEventListener('click', () => {
+        if (!window.currentGalleryImages || !window.currentGalleryImages.length) return;
+        
+        window.currentImageIndex = (window.currentImageIndex - 1 + window.currentGalleryImages.length) % window.currentGalleryImages.length;
+        const currentImage = window.currentGalleryImages[window.currentImageIndex];
+        
+        const viewerImage = fullscreenViewer.querySelector('.viewer-image');
+        viewerImage.src = currentImage.src;
+        viewerImage.alt = currentImage.alt || '';
+      });
+    }
+    
+    if (nextButton) {
+      const newNextButton = nextButton.cloneNode(true);
+      nextButton.parentNode.replaceChild(newNextButton, nextButton);
+      
+      newNextButton.addEventListener('click', () => {
+        if (!window.currentGalleryImages || !window.currentGalleryImages.length) return;
+        
+        window.currentImageIndex = (window.currentImageIndex + 1) % window.currentGalleryImages.length;
+        const currentImage = window.currentGalleryImages[window.currentImageIndex];
+        
+        const viewerImage = fullscreenViewer.querySelector('.viewer-image');
+        viewerImage.src = currentImage.src;
+        viewerImage.alt = currentImage.alt || '';
+      });
+    }
+    
+    // Run our setup function immediately
+    if (document.readyState === 'loading') {
+      // Document still loading, wait for DOMContentLoaded
+      document.addEventListener('DOMContentLoaded', () => {
+        window.setupImageClickEvents();
+      });
+    } else {
+      // Document already loaded, run immediately
+      window.setupImageClickEvents();
+    }
+    
+    console.log("Fullscreen fix script completed");
+  })();
   </script>
 </body>
 </html>
