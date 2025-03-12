@@ -26,12 +26,22 @@
     }
 
     #canvas-container {
-      position: fixed; /* Changed from absolute to fixed */
+      position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      z-index: -1; /* Default low z-index, will be increased when viewer is active */
+      z-index: -1; /* Default: behind everything */
+    }
+
+    /* When fullscreen viewer is active, we'll change this via JavaScript */
+    .fullscreen-viewer.active + #canvas-container {
+      z-index: 290 !important; /* Just below the fullscreen viewer */
+    }
+
+    /* When the fullscreen viewer is active, hide other page elements */
+    .fullscreen-viewer.active ~ .archive-gallery {
+      visibility: hidden;
     }
 
     #feedback-canvas {
@@ -602,18 +612,18 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent overlay instead of solid black */
-      z-index: 300;
+      background-color: transparent; /* Completely transparent background */
+      z-index: 300; /* Very high z-index to be on top */
       display: none;
       align-items: center;
       justify-content: center;
-      backdrop-filter: blur(3px); /* Optional: adds a slight blur to the background */
     }
 
     .fullscreen-viewer.active {
       display: flex;
     }
 
+    /* Enhance the viewer controls for better visibility against the animated background */
     .viewer-controls {
       position: absolute;
       top: 0;
@@ -623,7 +633,7 @@
       justify-content: space-between;
       padding: 20px;
       box-sizing: border-box;
-      z-index: 301;
+      z-index: 301; /* Slightly higher than the viewer */
     }
 
     .viewer-controls button {
@@ -674,14 +684,16 @@
       align-items: center;
       justify-content: center;
       position: relative;
+      z-index: 300; /* Same as the viewer */
     }
 
     .viewer-image {
-      max-width: 100%;
-      max-height: 100%;
+      max-width: 90%;
+      max-height: 90%;
       object-fit: contain;
       transition: opacity 0.3s ease;
-      filter: drop-shadow(0 0 15px rgba(0, 0, 0, 0.7)); /* Add shadow to help the image stand out */
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.7); /* Strong shadow to help the image stand out */
+      border: 1px solid rgba(255, 255, 255, 0.2); /* Subtle border */
     }
 
     .image-caption {
@@ -696,6 +708,7 @@
       font-family: monospace;
       border-radius: 4px;
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+      z-index: 301; /* Ensure it's above the image */
     }
 
     /* ==========================================
@@ -3375,67 +3388,94 @@
       }
     });
   
+    // This code properly implements the fullscreen viewer with only the typography canvas in the background
+
     document.addEventListener('DOMContentLoaded', () => {
-      // Get the fullscreen viewer element
+      // Get reference to key elements
       const fullscreenViewer = document.getElementById('fullscreen-viewer');
+      const canvasContainer = document.getElementById('canvas-container');
+      const archiveGallery = document.getElementById('archive-gallery');
+      const typographyCanvas = document.getElementById('typography-canvas');
+      const feedbackCanvas = document.getElementById('feedback-canvas');
       
-      // Apply the CSS changes when the fullscreen viewer is opened
-      const originalOpenViewer = updateViewerImage;
+      // Original handling functions
+      const originalSetupImageClickEvents = setupImageClickEvents;
       
-      // Override the updateViewerImage function to add our background modifications
-      window.updateViewerImage = function() {
-        // Call the original function first
-        if (originalOpenViewer) {
-          originalOpenViewer();
-        }
-        
-        // Make sure the canvas is visible behind the fullscreen viewer
-        const canvasContainer = document.getElementById('canvas-container');
-        if (canvasContainer) {
-          // Ensure the canvas container has a higher z-index than other page elements
-          // but lower than the fullscreen viewer
-          canvasContainer.style.zIndex = "250";
-        }
+      // Override the image click setup function
+      window.setupImageClickEvents = function() {
+        document.querySelectorAll('.album-image').forEach((imageContainer) => {
+          imageContainer.addEventListener('click', (e) => {
+            // Find which album this image belongs to
+            const albumElement = e.currentTarget.closest('.album');
+            const allImages = albumElement.querySelectorAll('.album-image img');
+            
+            // Collect image data
+            currentGalleryImages = Array.from(allImages).map(img => ({
+              src: img.getAttribute('data-src') || img.src,
+              alt: img.alt
+            }));
+            
+            // Set current index
+            currentImageIndex = Array.from(albumElement.querySelectorAll('.album-image')).indexOf(e.currentTarget);
+            
+            // Update and show viewer
+            updateViewerImage();
+            
+            // Show fullscreen viewer
+            fullscreenViewer.classList.add('active');
+            
+            // Show only the typography canvas behind the viewer
+            if (canvasContainer) {
+              // Move the canvas container to be directly behind the fullscreen viewer
+              canvasContainer.style.zIndex = "290";
+              
+              // Make sure the feedback and typography canvases are visible
+              if (typographyCanvas) typographyCanvas.style.zIndex = "0";
+              if (feedbackCanvas) feedbackCanvas.style.zIndex = "-1";
+            }
+            
+            // Hide the archive gallery content but keep the viewer visible
+            if (archiveGallery) {
+              archiveGallery.style.visibility = "hidden";
+            }
+          });
+        });
       };
       
-      // Make sure the canvas animations continue when the viewer is open
-      // This is handled automatically since we're just changing the background
-      
-      // Cleanup when viewer is closed
+      // Handle fullscreen viewer closing
       const closeViewerButton = fullscreenViewer.querySelector('.close-button');
       if (closeViewerButton) {
-        const originalCloseHandler = closeViewerButton.onclick;
-        closeViewerButton.onclick = function(e) {
-          // Reset the canvas container z-index when closing
-          const canvasContainer = document.getElementById('canvas-container');
-          if (canvasContainer) {
-            canvasContainer.style.zIndex = "-1"; // Return to original z-index
-          }
-          
-          // Call the original close handler if it exists
-          if (originalCloseHandler) {
-            originalCloseHandler.call(this, e);
-          } else {
-            fullscreenViewer.classList.remove('active');
-          }
-        };
+        closeViewerButton.addEventListener('click', () => {
+          closeFullscreenViewer();
+        });
       }
       
       // Also handle ESC key
-      const originalKeydownHandler = document.onkeydown;
-      document.onkeydown = function(e) {
+      document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && fullscreenViewer.classList.contains('active')) {
-          const canvasContainer = document.getElementById('canvas-container');
-          if (canvasContainer) {
-            canvasContainer.style.zIndex = "-1";
-          }
+          closeFullscreenViewer();
+        }
+      });
+      
+      // Function to close the fullscreen viewer and restore normal display
+      function closeFullscreenViewer() {
+        fullscreenViewer.classList.remove('active');
+        
+        // Reset the z-index of canvas container
+        if (canvasContainer) {
+          canvasContainer.style.zIndex = "-1";
         }
         
-        // Call the original keydown handler if it exists
-        if (originalKeydownHandler) {
-          originalKeydownHandler.call(this, e);
+        // Make archive gallery visible again
+        if (archiveGallery) {
+          archiveGallery.style.visibility = "visible";
         }
-      };
+      }
+      
+      // If the original setupImageClickEvents function exists, call it
+      if (originalSetupImageClickEvents && typeof originalSetupImageClickEvents === 'function') {
+        originalSetupImageClickEvents();
+      }
     });
   </script>
 </body>
