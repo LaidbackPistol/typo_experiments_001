@@ -3,6 +3,91 @@ const fs = require('fs');
 const path = require('path');
 const app = express();
 const port = process.env.PORT || 3000;
+const sharp = require('sharp');
+const path = require('path');
+const fs = require('fs');
+const util = require('util');
+const fsExists = util.promisify(fs.exists);
+const fsMkdir = util.promisify(fs.mkdir);
+
+// Create cache directories if they don't exist
+async function ensureCacheDirectories() {
+  const cacheDir = path.join(__dirname, 'public', 'cache');
+  const thumbsDir = path.join(cacheDir, 'thumbnails');
+  
+  if (!await fsExists(cacheDir)) {
+    await fsMkdir(cacheDir);
+  }
+  
+  if (!await fsExists(thumbsDir)) {
+    await fsMkdir(thumbsDir);
+  }
+  
+  return thumbsDir;
+}
+
+// Generate a thumbnail for an image
+async function generateThumbnail(imagePath, thumbPath, width) {
+  try {
+    await sharp(imagePath)
+      .resize(width, null, { 
+        withoutEnlargement: true,
+        fit: 'inside'
+      })
+      .toFormat('webp', { quality: 80 })
+      .toFile(thumbPath);
+    
+    return true;
+  } catch (error) {
+    console.error(`Error generating thumbnail for ${imagePath}:`, error);
+    return false;
+  }
+}
+
+// Modify the existing API endpoint to include thumbnails
+app.get('/api/archives', (req, res) => {
+  // Update the path to look in public/archive_assets
+  const archivePath = path.join(__dirname, 'public', 'archive_assets');
+  
+  // Check if archive_assets directory exists
+  if (!fs.existsSync(archivePath)) {
+    return res.json({ albums: [] });
+  }
+  
+  try {
+    // Read all directories (albums) in the archive_assets folder
+    const albums = fs.readdirSync(archivePath, { withFileTypes: true })
+      .filter(dirent => dirent.isDirectory())
+      .map(dirent => {
+        const albumName = dirent.name;
+        const albumPath = path.join(archivePath, albumName);
+        
+        // Get all image files in the album directory
+        const imageFiles = fs.readdirSync(albumPath)
+          .filter(file => {
+            const ext = path.extname(file).toLowerCase();
+            return ['.jpg', '.jpeg', '.png', '.gif', '.webp'].includes(ext);
+          })
+          .map(file => ({
+            src: `/archive_assets/${encodeURIComponent(albumName)}/${encodeURIComponent(file)}`,
+            alt: file.split('.')[0] // Use filename without extension as alt text
+          }));
+        
+        return {
+          title: albumName,
+          images: imageFiles
+        };
+      });
+    
+    res.json({ albums });
+  } catch (error) {
+    console.error('Error reading archive directories:', error);
+    res.status(500).json({ error: 'Failed to read archive directories' });
+  }
+});
+
+// Add a route to serve cached thumbnails
+app.use('/cache/thumbnails', express.static(path.join(__dirname, 'public', 'cache', 'thumbnails')));
 
 // Serve static files from the public directory
 app.use(express.static('public'));
