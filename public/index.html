@@ -26,11 +26,12 @@
     }
 
     #canvas-container {
-      position: absolute;
+      position: fixed; /* Changed from absolute to fixed */
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
+      z-index: -1; /* Default low z-index, will be increased when viewer is active */
     }
 
     #feedback-canvas {
@@ -595,17 +596,18 @@
     /* ==========================================
       FULLSCREEN VIEWER
       ========================================== */
-    .fullscreen-viewer {
+      .fullscreen-viewer {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background-color: rgba(0, 0, 0, 0.95);
+      background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent overlay instead of solid black */
       z-index: 300;
       display: none;
       align-items: center;
       justify-content: center;
+      backdrop-filter: blur(3px); /* Optional: adds a slight blur to the background */
     }
 
     .fullscreen-viewer.active {
@@ -625,9 +627,9 @@
     }
 
     .viewer-controls button {
-      background: rgba(0, 0, 0, 0.5);
+      background: rgba(0, 0, 0, 0.7);
       color: white;
-      border: none;
+      border: 1px solid rgba(255, 255, 255, 0.3);
       width: 50px;
       height: 50px;
       border-radius: 50%;
@@ -637,10 +639,12 @@
       align-items: center;
       justify-content: center;
       transition: background 0.3s ease;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
     }
 
     .viewer-controls button:hover {
-      background: rgba(50, 50, 50, 0.7);
+      background: rgba(50, 50, 50, 0.9);
+      border-color: rgba(255, 255, 255, 0.5);
     }
 
     .close-button {
@@ -669,6 +673,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      position: relative;
     }
 
     .viewer-image {
@@ -676,6 +681,7 @@
       max-height: 100%;
       object-fit: contain;
       transition: opacity 0.3s ease;
+      filter: drop-shadow(0 0 15px rgba(0, 0, 0, 0.7)); /* Add shadow to help the image stand out */
     }
 
     .image-caption {
@@ -686,8 +692,10 @@
       text-align: center;
       color: white;
       padding: 10px;
-      background: rgba(0, 0, 0, 0.5);
+      background: rgba(0, 0, 0, 0.7);
       font-family: monospace;
+      border-radius: 4px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
     }
 
     /* ==========================================
@@ -3365,6 +3373,69 @@
         loadArchiveContent();
         archiveGallery.classList.add('active');
       }
+    });
+  
+    document.addEventListener('DOMContentLoaded', () => {
+      // Get the fullscreen viewer element
+      const fullscreenViewer = document.getElementById('fullscreen-viewer');
+      
+      // Apply the CSS changes when the fullscreen viewer is opened
+      const originalOpenViewer = updateViewerImage;
+      
+      // Override the updateViewerImage function to add our background modifications
+      window.updateViewerImage = function() {
+        // Call the original function first
+        if (originalOpenViewer) {
+          originalOpenViewer();
+        }
+        
+        // Make sure the canvas is visible behind the fullscreen viewer
+        const canvasContainer = document.getElementById('canvas-container');
+        if (canvasContainer) {
+          // Ensure the canvas container has a higher z-index than other page elements
+          // but lower than the fullscreen viewer
+          canvasContainer.style.zIndex = "250";
+        }
+      };
+      
+      // Make sure the canvas animations continue when the viewer is open
+      // This is handled automatically since we're just changing the background
+      
+      // Cleanup when viewer is closed
+      const closeViewerButton = fullscreenViewer.querySelector('.close-button');
+      if (closeViewerButton) {
+        const originalCloseHandler = closeViewerButton.onclick;
+        closeViewerButton.onclick = function(e) {
+          // Reset the canvas container z-index when closing
+          const canvasContainer = document.getElementById('canvas-container');
+          if (canvasContainer) {
+            canvasContainer.style.zIndex = "-1"; // Return to original z-index
+          }
+          
+          // Call the original close handler if it exists
+          if (originalCloseHandler) {
+            originalCloseHandler.call(this, e);
+          } else {
+            fullscreenViewer.classList.remove('active');
+          }
+        };
+      }
+      
+      // Also handle ESC key
+      const originalKeydownHandler = document.onkeydown;
+      document.onkeydown = function(e) {
+        if (e.key === 'Escape' && fullscreenViewer.classList.contains('active')) {
+          const canvasContainer = document.getElementById('canvas-container');
+          if (canvasContainer) {
+            canvasContainer.style.zIndex = "-1";
+          }
+        }
+        
+        // Call the original keydown handler if it exists
+        if (originalKeydownHandler) {
+          originalKeydownHandler.call(this, e);
+        }
+      };
     });
   </script>
 </body>
