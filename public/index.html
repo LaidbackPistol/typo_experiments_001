@@ -3470,6 +3470,9 @@
         viewerImage.style.maxWidth = '';
         viewerImage.style.maxHeight = '';
         
+        // Check if we're on mobile
+        const isMobile = window.innerWidth <= 768;
+        
         // Load the image first
         viewerImage.onload = function() {
           // Now that the image is loaded, optimize its size based on aspect ratio
@@ -3478,14 +3481,28 @@
           const viewportWidth = window.innerWidth;
           const viewportHeight = window.innerHeight;
           
-          // For very tall images, adjust max-height to avoid truncation
-          if (imgHeight > imgWidth * 1.5) { // If height is significantly greater than width
-            viewerImage.style.maxHeight = 'calc(95vh - 80px)'; // Allow space for controls
-          }
-          
-          // For very wide images, ensure they fit properly
-          if (imgWidth > imgHeight * 1.5) { // If width is significantly greater than height
-            viewerImage.style.maxWidth = 'calc(95vw - 40px)'; // Allow space for controls
+          if (isMobile) {
+            // Mobile-specific adjustments - more conservative sizing
+            if (imgHeight > imgWidth) {
+              // Portrait image on mobile - ensure it's not too tall
+              viewerImage.style.maxHeight = 'calc(85vh - 100px)';
+              viewerImage.style.maxWidth = '90vw';
+            } else {
+              // Landscape image on mobile - ensure it's not too wide
+              viewerImage.style.maxWidth = '90vw';
+              viewerImage.style.maxHeight = 'calc(70vh - 80px)';
+            }
+          } else {
+            // Desktop adjustments
+            // For very tall images, adjust max-height to avoid truncation
+            if (imgHeight > imgWidth * 1.5) { // If height is significantly greater than width
+              viewerImage.style.maxHeight = 'calc(95vh - 80px)'; // Allow space for controls
+            }
+            
+            // For very wide images, ensure they fit properly
+            if (imgWidth > imgHeight * 1.5) { // If width is significantly greater than height
+              viewerImage.style.maxWidth = 'calc(95vw - 40px)'; // Allow space for controls
+            }
           }
         };
         
@@ -3517,9 +3534,11 @@
         fullscreenViewer.style.display = 'flex';
         fullscreenViewer.classList.add('active');
         
-        // Add a class to the body for 5 seconds to temporarily hide cursor
-        body.classList.add('viewing-fullscreen');
-        setTimeout(() => body.classList.remove('viewing-fullscreen'), 5000);
+        // Add a class to the body to temporarily hide cursor (desktop only)
+        if (!isMobile) {
+          body.classList.add('viewing-fullscreen');
+          setTimeout(() => body.classList.remove('viewing-fullscreen'), 5000);
+        }
       }
       
       // Close the fullscreen viewer - with explicit reset of all states
