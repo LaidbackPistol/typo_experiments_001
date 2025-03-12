@@ -3411,6 +3411,7 @@
       }
     });
 
+    // Simplified fullscreen viewer functionality
     function setupFullscreenViewer() {
       // Cache DOM elements
       const body = document.body;
@@ -3448,8 +3449,16 @@
       
       // Close the fullscreen viewer
       function closeViewer() {
+        console.log("Closing viewer");
         fullscreenViewer.classList.remove('active');
         body.classList.remove('fullscreen-mode');
+        
+        // Force visibility of UI elements back to normal
+        setTimeout(function() {
+          document.querySelectorAll('.menu-container, .text-input, .controls, .toggle-controls-panel, .preset-panel, .toggle-preset-panel, .archive-gallery, .mixes-gallery').forEach(function(el) {
+            el.style.visibility = '';
+          });
+        }, 100);
       }
       
       // Update or create the image caption
@@ -3535,24 +3544,56 @@
       prevButton.addEventListener('click', showPreviousImage);
       nextButton.addEventListener('click', showNextImage);
       
-      // Keyboard navigation
+      // Keyboard navigation - with improved Escape key handling
       document.addEventListener('keydown', function(e) {
-        if (!fullscreenViewer.classList.contains('active')) return;
-        
-        if (e.key === 'Escape') {
+        // Only process if the viewer is active
+        if (fullscreenViewer.classList.contains('active')) {
+          // Handle both "Escape" (modern) and "Esc" (older browsers)
+          if (e.key === 'Escape' || e.key === 'Esc' || e.keyCode === 27) {
+            e.preventDefault(); // Prevent any default actions
+            closeViewer();
+          } else if (e.key === 'ArrowLeft' || e.keyCode === 37) {
+            showPreviousImage();
+          } else if (e.key === 'ArrowRight' || e.keyCode === 39) {
+            showNextImage();
+          }
+        }
+      });
+      
+      // Add an explicit click handler on the fullscreen viewer background
+      // This provides an additional way to close the viewer
+      fullscreenViewer.addEventListener('click', function(e) {
+        // Only close if clicking directly on the fullscreen viewer (not on images or controls)
+        if (e.target === fullscreenViewer) {
           closeViewer();
-        } else if (e.key === 'ArrowLeft') {
-          showPreviousImage();
-        } else if (e.key === 'ArrowRight') {
-          showNextImage();
         }
       });
     }
 
     // Initialize when DOM is ready
     document.addEventListener('DOMContentLoaded', function() {
-      setupFullscreenViewer();
+      // Ensure all required elements exist before setup
+      if (document.getElementById('fullscreen-viewer') && 
+          document.getElementById('archive-gallery')) {
+        setupFullscreenViewer();
+        console.log("Fullscreen viewer setup complete");
+      } else {
+        console.error("Could not initialize fullscreen viewer - missing required elements");
+      }
     });
+
+    // Fallback initialization in case DOM is already loaded
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+      setTimeout(function() {
+        if (document.getElementById('fullscreen-viewer') && 
+            document.getElementById('archive-gallery') &&
+            !document.body.classList.contains('fullscreen-initialized')) {
+          setupFullscreenViewer();
+          document.body.classList.add('fullscreen-initialized');
+          console.log("Fullscreen viewer setup complete (fallback)");
+        }
+      }, 500);
+    }
   </script>
 </body>
 </html>
