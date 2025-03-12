@@ -3388,5 +3388,217 @@
       }
     });
   </script>
+  <script>
+    // Self-executing function to avoid conflicts
+    (function() {
+      console.log("Custom fullscreen implementation starting");
+      
+      // Get references to key elements
+      const typographyCanvas = document.getElementById('typography-canvas');
+      const feedbackCanvas = document.getElementById('feedback-canvas');
+      const canvasContainer = document.getElementById('canvas-container');
+      const fullscreenViewer = document.getElementById('fullscreen-viewer');
+      const viewerImageContainer = fullscreenViewer.querySelector('.viewer-image-container');
+      const archiveGallery = document.getElementById('archive-gallery');
+      
+      // Track original parents for when we need to restore elements
+      let originalCanvasParent = canvasContainer;
+      
+      // Custom function to open the fullscreen viewer
+      function openFullscreenViewer(imageSrc, imageAlt, currentIndex, allImages) {
+        console.log("Opening fullscreen viewer with canvas backdrop");
+        
+        // Set the viewer image
+        const viewerImage = fullscreenViewer.querySelector('.viewer-image');
+        viewerImage.src = imageSrc;
+        viewerImage.alt = imageAlt || '';
+        
+        // Store gallery data for navigation
+        window.currentGalleryImages = allImages;
+        window.currentImageIndex = currentIndex;
+        
+        // Hide the archive gallery
+        if (archiveGallery) {
+          archiveGallery.style.display = 'none';
+        }
+        
+        // Hide all other page UI elements
+        document.querySelectorAll('.menu-container, .text-input, .controls, .toggle-controls-panel, .preset-panel, .toggle-preset-panel, .mixes-gallery')
+          .forEach(el => {
+            el.style.visibility = 'hidden';
+          });
+        
+        // Make sure the canvas container is directly behind the fullscreen viewer
+        canvasContainer.style.zIndex = '299';
+        
+        // Show the fullscreen viewer
+        fullscreenViewer.classList.add('active');
+        fullscreenViewer.style.backgroundColor = 'transparent';
+      }
+      
+      // Function to close the fullscreen viewer
+      function closeFullscreenViewer() {
+        console.log("Closing fullscreen viewer");
+        
+        // Hide the fullscreen viewer
+        fullscreenViewer.classList.remove('active');
+        
+        // Reset the canvas container z-index
+        canvasContainer.style.zIndex = '-1';
+        
+        // Show the archive gallery again
+        if (archiveGallery) {
+          archiveGallery.style.display = '';
+        }
+        
+        // Show all other page UI elements
+        document.querySelectorAll('.menu-container, .text-input, .controls, .toggle-controls-panel, .preset-panel, .toggle-preset-panel, .mixes-gallery')
+          .forEach(el => {
+            el.style.visibility = '';
+          });
+      }
+      
+      // Apply our custom image click handler to all album images
+      function setupCustomImageClickEvents() {
+        console.log("Setting up custom image click events");
+        
+        document.querySelectorAll('.album-image').forEach(imageContainer => {
+          // First try to remove existing click handlers by cloning
+          try {
+            const newContainer = imageContainer.cloneNode(true);
+            imageContainer.parentNode.replaceChild(newContainer, imageContainer);
+            imageContainer = newContainer;
+          } catch (e) {
+            console.log("Could not clone image container, proceeding with original");
+          }
+          
+          // Add our click handler
+          imageContainer.addEventListener('click', e => {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const albumElement = imageContainer.closest('.album');
+            if (!albumElement) {
+              console.error("Could not find parent album element");
+              return;
+            }
+            
+            const allImagesElements = albumElement.querySelectorAll('.album-image img');
+            const thisImg = imageContainer.querySelector('img');
+            
+            if (!thisImg) {
+              console.error("No image found in container");
+              return;
+            }
+            
+            // Get image source, either from data-src (for lazy loaded images) or src
+            const imgSrc = thisImg.getAttribute('data-src') || thisImg.src;
+            const imgAlt = thisImg.alt || '';
+            
+            // Find the index of this image
+            const allImages = Array.from(allImagesElements).map(img => ({
+              src: img.getAttribute('data-src') || img.src,
+              alt: img.alt || ''
+            }));
+            
+            // Find the index of the current image
+            const currentIndex = Array.from(albumElement.querySelectorAll('.album-image')).indexOf(imageContainer);
+            
+            // Open the fullscreen viewer with this image and all images for navigation
+            openFullscreenViewer(imgSrc, imgAlt, currentIndex, allImages);
+          });
+        });
+      }
+      
+      // Set up our custom close button handler
+      const closeButton = fullscreenViewer.querySelector('.close-button');
+      if (closeButton) {
+        // First try to remove existing click handlers by cloning
+        try {
+          const newCloseButton = closeButton.cloneNode(true);
+          closeButton.parentNode.replaceChild(newCloseButton, closeButton);
+          
+          // Add our close handler
+          newCloseButton.addEventListener('click', closeFullscreenViewer);
+        } catch (e) {
+          console.log("Could not clone close button, adding new handler to existing button");
+          closeButton.addEventListener('click', closeFullscreenViewer);
+        }
+      } else {
+        console.error("Close button not found");
+      }
+      
+      // Set up navigation buttons
+      const prevButton = fullscreenViewer.querySelector('.prev-button');
+      if (prevButton) {
+        try {
+          const newPrevButton = prevButton.cloneNode(true);
+          prevButton.parentNode.replaceChild(newPrevButton, prevButton);
+          
+          newPrevButton.addEventListener('click', () => {
+            if (!window.currentGalleryImages || !window.currentGalleryImages.length) return;
+            
+            window.currentImageIndex = (window.currentImageIndex - 1 + window.currentGalleryImages.length) % window.currentGalleryImages.length;
+            const currentImage = window.currentGalleryImages[window.currentImageIndex];
+            
+            const viewerImage = fullscreenViewer.querySelector('.viewer-image');
+            viewerImage.src = currentImage.src;
+            viewerImage.alt = currentImage.alt || '';
+          });
+        } catch (e) {
+          console.log("Could not clone prev button, using existing button");
+        }
+      }
+      
+      const nextButton = fullscreenViewer.querySelector('.next-button');
+      if (nextButton) {
+        try {
+          const newNextButton = nextButton.cloneNode(true);
+          nextButton.parentNode.replaceChild(newNextButton, nextButton);
+          
+          newNextButton.addEventListener('click', () => {
+            if (!window.currentGalleryImages || !window.currentGalleryImages.length) return;
+            
+            window.currentImageIndex = (window.currentImageIndex + 1) % window.currentGalleryImages.length;
+            const currentImage = window.currentGalleryImages[window.currentImageIndex];
+            
+            const viewerImage = fullscreenViewer.querySelector('.viewer-image');
+            viewerImage.src = currentImage.src;
+            viewerImage.alt = currentImage.alt || '';
+          });
+        } catch (e) {
+          console.log("Could not clone next button, using existing button");
+        }
+      }
+      
+      // Handle keyboard controls
+      document.addEventListener('keydown', e => {
+        if (!fullscreenViewer.classList.contains('active')) return;
+        
+        if (e.key === 'Escape') {
+          closeFullscreenViewer();
+        } else if (e.key === 'ArrowLeft' && prevButton) {
+          prevButton.click();
+        } else if (e.key === 'ArrowRight' && nextButton) {
+          nextButton.click();
+        }
+      });
+      
+      // Make sure the fullscreen viewer background is transparent
+      fullscreenViewer.style.backgroundColor = 'transparent';
+      
+      // Run our setup immediately or on DOMContentLoaded
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', setupCustomImageClickEvents);
+      } else {
+        setupCustomImageClickEvents();
+      }
+      
+      // Also try to run it again after a delay to catch any dynamically loaded content
+      setTimeout(setupCustomImageClickEvents, 1000);
+      
+      console.log("Custom fullscreen implementation completed");
+    })();
+    </script>
 </body>
 </html>
