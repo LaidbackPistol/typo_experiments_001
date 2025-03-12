@@ -606,24 +606,24 @@
     /* ==========================================
       FULLSCREEN VIEWER - UPDATED
     ========================================== */
-      .fullscreen-viewer {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: transparent; /* Completely transparent background */
-        z-index: 300;
-        display: none;
-        align-items: center;
-        justify-content: center;
-      }
+    .fullscreen-viewer {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: transparent; /* Completely transparent background */
+      z-index: 300;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
 
-      .fullscreen-viewer.active {
-        display: flex;
-      }
+    .fullscreen-viewer.active {
+      display: flex;
+    }
 
-      /* When fullscreen viewer is active, move canvas container up in the stacking order */
+    /* When fullscreen viewer is active, move canvas container up in the stacking order */
     .fullscreen-viewer.active ~ #canvas-container,
     body.fullscreen-mode #canvas-container {
       z-index: 290 !important; /* Just below the fullscreen viewer */
@@ -639,6 +639,16 @@
     body.fullscreen-mode .archive-gallery,
     body.fullscreen-mode .mixes-gallery {
       visibility: hidden !important;
+    }
+
+    /* Hide cursor when initially viewing in fullscreen */
+    body.viewing-fullscreen {
+      cursor: none;
+    }
+
+    /* Show cursor when moving the mouse */
+    body.viewing-fullscreen:hover {
+      cursor: auto;
     }
 
     /* Make sure the fullscreen viewer is always visible */
@@ -710,15 +720,6 @@
       z-index: 300;
     }
 
-    .viewer-image {
-      max-width: 90%;
-      max-height: 90%;
-      object-fit: contain;
-      transition: opacity 0.3s ease;
-      box-shadow: 0 0 30px rgba(0, 0, 0, 0.7); /* Strong shadow to help the image stand out */
-      border: 1px solid rgba(255, 255, 255, 0.2); /* Subtle border */
-    }
-
     .image-caption {
       position: absolute;
       bottom: 20px;
@@ -732,6 +733,39 @@
       border-radius: 4px;
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
       z-index: 301; /* Above the image */
+    }
+
+    /* Responsive adjustments for fullscreen viewer */
+    @media screen and (min-width: 1200px) {
+      /* For larger screens, make images even bigger */
+      .viewer-image-container {
+        width: 98%;
+        height: 98%;
+      }
+      
+      .viewer-image {
+        max-width: 98%;
+        max-height: 98%;
+      }
+    }
+
+    @media screen and (max-width: 768px) {
+      /* For mobile, ensure controls are big enough to tap */
+      .viewer-controls button {
+        width: 44px;
+        height: 44px;
+      }
+      
+      /* Reduce any unnecessary padding */
+      .fullscreen-viewer {
+        padding: 0;
+      }
+      
+      /* Position the close button better on mobile */
+      .close-button {
+        top: 10px;
+        right: 10px;
+      }
     }
 
     /* ==========================================
@@ -3432,7 +3466,30 @@
       function openViewer(imageSrc, imageAlt, index, allImages) {
         console.log("Opening viewer");
         
-        // Set image properties
+        // Reset any previous styles to ensure clean state
+        viewerImage.style.maxWidth = '';
+        viewerImage.style.maxHeight = '';
+        
+        // Load the image first
+        viewerImage.onload = function() {
+          // Now that the image is loaded, optimize its size based on aspect ratio
+          const imgWidth = this.naturalWidth;
+          const imgHeight = this.naturalHeight;
+          const viewportWidth = window.innerWidth;
+          const viewportHeight = window.innerHeight;
+          
+          // For very tall images, adjust max-height to avoid truncation
+          if (imgHeight > imgWidth * 1.5) { // If height is significantly greater than width
+            viewerImage.style.maxHeight = 'calc(95vh - 80px)'; // Allow space for controls
+          }
+          
+          // For very wide images, ensure they fit properly
+          if (imgWidth > imgHeight * 1.5) { // If width is significantly greater than height
+            viewerImage.style.maxWidth = 'calc(95vw - 40px)'; // Allow space for controls
+          }
+        };
+        
+        // Set image src after setting up the onload handler
         viewerImage.src = imageSrc;
         viewerImage.alt = imageAlt || '';
         
@@ -3459,6 +3516,10 @@
         // Show viewer
         fullscreenViewer.style.display = 'flex';
         fullscreenViewer.classList.add('active');
+        
+        // Add a class to the body for 5 seconds to temporarily hide cursor
+        body.classList.add('viewing-fullscreen');
+        setTimeout(() => body.classList.remove('viewing-fullscreen'), 5000);
       }
       
       // Close the fullscreen viewer - with explicit reset of all states
