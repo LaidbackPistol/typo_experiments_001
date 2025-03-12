@@ -563,6 +563,29 @@
         filter: brightness(1); /* Brighten on hover */
       }
 
+      /* Add a skeleton loading animation for images */
+      .album-image.loading::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, #333 25%, #444 50%, #333 75%);
+        background-size: 200% 100%;
+        animation: loading 1.5s infinite;
+        z-index: 0;
+      }
+
+      @keyframes loading {
+        0% {
+          background-position: 200% 0;
+        }
+        100% {
+          background-position: -200% 0;
+        }
+      }
+
       /* Optimize mobile view - make thumbnails sensible sizes initially */
       @media (max-width: 768px) {
         .album-image img {
@@ -576,10 +599,15 @@
         }
       }
 
+      
       /* Improve fullscreen viewer image loading */
       .fullscreen-viewer .viewer-image {
         opacity: 0;
         transition: opacity 0.3s ease;
+      }
+
+      .fullscreen-viewer .viewer-image.loaded {
+        opacity: 1;
       }
 
       .fullscreen-viewer .viewer-image-container {
@@ -599,6 +627,10 @@
         border-top-color: #fff;
         animation: spin 1s infinite linear;
         z-index: 0;
+      }
+
+      .fullscreen-viewer .viewer-image.loaded ~ .viewer-image-container::before {
+        display: none;
       }
 
       @keyframes spin {
@@ -3209,64 +3241,17 @@
           
           // Create and append album elements
           data.albums.forEach(album => {
-            console.log(`Creating album: ${album.title} with ${album.images.length} images`); // Debug log
+            console.log(`Creating album: ${album.title} with ${album.images.length} images`);
             const albumElement = createAlbumElement(album);
             galleryContainer.appendChild(albumElement);
           });
           
-          // INJECT EMERGENCY STYLES FOR MOBILE
-          const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-          if (isMobile) {
-            const mobileStyle = document.createElement('style');
-            mobileStyle.id = 'mobileForcedStyles';
-            mobileStyle.textContent = `
-              .album-image {
-                margin: -15px !important;
-                padding: 0 !important;
-                position: relative !important;
-                display: inline-block !important;
-                visibility: visible !important;
-                opacity: 1 !important;
-              }
-              
-              .album-images {
-                display: flex !important;
-                flex-wrap: wrap !important;
-                justify-content: center !important;
-              }
-              
-              .album-image img {
-                display: block !important;
-                width: auto !important;
-                height: auto !important;
-                max-width: 600px !important;
-                max-height: 600px !important;
-                position: static !important;
-                margin: 0 !important;
-                padding: 0 !important;
-              }
-            `;
-            document.head.appendChild(mobileStyle);
-            
-            // Force visibility on all images on mobile
-            setTimeout(() => {
-              document.querySelectorAll('.album-image img').forEach(img => {
-                if (!img.src || img.src.includes('data:image')) {
-                  img.src = img.getAttribute('data-src');
-                }
-                img.style.display = 'block';
-                img.style.visibility = 'visible';
-                img.style.opacity = '1';
-              });
-            }, 500);
-          } else {
-            // Desktop uses normal lazy loading
-            setupLazyLoading();
-          }
-          
-          // Setup click events
+          // Setup click events and hover effects
           setupImageClickEvents();
           setupImageHoverEffects();
+          
+          // Use Intersection Observer for more efficient lazy loading
+          setupIntersectionObserver();
         } catch (error) {
           console.error('Error loading archives:', error);
           galleryContainer.innerHTML = `<div style="color: white; text-align: center; padding: 50px;">
@@ -3274,6 +3259,7 @@
           </div>`;
         }
       }
+
       // New function to use Intersection Observer for better lazy loading
       function setupIntersectionObserver() {
         // Check if IntersectionObserver is supported
@@ -3321,28 +3307,24 @@
         const imagesContainer = document.createElement('div');
         imagesContainer.className = 'album-images';
         
-        // On mobile, use a simpler layout
+        // Check if we're on mobile
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         
         album.images.forEach((image, index) => {
           const imageContainer = document.createElement('div');
           imageContainer.className = 'album-image';
+          imageContainer.dataset.fullSrc = image.src; // Store the full image source for later
           
+          // Apply styling based on device
           if (!isMobile) {
-            // Only apply fancy effects on desktop
-            // Add random rotation between -8 and 8 degrees
+            // Desktop version: fancy effects
             const randomRotation = (Math.random() * 16 - 8).toFixed(1);
             imageContainer.style.transform = `rotate(${randomRotation}deg)`;
-            
-            // Random z-index for natural layering
             imageContainer.style.zIndex = Math.floor(Math.random() * 5) + 1;
-            
-            // Store original z-index for later reference
             imageContainer.dataset.zIndex = imageContainer.style.zIndex;
           } else {
-            // Simpler mobile version - EXPLICITLY SET INLINE STYLES FOR MOBILE
-            // Random small rotation 
-            const randomMobileRotation = [(Math.random() * 6 - 3).toFixed(1)];
+            // Mobile version: simpler styling
+            const randomMobileRotation = (Math.random() * 6 - 3).toFixed(1);
             imageContainer.style.transform = `rotate(${randomMobileRotation}deg)`;
             imageContainer.style.display = "inline-block";
             imageContainer.style.margin = "-15px";
@@ -3350,25 +3332,43 @@
             imageContainer.style.position = "relative";
           }
           
+          // Create the image element with proper responsive attributes
           const img = document.createElement('img');
           img.alt = image.alt || 'Gallery image';
+          img.loading = "lazy"; // Use native lazy loading
           
-          // For mobile, load immediately and SET EXPLICIT DIMENSIONS
-          if (isMobile) {
-            img.src = image.src;
-            img.style.display = 'block';
-            img.style.maxWidth = '800px';
-            img.style.maxHeight = '800px';
-            img.style.width = 'auto';
-            img.style.height = 'auto';
-            img.style.objectFit = 'contain';
-            img.style.margin = '0';
-            img.style.padding = '0';
+          // Set up responsive images with srcset
+          if (image.thumbs) {
+            // Use a tiny placeholder initially
+            img.src = image.thumbs.small; 
+            
+            // Set up srcset for responsive loading
+            img.srcset = `
+              ${image.thumbs.small} 200w,
+              ${image.thumbs.medium} 600w,
+              ${image.src} 1200w
+            `;
+            img.sizes = isMobile ? 
+              "(max-width: 768px) 100vw" : 
+              "(max-width: 1200px) 50vw, 33vw";
           } else {
-            // Desktop lazy loading
-            img.setAttribute('data-src', image.src);
-            img.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1"%3E%3C/svg%3E';
+            // Fallback if thumbs are not available
+            img.src = image.src;
           }
+          
+          // Apply appropriate styles
+          if (isMobile) {
+            img.style.maxWidth = '400px';
+            img.style.maxHeight = '400px';
+          }
+          
+          img.style.display = 'block';
+          img.style.width = 'auto';
+          img.style.height = 'auto';
+          img.style.objectFit = 'contain';
+          
+          // Store the full image URL for the fullscreen viewer
+          img.dataset.fullSrc = image.src;
           
           imageContainer.appendChild(img);
           imagesContainer.appendChild(imageContainer);
@@ -3436,20 +3436,25 @@
           imageContainer.addEventListener('click', (e) => {
             // Find which album this image belongs to
             const albumElement = e.currentTarget.closest('.album');
-            const allImages = albumElement.querySelectorAll('.album-image img');
+            const allImageContainers = albumElement.querySelectorAll('.album-image');
             
-            // Collect image data
-            currentGalleryImages = Array.from(allImages).map(img => ({
-              src: img.getAttribute('data-src') || img.src,
-              alt: img.alt
-            }));
+            // Collect image data with full-resolution sources
+            currentGalleryImages = Array.from(allImageContainers).map(container => {
+              const img = container.querySelector('img');
+              return {
+                // Use the full-resolution source stored in data attributes
+                src: img.dataset.fullSrc || container.dataset.fullSrc || img.src,
+                alt: img.alt || ''
+              };
+            });
             
             // Set current index
-            currentImageIndex = Array.from(albumElement.querySelectorAll('.album-image')).indexOf(e.currentTarget);
+            currentImageIndex = Array.from(allImageContainers).indexOf(e.currentTarget);
             
             // Update and show viewer
             updateViewerImage();
             fullscreenViewer.classList.add('active');
+            document.body.classList.add('fullscreen-mode');
           });
         });
       }
