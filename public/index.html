@@ -3416,6 +3416,7 @@
       // Cache DOM elements
       const body = document.body;
       const fullscreenViewer = document.getElementById('fullscreen-viewer');
+      const canvasContainer = document.getElementById('canvas-container');
       const archiveGallery = document.getElementById('archive-gallery');
       const viewerImage = fullscreenViewer.querySelector('.viewer-image');
       const viewerImageContainer = fullscreenViewer.querySelector('.viewer-image-container');
@@ -3429,6 +3430,8 @@
       
       // Open fullscreen viewer with the specified image
       function openViewer(imageSrc, imageAlt, index, allImages) {
+        console.log("Opening viewer");
+        
         // Set image properties
         viewerImage.src = imageSrc;
         viewerImage.alt = imageAlt || '';
@@ -3440,25 +3443,54 @@
         // Update caption
         updateCaption(imageAlt);
         
-        // Add fullscreen mode class to body for CSS targeting
-        body.classList.add('fullscreen-mode');
+        // Move the canvas container behind the fullscreen viewer
+        canvasContainer.style.zIndex = '290';
+        
+        // Hide UI elements
+        document.querySelectorAll('.menu-container, .text-input, .controls, .toggle-controls-panel, .preset-panel, .toggle-preset-panel, .mixes-gallery').forEach(el => {
+          el.style.visibility = 'hidden';
+        });
+        
+        // Hide the archive gallery while in fullscreen mode
+        if (archiveGallery) {
+          archiveGallery.style.visibility = 'hidden';
+        }
         
         // Show viewer
+        fullscreenViewer.style.display = 'flex';
         fullscreenViewer.classList.add('active');
       }
       
-      // Close the fullscreen viewer
+      // Close the fullscreen viewer - with explicit reset of all states
       function closeViewer() {
         console.log("Closing viewer");
-        fullscreenViewer.classList.remove('active');
-        body.classList.remove('fullscreen-mode');
         
-        // Force visibility of UI elements back to normal
-        setTimeout(function() {
-          document.querySelectorAll('.menu-container, .text-input, .controls, .toggle-controls-panel, .preset-panel, .toggle-preset-panel, .archive-gallery, .mixes-gallery').forEach(function(el) {
-            el.style.visibility = '';
-          });
-        }, 100);
+        // Hide the viewer first
+        fullscreenViewer.classList.remove('active');
+        fullscreenViewer.style.display = 'none';
+        
+        // Reset canvas container z-index
+        canvasContainer.style.zIndex = '-1';
+        
+        // Show all UI elements immediately
+        document.querySelectorAll('.menu-container, .text-input, .controls, .toggle-controls-panel, .preset-panel, .toggle-preset-panel').forEach(el => {
+          el.style.visibility = 'visible';
+        });
+        
+        // Restore the archive gallery visibility
+        if (archiveGallery) {
+          archiveGallery.style.visibility = 'visible';
+        }
+        
+        // Also ensure the mixes gallery visibility is properly handled
+        const mixesGallery = document.getElementById('mixes-gallery');
+        if (mixesGallery) {
+          // Check if we should show it based on the active menu item
+          const mixxsMenuItem = document.querySelector('.menu-item[data-section="mixxs"]');
+          if (mixxsMenuItem && mixxsMenuItem.classList.contains('active')) {
+            mixesGallery.style.visibility = 'visible';
+          }
+        }
       }
       
       // Update or create the image caption
@@ -3503,80 +3535,115 @@
       }
       
       // Event delegation for album image clicks
-      archiveGallery.addEventListener('click', function(e) {
-        // Find if we clicked on an album image
-        let target = e.target;
-        
-        // Walk up the DOM to find the album-image container
-        while (target && target !== this) {
-          if (target.classList && target.classList.contains('album-image')) {
-            e.preventDefault();
-            
-            const albumElement = target.closest('.album');
-            const thisImg = target.querySelector('img');
-            
-            if (!thisImg || !albumElement) return;
-            
-            // Get image source (either from data-src or src)
-            const imgSrc = thisImg.getAttribute('data-src') || thisImg.src;
-            const imgAlt = thisImg.alt || '';
-            
-            // Get all images in this album for navigation
-            const allImagesElements = albumElement.querySelectorAll('.album-image img');
-            const allImages = Array.from(allImagesElements).map(img => ({
-              src: img.getAttribute('data-src') || img.src,
-              alt: img.alt || ''
-            }));
-            
-            // Find the index of the current image
-            const index = Array.from(albumElement.querySelectorAll('.album-image')).indexOf(target);
-            
-            // Open viewer with this image
-            openViewer(imgSrc, imgAlt, index, allImages);
-            return;
+      if (archiveGallery) {
+        archiveGallery.addEventListener('click', function(e) {
+          // Find if we clicked on an album image
+          let target = e.target;
+          
+          // Walk up the DOM to find the album-image container
+          while (target && target !== this) {
+            if (target.classList && target.classList.contains('album-image')) {
+              e.preventDefault();
+              
+              const albumElement = target.closest('.album');
+              const thisImg = target.querySelector('img');
+              
+              if (!thisImg || !albumElement) return;
+              
+              // Get image source (either from data-src or src)
+              const imgSrc = thisImg.getAttribute('data-src') || thisImg.src;
+              const imgAlt = thisImg.alt || '';
+              
+              // Get all images in this album for navigation
+              const allImagesElements = albumElement.querySelectorAll('.album-image img');
+              const allImages = Array.from(allImagesElements).map(img => ({
+                src: img.getAttribute('data-src') || img.src,
+                alt: img.alt || ''
+              }));
+              
+              // Find the index of the current image
+              const index = Array.from(albumElement.querySelectorAll('.album-image')).indexOf(target);
+              
+              // Open viewer with this image
+              openViewer(imgSrc, imgAlt, index, allImages);
+              return;
+            }
+            target = target.parentNode;
           }
-          target = target.parentNode;
-        }
-      });
+        });
+      }
       
       // Add click handlers for navigation buttons
-      closeButton.addEventListener('click', closeViewer);
-      prevButton.addEventListener('click', showPreviousImage);
-      nextButton.addEventListener('click', showNextImage);
+      if (closeButton) {
+        closeButton.addEventListener('click', closeViewer);
+      }
       
-      // Keyboard navigation - with improved Escape key handling
+      if (prevButton) {
+        prevButton.addEventListener('click', showPreviousImage);
+      }
+      
+      if (nextButton) {
+        nextButton.addEventListener('click', showNextImage);
+      }
+      
+      // Keyboard navigation - with special handling for Escape key
       document.addEventListener('keydown', function(e) {
-        // Only process if the viewer is active
+        // Only handle keyboard events when the viewer is active
         if (fullscreenViewer.classList.contains('active')) {
-          // Handle both "Escape" (modern) and "Esc" (older browsers)
+          console.log(`Key pressed: ${e.key}`);
+          
+          // Handle Escape key with multiple fallbacks
           if (e.key === 'Escape' || e.key === 'Esc' || e.keyCode === 27) {
-            e.preventDefault(); // Prevent any default actions
+            console.log("Escape key detected");
+            e.preventDefault();
+            e.stopPropagation(); // Prevent other handlers from capturing this
+            
+            // Call closeViewer and add a class to track Escape usage
+            document.body.classList.add('closed-with-escape');
             closeViewer();
+            
+            // Double-check the state after a short delay
+            setTimeout(function() {
+              if (fullscreenViewer.classList.contains('active')) {
+                console.log("Force-closing viewer");
+                fullscreenViewer.classList.remove('active');
+                fullscreenViewer.style.display = 'none';
+              }
+            }, 50);
           } else if (e.key === 'ArrowLeft' || e.keyCode === 37) {
             showPreviousImage();
           } else if (e.key === 'ArrowRight' || e.keyCode === 39) {
             showNextImage();
           }
         }
-      });
+      }, true); // Use capture phase to ensure we get the event first
       
-      // Add an explicit click handler on the fullscreen viewer background
-      // This provides an additional way to close the viewer
+      // Add a click handler on the fullscreen viewer background
       fullscreenViewer.addEventListener('click', function(e) {
         // Only close if clicking directly on the fullscreen viewer (not on images or controls)
         if (e.target === fullscreenViewer) {
           closeViewer();
         }
       });
+      
+      // Reset state when the window is resized
+      window.addEventListener('resize', function() {
+        // If the viewer is active, make sure z-index is correct
+        if (fullscreenViewer.classList.contains('active')) {
+          canvasContainer.style.zIndex = '290';
+        } else {
+          canvasContainer.style.zIndex = '-1';
+        }
+      });
+      
+      console.log("Fullscreen viewer setup complete");
     }
 
     // Initialize when DOM is ready
     document.addEventListener('DOMContentLoaded', function() {
       // Ensure all required elements exist before setup
-      if (document.getElementById('fullscreen-viewer') && 
-          document.getElementById('archive-gallery')) {
+      if (document.getElementById('fullscreen-viewer')) {
         setupFullscreenViewer();
-        console.log("Fullscreen viewer setup complete");
       } else {
         console.error("Could not initialize fullscreen viewer - missing required elements");
       }
@@ -3585,8 +3652,7 @@
     // Fallback initialization in case DOM is already loaded
     if (document.readyState === 'complete' || document.readyState === 'interactive') {
       setTimeout(function() {
-        if (document.getElementById('fullscreen-viewer') && 
-            document.getElementById('archive-gallery') &&
+        if (document.getElementById('fullscreen-viewer') &&
             !document.body.classList.contains('fullscreen-initialized')) {
           setupFullscreenViewer();
           document.body.classList.add('fullscreen-initialized');
