@@ -3388,10 +3388,11 @@
       }
     });
   </script>
- <script>
+ <!-- Add this script at the very end of your HTML file, right before the closing </body> tag -->
+<script>
   // Self-executing function to avoid conflicts
   (function() {
-    console.log("Custom fullscreen implementation starting");
+    console.log("Persistent fullscreen implementation starting");
     
     // Get references to key elements
     const typographyCanvas = document.getElementById('typography-canvas');
@@ -3401,8 +3402,8 @@
     const viewerImageContainer = fullscreenViewer.querySelector('.viewer-image-container');
     const archiveGallery = document.getElementById('archive-gallery');
     
-    // Track original parents for when we need to restore elements
-    let originalCanvasParent = canvasContainer;
+    // Flag to track whether our handlers have been applied
+    let handlersApplied = false;
     
     // Custom function to open the fullscreen viewer
     function openFullscreenViewer(imageSrc, imageAlt, currentIndex, allImages) {
@@ -3473,84 +3474,118 @@
         });
     }
     
-    // Apply our custom image click handler to all album images
-    function setupCustomImageClickEvents() {
-      console.log("Setting up custom image click events");
+    // Use event delegation for album image clicks
+    function handleAlbumImageClick(e) {
+      // Find if we clicked on an album image
+      let target = e.target;
+      let imageContainer = null;
       
-      document.querySelectorAll('.album-image').forEach(imageContainer => {
-        // First try to remove existing click handlers by cloning
-        try {
-          const newContainer = imageContainer.cloneNode(true);
-          imageContainer.parentNode.replaceChild(newContainer, imageContainer);
-          imageContainer = newContainer;
-        } catch (e) {
-          console.log("Could not clone image container, proceeding with original");
+      // Walk up the DOM to find the album-image container
+      while (target && target !== document) {
+        if (target.classList && target.classList.contains('album-image')) {
+          imageContainer = target;
+          break;
         }
-        
-        // Add our click handler
-        imageContainer.addEventListener('click', e => {
-          e.preventDefault();
-          e.stopPropagation();
-          
-          const albumElement = imageContainer.closest('.album');
-          if (!albumElement) {
-            console.error("Could not find parent album element");
-            return;
-          }
-          
-          const allImagesElements = albumElement.querySelectorAll('.album-image img');
-          const thisImg = imageContainer.querySelector('img');
-          
-          if (!thisImg) {
-            console.error("No image found in container");
-            return;
-          }
-          
-          // Get image source, either from data-src (for lazy loaded images) or src
-          const imgSrc = thisImg.getAttribute('data-src') || thisImg.src;
-          const imgAlt = thisImg.alt || '';
-          
-          // Find the index of this image
-          const allImages = Array.from(allImagesElements).map(img => ({
-            src: img.getAttribute('data-src') || img.src,
-            alt: img.alt || ''
-          }));
-          
-          // Find the index of the current image
-          const currentIndex = Array.from(albumElement.querySelectorAll('.album-image')).indexOf(imageContainer);
-          
-          // Open the fullscreen viewer with this image and all images for navigation
-          openFullscreenViewer(imgSrc, imgAlt, currentIndex, allImages);
-        });
-      });
-    }
-    
-    // Set up our custom close button handler
-    const closeButton = fullscreenViewer.querySelector('.close-button');
-    if (closeButton) {
-      // First try to remove existing click handlers by cloning
-      try {
-        const newCloseButton = closeButton.cloneNode(true);
-        closeButton.parentNode.replaceChild(newCloseButton, closeButton);
-        
-        // Add our close handler
-        newCloseButton.addEventListener('click', closeFullscreenViewer);
-      } catch (e) {
-        console.log("Could not clone close button, adding new handler to existing button");
-        closeButton.addEventListener('click', closeFullscreenViewer);
+        target = target.parentNode;
       }
-    } else {
-      console.error("Close button not found");
+      
+      // If we didn't find an album-image, ignore this click
+      if (!imageContainer) return;
+      
+      // Prevent default handling and stop propagation
+      e.preventDefault();
+      e.stopPropagation();
+      
+      const albumElement = imageContainer.closest('.album');
+      if (!albumElement) {
+        console.error("Could not find parent album element");
+        return;
+      }
+      
+      const thisImg = imageContainer.querySelector('img');
+      if (!thisImg) {
+        console.error("No image found in container");
+        return;
+      }
+      
+      // Get all images in this album
+      const allImagesElements = albumElement.querySelectorAll('.album-image img');
+      
+      // Get image source, either from data-src (for lazy loaded images) or src
+      const imgSrc = thisImg.getAttribute('data-src') || thisImg.src;
+      const imgAlt = thisImg.alt || '';
+      
+      // Collect all images for navigation
+      const allImages = Array.from(allImagesElements).map(img => ({
+        src: img.getAttribute('data-src') || img.src,
+        alt: img.alt || ''
+      }));
+      
+      // Find the index of the current image
+      const currentIndex = Array.from(albumElement.querySelectorAll('.album-image')).indexOf(imageContainer);
+      
+      // Open the fullscreen viewer with this image and all images for navigation
+      openFullscreenViewer(imgSrc, imgAlt, currentIndex, allImages);
     }
     
-    // Set up navigation buttons
-    const prevButton = fullscreenViewer.querySelector('.prev-button');
-    if (prevButton) {
-      try {
-        const newPrevButton = prevButton.cloneNode(true);
-        prevButton.parentNode.replaceChild(newPrevButton, prevButton);
+    // Monitor changes to the 'archives' menu item to detect when we return to the archives section
+    function monitorArchivesSection() {
+      // Find the archives menu item
+      const archivesMenuItem = document.querySelector('.menu-item[data-section="archives"]');
+      
+      if (archivesMenuItem) {
+        // Create a MutationObserver to watch for class changes
+        const observer = new MutationObserver(mutations => {
+          mutations.forEach(mutation => {
+            if (mutation.attributeName === 'class') {
+              // If the archives section becomes active, ensure our handlers are set up
+              if (archivesMenuItem.classList.contains('active')) {
+                console.log("Archives section activated - ensuring handlers are set up");
+                setupFullscreenHandlers();
+              }
+            }
+          });
+        });
         
-        newPrevButton.addEventListener('click', () => {
+        // Start observing class changes on the archives menu item
+        observer.observe(archivesMenuItem, { attributes: true });
+      }
+    }
+    
+    // Also monitor the archive gallery for changes
+    function monitorArchiveGallery() {
+      if (archiveGallery) {
+        // Create a MutationObserver to watch for content changes
+        const observer = new MutationObserver(mutations => {
+          // If the archive gallery content changes, ensure our handlers are set up
+          console.log("Archive gallery content changed - ensuring handlers are set up");
+          setupFullscreenHandlers();
+        });
+        
+        // Start observing the archive gallery for content changes
+        observer.observe(archiveGallery, { 
+          childList: true, 
+          subtree: true 
+        });
+      }
+    }
+    
+    // Set up handlers for the fullscreen viewer
+    function setupFullscreenHandlers() {
+      // Set up event delegation for album image clicks
+      document.removeEventListener('click', handleAlbumImageClick); // Remove to avoid duplicates
+      document.addEventListener('click', handleAlbumImageClick);
+      
+      // Set up close button handler
+      const closeButton = fullscreenViewer.querySelector('.close-button');
+      if (closeButton) {
+        closeButton.onclick = closeFullscreenViewer;
+      }
+      
+      // Set up navigation buttons
+      const prevButton = fullscreenViewer.querySelector('.prev-button');
+      if (prevButton) {
+        prevButton.onclick = () => {
           if (!window.currentGalleryImages || !window.currentGalleryImages.length) return;
           
           window.currentImageIndex = (window.currentImageIndex - 1 + window.currentGalleryImages.length) % window.currentGalleryImages.length;
@@ -3570,19 +3605,12 @@
               caption.style.display = 'none';
             }
           }
-        });
-      } catch (e) {
-        console.log("Could not clone prev button, using existing button");
+        };
       }
-    }
-    
-    const nextButton = fullscreenViewer.querySelector('.next-button');
-    if (nextButton) {
-      try {
-        const newNextButton = nextButton.cloneNode(true);
-        nextButton.parentNode.replaceChild(newNextButton, nextButton);
-        
-        newNextButton.addEventListener('click', () => {
+      
+      const nextButton = fullscreenViewer.querySelector('.next-button');
+      if (nextButton) {
+        nextButton.onclick = () => {
           if (!window.currentGalleryImages || !window.currentGalleryImages.length) return;
           
           window.currentImageIndex = (window.currentImageIndex + 1) % window.currentGalleryImages.length;
@@ -3602,29 +3630,14 @@
               caption.style.display = 'none';
             }
           }
-        });
-      } catch (e) {
-        console.log("Could not clone next button, using existing button");
+        };
       }
+      
+      // Mark that handlers have been applied
+      handlersApplied = true;
     }
     
-    // Handle keyboard controls
-    document.addEventListener('keydown', e => {
-      if (!fullscreenViewer.classList.contains('active')) return;
-      
-      if (e.key === 'Escape') {
-        closeFullscreenViewer();
-      } else if (e.key === 'ArrowLeft' && prevButton) {
-        prevButton.click();
-      } else if (e.key === 'ArrowRight' && nextButton) {
-        nextButton.click();
-      }
-    });
-    
-    // Make sure the fullscreen viewer background is transparent
-    fullscreenViewer.style.backgroundColor = 'transparent';
-    
-    // Add some necessary CSS for the caption
+    // Add CSS for the caption
     const style = document.createElement('style');
     style.textContent = `
       .image-caption {
@@ -3644,18 +3657,41 @@
     `;
     document.head.appendChild(style);
     
-    // Run our setup immediately or on DOMContentLoaded
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', setupCustomImageClickEvents);
-    } else {
-      setupCustomImageClickEvents();
-    }
+    // Handle keyboard controls
+    document.addEventListener('keydown', e => {
+      if (!fullscreenViewer.classList.contains('active')) return;
+      
+      if (e.key === 'Escape') {
+        closeFullscreenViewer();
+      } else if (e.key === 'ArrowLeft') {
+        const prevButton = fullscreenViewer.querySelector('.prev-button');
+        if (prevButton) prevButton.click();
+      } else if (e.key === 'ArrowRight') {
+        const nextButton = fullscreenViewer.querySelector('.next-button');
+        if (nextButton) nextButton.click();
+      }
+    });
     
-    // Also try to run it again after a delay to catch any dynamically loaded content
-    setTimeout(setupCustomImageClickEvents, 1000);
+    // Make sure the fullscreen viewer background is transparent
+    fullscreenViewer.style.backgroundColor = 'transparent';
     
-    console.log("Custom fullscreen implementation completed");
+    // Set up the initial handlers
+    setupFullscreenHandlers();
+    
+    // Set up observers to monitor for changes
+    monitorArchivesSection();
+    monitorArchiveGallery();
+    
+    // Also periodically check if we need to reapply handlers
+    setInterval(() => {
+      if (archiveGallery && archiveGallery.classList.contains('active') && !handlersApplied) {
+        console.log("Periodic check - ensuring handlers are set up");
+        setupFullscreenHandlers();
+      }
+    }, 2000);
+    
+    console.log("Persistent fullscreen implementation completed");
   })();
-</script>
+  </script>
 </body>
 </html>
