@@ -1,0 +1,21 @@
+{
+    "name": "EN5EMBLE Collectif",
+    "short_name": "EN5EMBLE",
+    "description": "EN5EMBLE est un collectif de gens qui mixx",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#000000",
+    "theme_color": "#ffff00",
+    "icons": [
+      {
+        "src": "/path/to/icon-192x192.png",
+        "sizes": "192x192",
+        "type": "image/png"
+      },
+      {
+        "src": "/path/to/icon-512x512.png",
+        "sizes": "512x512",
+        "type": "image/png"
+      }
+    ]
+  }
