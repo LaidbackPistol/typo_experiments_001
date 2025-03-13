@@ -1355,8 +1355,8 @@
           left: 10px;
           width: 20px;
           height: 20px;
-          background-color: rgba(100, 100, 100, 0.05);
-          border: 1px solid rgba(255, 255, 255, 0.0);
+          background-color: rgba(100, 100, 100, 0.5);
+          border: 1px solid rgba(255, 255, 255, 0.3);
           border-radius: 50%;
           z-index: 9999;
           cursor: pointer;
@@ -1373,10 +1373,36 @@
         document.body.appendChild(toggleButton);
       }
 
-      // Initialize design mode
+      // Initialize design mode with improved timing
       function initDesignMode() {
         createDesignModeToggleButton();
+        
+        // First immediate update
         updateDesignModeUI();
+        
+        // Run again after a short delay to catch elements created later
+        setTimeout(updateDesignModeUI, 100);
+        
+        // And again after the page has fully loaded
+        window.addEventListener('load', () => {
+          updateDesignModeUI();
+          
+          // One final update after everything is definitely loaded
+          setTimeout(updateDesignModeUI, 500);
+        });
+        
+        // Set up a MutationObserver to watch for newly added elements
+        const observer = new MutationObserver((mutations) => {
+          for (const mutation of mutations) {
+            if (mutation.addedNodes.length) {
+              // If we detect new elements, update the UI again
+              updateDesignModeUI();
+            }
+          }
+        });
+        
+        // Start observing the document body for added nodes
+        observer.observe(document.body, { childList: true, subtree: true });
         
         // Show initial message in design mode only
         if (designMode) {
