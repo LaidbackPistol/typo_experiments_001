@@ -1286,15 +1286,26 @@
         const designElements = [
           document.querySelector('.toggle-preset-panel'),       // P button
           document.querySelector('.preset-panel'),              // Presets panel
-          document.querySelector('.toggle-controls-panel'),     // C button
-          document.querySelector('.controls'),                  // Controls panel 
-          document.querySelector('.text-input')                 // Text input field
+          document.querySelector('.toggle-controls-panel'),     // C button (both states)
+          document.querySelector('.controls'),                  // Controls panel
+          document.querySelector('.text-input'),                // Text input field
+          document.querySelector('.notification')               // Notifications
         ];
+        
+        // Make sure we also hide the C button in all states
+        const allControlButtons = document.querySelectorAll('.toggle-controls-panel, .toggle-controls-panel.panel-hidden');
         
         // Hide/show design elements based on current mode
         designElements.forEach(el => {
           if (el) {
             el.style.display = designMode ? '' : 'none';
+          }
+        });
+        
+        // Specifically handle all control buttons in case the querySelector above missed any
+        allControlButtons.forEach(btn => {
+          if (btn) {
+            btn.style.display = designMode ? '' : 'none';
           }
         });
         
@@ -1306,6 +1317,24 @@
           document.body.classList.add('production-mode');
           document.body.classList.remove('design-mode');
         }
+        
+        // Override showNotification function when in production mode
+        if (!designMode) {
+          // Store the original function if we haven't already
+          if (!window._originalShowNotification) {
+            window._originalShowNotification = window.showNotification || function() {};
+          }
+          
+          // Override with empty function in production mode
+          window.showNotification = function() { 
+            // Do nothing in production mode
+          };
+        } else {
+          // Restore original function in design mode
+          if (window._originalShowNotification) {
+            window.showNotification = window._originalShowNotification;
+          }
+        }
       }
 
       // Add keyboard shortcut (Ctrl+Shift+D) to toggle design mode
@@ -1316,7 +1345,7 @@
         }
       });
 
-      // Create a tiny hidden button in the corner for touch devices
+      // Create a more visible toggle button in the corner for touch devices
       function createDesignModeToggleButton() {
         const toggleButton = document.createElement('div');
         toggleButton.id = 'design-mode-toggle';
@@ -1326,8 +1355,8 @@
           left: 10px;
           width: 20px;
           height: 20px;
-          background-color: rgba(100, 100, 100, 0);
-          border: 1px solid rgba(255, 255, 255, 0);
+          background-color: rgba(100, 100, 100, 0.05);
+          border: 1px solid rgba(255, 255, 255, 0.0);
           border-radius: 50%;
           z-index: 9999;
           cursor: pointer;
@@ -1348,7 +1377,33 @@
       function initDesignMode() {
         createDesignModeToggleButton();
         updateDesignModeUI();
+        
+        // Show initial message in design mode only
+        if (designMode) {
+          setTimeout(() => {
+            showNotification('Design Mode Active - Press Ctrl+Shift+D to toggle');
+          }, 1000);
+        }
       }
+
+      // Override applyDefaultPreset to be silent in production mode
+      const originalApplyDefaultPreset = window.applyDefaultPreset || function() {};
+      window.applyDefaultPreset = function() {
+        // If we're in production mode, apply silently without notification
+        if (!designMode) {
+          // Find the Unsure preset
+          const unsurePreset = (window.builtinPresets || []).find(preset => preset.name === "Unsure");
+          if (unsurePreset) {
+            // Apply settings but don't show notification
+            if (window.applySettings) {
+              window.applySettings(unsurePreset.settings);
+            }
+          }
+        } else {
+          // In design mode, use the original function
+          originalApplyDefaultPreset.apply(this, arguments);
+        }
+      };
 
       // Call initialization function immediately
       initDesignMode();
