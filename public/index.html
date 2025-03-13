@@ -1068,6 +1068,33 @@
         margin-bottom: 15px;
       }
     }
+    
+    body.fullscreen-mode .mixes-gallery,
+    body.fullscreen-mode .archive-gallery {
+      visibility: hidden !important;
+    }
+
+    /* When fullscreen viewer is closed and section is active, ensure visibility */
+    .mixes-gallery.active {
+      visibility: visible !important; 
+      display: block !important;
+    }
+
+    .archive-gallery.active {
+      visibility: visible !important;
+      display: block !important;
+    }
+
+    /* Ensure visible embeds in mixes gallery */
+    .mixes-gallery.active .soundcloud-embed {
+      visibility: visible !important;
+      display: block !important;
+    }
+
+    .mixes-gallery.active .soundcloud-embed iframe {
+      visibility: visible !important;
+      display: block !important;
+    }
   </style>
 </head>
 <body>
@@ -2904,8 +2931,16 @@
         mixxsMenuItem.addEventListener('click', (e) => {
           // If mixxs section becomes active, show the gallery
           if (mixxsMenuItem.classList.contains('active')) {
-            loadMixesContent();
+            // Make sure mixes gallery has both proper visibility and active class
+            mixesGallery.style.visibility = 'visible';
             mixesGallery.classList.add('active');
+            // Always reload content to ensure it's displayed properly
+            loadMixesContent();
+            
+            // Make sure archive gallery is hidden to avoid conflicts
+            if (archiveGallery) {
+              archiveGallery.classList.remove('active');
+            }
           } else {
             mixesGallery.classList.remove('active');
           }
@@ -3683,8 +3718,6 @@
       
       // Close the fullscreen viewer - with explicit reset of all states
       function closeViewer() {
-        console.log("Closing viewer");
-        
         // Hide the viewer first
         fullscreenViewer.classList.remove('active');
         fullscreenViewer.style.display = 'none';
@@ -3697,19 +3730,46 @@
           el.style.visibility = 'visible';
         });
         
-        // Restore the archive gallery visibility
-        if (archiveGallery) {
-          archiveGallery.style.visibility = 'visible';
-        }
+        // Handle gallery visibility based on which section is active
+        const mixxsMenuItem = document.querySelector('.menu-item[data-section="mixxs"]');
+        const archiveMenuItem = document.querySelector('.menu-item[data-section="archives"]');
         
-        // Also ensure the mixes gallery visibility is properly handled
+        const archiveGallery = document.getElementById('archive-gallery');
         const mixesGallery = document.getElementById('mixes-gallery');
-        if (mixesGallery) {
-          // Check if we should show it based on the active menu item
-          const mixxsMenuItem = document.querySelector('.menu-item[data-section="mixxs"]');
-          if (mixxsMenuItem && mixxsMenuItem.classList.contains('active')) {
-            mixesGallery.style.visibility = 'visible';
+        
+        // First, properly reset both galleries' visibility
+        if (archiveGallery) archiveGallery.style.visibility = 'visible';
+        if (mixesGallery) mixesGallery.style.visibility = 'visible';
+        
+        // Then apply the correct active state and load content if needed
+        if (mixxsMenuItem && mixxsMenuItem.classList.contains('active')) {
+          // If mixesGallery is hidden, display it
+          if (mixesGallery && !mixesGallery.classList.contains('active')) {
+            mixesGallery.classList.add('active');
+            // Force reload mixes content to ensure it's displayed
+            loadMixesContent();
           }
+          
+          // Make sure archive gallery is hidden
+          if (archiveGallery) {
+            archiveGallery.classList.remove('active');
+          }
+        } else if (archiveMenuItem && archiveMenuItem.classList.contains('active')) {
+          // If archive section is active
+          if (archiveGallery && !archiveGallery.classList.contains('active')) {
+            archiveGallery.classList.add('active');
+            // Optionally reload archive content
+            loadArchiveContent();
+          }
+          
+          // Make sure mixes gallery is hidden
+          if (mixesGallery) {
+            mixesGallery.classList.remove('active');
+          }
+        } else {
+          // If neither section is active, hide both galleries
+          if (archiveGallery) archiveGallery.classList.remove('active');
+          if (mixesGallery) mixesGallery.classList.remove('active');
         }
       }
       
