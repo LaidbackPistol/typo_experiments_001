@@ -1,129 +1,157 @@
-// Add this CSS to your main styles (in index.html) or to a separate CSS file
-const musicIndicatorStyles = `
-  /* Music Playing Indicator */
-  .music-indicator {
-    position: fixed;
-    bottom: 20px;
-    left: 20px;
-    width: 36px;
-    height: 36px;
-    background-color: rgba(0, 0, 0, 0.0);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 101;
-    opacity: 0;
-    transition: opacity 0.4s ease, transform 0.3s ease;
-    pointer-events: none;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    transform: scale(0.8);
-  }
+// Creative Music Indicator using Menu Animation
+// This script transforms the "mixxs" menu item into a sound wave visualization
 
-  .music-indicator.playing {
-    opacity: 1;
-    transform: scale(1);
-  }
-
-  .music-indicator .wave {
-    display: flex;
-    align-items: center;
-    height: 20px;
-  }
-
-  .music-indicator .bar {
-    width: 2px;
-    height: 3px;
-    margin: 0 1px;
-    background-color: #ffff00;
-    border-radius: 1px;
-    animation-name: sound-wave;
+// CSS for the wave animation
+const waveAnimationStyles = `
+  /* Base letter animation styles */
+  .menu-item[data-section="mixxs"].music-playing span {
+    display: inline-block;
+    animation-name: wave-letter;
     animation-iteration-count: infinite;
     animation-direction: alternate;
+    transform-origin: center bottom;
+    animation-timing-function: ease-in-out;
+    animation-play-state: running;
   }
-
-  .music-indicator .bar:nth-child(1) { 
-    animation-duration: 0.4s;
-    animation-delay: 0.3s;
+  
+  /* Remove animation when menu item is active */
+  .menu-item[data-section="mixxs"].active.music-playing span {
+    animation-play-state: paused !important;
   }
-  .music-indicator .bar:nth-child(2) { 
+  
+  /* Glow effect when music is playing */
+  .menu-item[data-section="mixxs"].music-playing {
+    text-shadow: 0 0 8px rgba(255, 255, 0, 0.6);
+    position: relative;
+  }
+  
+  /* Tiny equalizer indicator */
+  .menu-item[data-section="mixxs"].music-playing::after {
+    content: '';
+    position: absolute;
+    right: -15px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #ffff00;
+    box-shadow: 0 0 8px rgba(255, 255, 0, 0.8);
+    animation: pulse-dot 1.5s ease-in-out infinite;
+  }
+  
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 0.4; transform: translateY(-50%) scale(0.8); }
+    50% { opacity: 1; transform: translateY(-50%) scale(1); }
+  }
+  
+  /* Letter animation keyframes */
+  @keyframes wave-letter {
+    0% { transform: translateY(0px) scaleY(1); }
+    100% { transform: translateY(-2px) scaleY(1.1); }
+  }
+  
+  /* Apply different timings to each letter for wave effect */
+  .menu-item[data-section="mixxs"].music-playing span:nth-child(1) {
     animation-duration: 0.5s;
     animation-delay: 0.1s;
   }
-  .music-indicator .bar:nth-child(3) { 
+  .menu-item[data-section="mixxs"].music-playing span:nth-child(2) {
     animation-duration: 0.7s;
-    animation-delay: 0s;
-  }
-  .music-indicator .bar:nth-child(4) { 
-    animation-duration: 0.3s;
     animation-delay: 0.2s;
   }
-  .music-indicator .bar:nth-child(5) { 
+  .menu-item[data-section="mixxs"].music-playing span:nth-child(3) {
     animation-duration: 0.6s;
+    animation-delay: 0.3s;
+  }
+  .menu-item[data-section="mixxs"].music-playing span:nth-child(4) {
+    animation-duration: 0.8s;
     animation-delay: 0.1s;
   }
-
-  @keyframes sound-wave {
-    0% {
-      height: 3px;
-    }
-    100% {
-      height: 15px;
-    }
+  .menu-item[data-section="mixxs"].music-playing span:nth-child(5) {
+    animation-duration: 0.7s;
+    animation-delay: 0.2s;
   }
-
-  /* Make sure it's hidden when not in main view */
-  .archive-gallery.active ~ .music-indicator,
-  .mixes-gallery.active ~ .music-indicator,
-  .fullscreen-viewer.active ~ .music-indicator {
-    opacity: 0 !important;
-    visibility: hidden !important;
+  
+  /* Special animation for the characters at the end */
+  .menu-item[data-section="mixxs"].music-playing span:nth-child(6) {
+    animation-duration: 0.6s;
+    animation-delay: 0.05s;
+  }
+  
+  @media (max-width: 768px) {
+    /* Adjust for mobile */
+    .menu-item[data-section="mixxs"].music-playing::after {
+      right: -10px;
+      width: 6px;
+      height: 6px;
+    }
+    
+    @keyframes wave-letter {
+      0% { transform: translateY(0px) scaleY(1); }
+      100% { transform: translateY(-1px) scaleY(1.1); }
+    }
   }
 `;
 
-// Create and inject the styles
-function injectMusicIndicatorStyles() {
+// Function to inject styles
+function injectWaveStyles() {
   const styleEl = document.createElement('style');
-  styleEl.textContent = musicIndicatorStyles;
+  styleEl.textContent = waveAnimationStyles;
   document.head.appendChild(styleEl);
 }
 
-// Create the indicator HTML element
-function createMusicIndicator() {
-  const indicator = document.createElement('div');
-  indicator.className = 'music-indicator';
+// Function to convert menu text into span-wrapped letters
+function wrapMenuLetters() {
+  const mixxsMenuItem = document.querySelector('.menu-item[data-section="mixxs"]');
+  if (!mixxsMenuItem) return;
   
-  // Create wave animation elements
-  const wave = document.createElement('div');
-  wave.className = 'wave';
+  // Only process if not already processed
+  if (mixxsMenuItem.querySelector('span')) return;
   
-  // Add 5 bars for the sound wave visualization
-  for (let i = 0; i < 5; i++) {
-    const bar = document.createElement('div');
-    bar.className = 'bar';
-    wave.appendChild(bar);
+  // Get the original text
+  const text = mixxsMenuItem.textContent;
+  
+  // Clear the element
+  mixxsMenuItem.innerHTML = '';
+  
+  // Add each letter wrapped in a span
+  for (let i = 0; i < text.length; i++) {
+    const span = document.createElement('span');
+    span.textContent = text[i];
+    mixxsMenuItem.appendChild(span);
   }
-  
-  indicator.appendChild(wave);
-  document.body.appendChild(indicator);
-  
-  return indicator;
 }
 
-// Initialize the music indicator system
-function initMusicIndicator() {
-  // First inject the styles
-  injectMusicIndicatorStyles();
+// Function to toggle music playing animation
+function toggleMusicAnimation(isPlaying) {
+  const mixxsMenuItem = document.querySelector('.menu-item[data-section="mixxs"]');
+  if (!mixxsMenuItem) return;
   
-  // Create the indicator element
-  const indicator = createMusicIndicator();
+  if (isPlaying) {
+    mixxsMenuItem.classList.add('music-playing');
+  } else {
+    mixxsMenuItem.classList.remove('music-playing');
+  }
+}
+
+// Function to initialize the wave animation
+function initMusicWave() {
+  // Inject styles
+  injectWaveStyles();
   
-  // Track original updateFloatingHeadsMode function to hook into it
+  // Wrap menu letters
+  wrapMenuLetters();
+  
+  // Create a new global function to toggle the animation
+  window.updateMusicIndicator = function(isPlaying) {
+    toggleMusicAnimation(isPlaying);
+  };
+  
+  // Hook into existing music detection
   const originalUpdateFunction = window.updateFloatingHeadsMode;
-  
-  // Override the updateFloatingHeadsMode function to include our indicator
   window.updateFloatingHeadsMode = function(forcedState) {
-    // Call the original function first
+    // Call original function
     if (typeof originalUpdateFunction === 'function') {
       originalUpdateFunction.call(this, forcedState);
     }
@@ -131,51 +159,32 @@ function initMusicIndicator() {
     // Get the current music playing state
     const isPlaying = (forcedState !== undefined) ? forcedState : window.isMusicPlaying;
     
-    // Update the indicator
-    if (isPlaying) {
-      indicator.classList.add('playing');
-    } else {
-      indicator.classList.remove('playing');
-    }
+    // Update the animation
+    toggleMusicAnimation(isPlaying);
   };
   
-  // Add direct method to check music status from console
-  window.checkMusicIndicator = function() {
-    console.log('Music playing:', window.isMusicPlaying);
-    window.updateFloatingHeadsMode();
-  };
-  
-  // Handle visibility changes when navigating between sections
-  const menuItems = document.querySelectorAll('.menu-item');
-  menuItems.forEach(item => {
-    item.addEventListener('click', () => {
-      // If we're returning to the main screen and music is playing,
-      // make sure indicator is shown
-      if (!document.querySelector('.menu-item.active') && window.isMusicPlaying) {
-        setTimeout(() => {
-          indicator.classList.add('playing');
-        }, 300);
-      }
-    });
-  });
+  // Initial check if music is already playing
+  if (window.isMusicPlaying) {
+    toggleMusicAnimation(true);
+  }
 }
 
 // Run when the page loads
-document.addEventListener('DOMContentLoaded', initMusicIndicator);
+document.addEventListener('DOMContentLoaded', initMusicWave);
 
 // As a fallback, also run when window is fully loaded
 window.addEventListener('load', function() {
-  if (!document.querySelector('.music-indicator')) {
-    console.log('Music indicator not initialized during DOMContentLoaded, initializing now');
-    initMusicIndicator();
+  // Check if menu item spans exist, if not initialize again
+  const mixxsMenuItem = document.querySelector('.menu-item[data-section="mixxs"]');
+  if (mixxsMenuItem && !mixxsMenuItem.querySelector('span')) {
+    console.log('Music wave not initialized during DOMContentLoaded, initializing now');
+    initMusicWave();
   }
   
-  // Also ensure we hook into the SoundCloud integration's function
-  // if it wasn't available during initial setup
+  // Check if music is playing on load
   setTimeout(function() {
-    const indicator = document.querySelector('.music-indicator');
-    if (indicator && window.isMusicPlaying && !indicator.classList.contains('playing')) {
-      indicator.classList.add('playing');
+    if (window.isMusicPlaying) {
+      toggleMusicAnimation(true);
     }
-  }, 2000);
+  }, 1000);
 });
