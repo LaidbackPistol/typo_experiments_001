@@ -1131,7 +1131,57 @@
     .mixes-gallery.active .soundcloud-embed iframe {
       visibility: visible !important;
       display: block !important;
-    }   
+    }
+
+    /* Custom styles for SoundCloud embeds */
+    .soundcloud-embed {
+      position: relative;
+      border-radius: 4px;
+      overflow: hidden;
+      background: #000;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+      margin-bottom: 20px;
+    }
+
+    /* Hide the mix titles */
+    .mix-title {
+      display: none;
+    }
+
+    /* Style for the mix metadata (artist and date) */
+    .mix-metadata {
+      color: #ffff00;
+      font-family: monospace;
+      margin-bottom: 10px;
+      font-size: 14px;
+    }
+
+    /* Make mix containers more prominent */
+    .mix-container {
+      margin-bottom: 40px;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      padding: 15px;
+      background-color: rgba(0, 0, 0, 0.3);
+      border-radius: 6px;
+    }
+
+    /* Hover effect */
+    .mix-container:hover {
+      transform: scale(1.02) translateY(-5px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+    }
+
+    /* Pulsating yellow border on active player */
+    @keyframes soundcloud-playing {
+      0% { box-shadow: 0 0 0 0 rgba(255, 255, 0, 0.4); }
+      70% { box-shadow: 0 0 0 10px rgba(255, 255, 0, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(255, 255, 0, 0); }
+    }
+
+    /* This class will be added by JavaScript when a track is playing */
+    .soundcloud-embed.playing {
+      animation: soundcloud-playing 2s infinite;
+    }
 
   </style>
   <link rel="stylesheet" href="/floating-heads.css">
@@ -4115,6 +4165,71 @@
         }
       }, 500);
     }
+
+    document.addEventListener('DOMContentLoaded', function() {
+  // Wait for SoundCloud API to be available
+  const checkScAPI = setInterval(function() {
+    if (window.SC) {
+      clearInterval(checkScAPI);
+      enhanceSoundCloudPlayers();
+    }
+  }, 500);
+  
+  // If API doesn't load within 5 seconds, try to initialize anyway
+  setTimeout(function() {
+    if (!window.SC) {
+      console.log('SoundCloud API not detected, trying direct enhancement');
+      enhanceSoundCloudPlayers();
+    }
+  }, 5000);
+});
+
+function enhanceSoundCloudPlayers() {
+  // Find all SoundCloud embeds
+  const embeds = document.querySelectorAll('.soundcloud-embed');
+  
+  embeds.forEach((embed, index) => {
+    // Find iframe within the embed
+    const iframe = embed.querySelector('iframe');
+    if (!iframe) return;
+    
+    // Add visual indicator for the currently playing track
+    if (window.SC) {
+      try {
+        const widget = SC.Widget(iframe);
+        
+        widget.bind(SC.Widget.Events.PLAY, function() {
+          // Remove 'playing' class from all embeds
+          embeds.forEach(e => e.classList.remove('playing'));
+          // Add 'playing' class to currently playing embed
+          embed.classList.add('playing');
+        });
+        
+        widget.bind(SC.Widget.Events.PAUSE, function() {
+          embed.classList.remove('playing');
+        });
+        
+        widget.bind(SC.Widget.Events.FINISH, function() {
+          embed.classList.remove('playing');
+        });
+      } catch (e) {
+        console.warn('Error setting up SoundCloud widget:', e);
+      }
+    }
+  });
+  
+  // Add event listener for clicks on embeds
+  document.addEventListener('click', function(e) {
+    const embed = e.target.closest('.soundcloud-embed');
+    if (embed) {
+      // Add a subtle visual feedback when clicking anywhere on the embed
+      embed.style.transform = 'scale(0.98)';
+      setTimeout(() => {
+        embed.style.transform = '';
+      }, 200);
+    }
+  });
+}
   </script>
 <script src="/floating-heads.js"></script>
 <script src="/soundcloud-integration.js"></script>
