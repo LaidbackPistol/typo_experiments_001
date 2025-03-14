@@ -198,28 +198,40 @@ window.stopFloatingHeadsMusic = function() {
         }
       }
     }, 500);
-  }
+     }
   
-  // Update floating heads mode based on music state
-  function updateFloatingHeadsMode() {
+    // Make isMusicPlaying accessible globally
+    window.isMusicPlaying = false;
+
+    // Modify the updateFloatingHeadsMode function to expose the state globally
+    function updateFloatingHeadsMode() {
     if (isMusicPlaying === headsMusicMode) return; // No change needed
     
     headsMusicMode = isMusicPlaying;
+    window.isMusicPlaying = isMusicPlaying; // Make accessible globally
     
     // Find the FloatingHeads instance
     if (window.floatingHeadsInstance) {
-      window.floatingHeadsInstance.setMusicMode(headsMusicMode);
+        window.floatingHeadsInstance.setMusicMode(headsMusicMode);
     } else {
-      // Try to find the canvas or container
-      const canvas = document.getElementById('floating-heads-canvas');
-      if (canvas && canvas.__floatingHeads) {
+        // Try to find the canvas or container
+        const canvas = document.getElementById('floating-heads-canvas');
+        if (canvas && canvas.__floatingHeads) {
         canvas.__floatingHeads.setMusicMode(headsMusicMode);
-      } else {
+        } else {
         // Modify the global config as a fallback
         modifyFloatingHeadsConfig(headsMusicMode);
-      }
+        }
     }
-  }
+    
+    // This will trigger our music indicator if it's initialized
+    if (typeof window.updateMusicIndicator === 'function') {
+        window.updateMusicIndicator(isMusicPlaying);
+    }
+    }
+
+    // Make the function available globally for our indicator to call
+    window.updateFloatingHeadsMode = updateFloatingHeadsMode;
   
   // Modify global config as a fallback method
   function modifyFloatingHeadsConfig(musicOn) {
