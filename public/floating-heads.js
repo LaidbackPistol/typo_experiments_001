@@ -5,7 +5,7 @@
 
 // Configuration
 const FLOATING_HEADS_CONFIG = {
-  fps: 24,               // Frames per second (lower = more stop-motion feel)
+  fps: 6,               // Frames per second (lower = more stop-motion feel)
   repulsionRadius: 200,  // How close mouse needs to be to affect heads
   repulsionForce: 0.8,   // Strength of mouse repulsion
   shadowBlur: 15,        // Shadow blur amount for 3D effect
