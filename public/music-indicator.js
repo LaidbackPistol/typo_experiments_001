@@ -1,6 +1,5 @@
 /**
- * Non-Intrusive Music Menu Indicator with Minimal Spacing Fix
- * Creates a visual effect for the mixxs menu without excessive padding
+ * Music Menu Indicator with Original Dot Size but Minimal Spacing
  */
 
 // CSS for creating the music animation without modifying the DOM
@@ -10,23 +9,22 @@ const musicIndicatorStyles = `
     text-shadow: 0 0 8px rgba(255, 255, 0, 0.6);
     position: relative;
     animation: mixxs-pulse 1.2s ease-in-out infinite alternate;
-    /* Much more subtle margin adjustment */
-    margin-right: 5px;
+    /* Minimal margin adjustment */
+    margin-right: 4px;
   }
-    
   
-  /* Dot indicator - positioned more tightly */
+  /* Dot indicator - positioned closer but keeping original size */
   .menu-item[data-section="mixxs"].music-playing::after {
     content: '';
     position: absolute;
-    right: -8px; /* Reduced from -15px */
+    right: -10px; /* Closer than original -15px */
     top: 50%;
     transform: translateY(-50%);
-    width: 5px; /* Smaller dot */
-    height: 5px; /* Smaller dot */
+    width: 8px; /* Original size */
+    height: 8px; /* Original size */
     border-radius: 50%;
     background-color: #ffff00;
-    box-shadow: 0 0 5px rgba(255, 255, 0, 0.7);
+    box-shadow: 0 0 8px rgba(255, 255, 0, 0.8);
     animation: pulse-dot 1.5s ease-in-out infinite;
   }
   
@@ -50,12 +48,12 @@ const musicIndicatorStyles = `
     animation-play-state: paused;
   }
   
-  /* Mobile adjustments - keep everything tight */
+  /* Mobile adjustments */
   @media (max-width: 768px) {
     .menu-item[data-section="mixxs"].music-playing::after {
-      right: -6px;
-      width: 4px;
-      height: 4px;
+      right: -8px;
+      width: 6px;
+      height: 6px;
     }
     
     .menu-item[data-section="mixxs"].music-playing {
@@ -79,10 +77,10 @@ function toggleMusicAnimation(isPlaying) {
   if (isPlaying) {
     mixxsMenuItem.classList.add('music-playing');
     
-    // Very minimal adjustment to parent list item
+    // Minimal adjustment to parent spacing
     const parentLi = mixxsMenuItem.closest('li');
     if (parentLi) {
-      parentLi.style.marginRight = '2px';
+      parentLi.style.marginRight = '1px';
     }
     
   } else {
