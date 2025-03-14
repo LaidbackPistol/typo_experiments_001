@@ -1071,6 +1071,7 @@
       }
       
       .archive-gallery {
+        
         padding: 60px 10px 70px 10px; /* Add bigger bottom padding (70px) to make room for menu */
         height: calc(100% - 64px); /* Reduce height to leave space for menu */
         bottom: 64px; /* Position above the menu bar */
@@ -1115,6 +1116,7 @@
     }
 
     .archive-gallery.active {
+      overflow-x: hidden !important; /* Prevent horizontal scrolling */
       visibility: visible !important;
       display: block !important;
     }
