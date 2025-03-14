@@ -152,7 +152,7 @@ document.addEventListener('DOMContentLoaded', function() {
           } else {
             // Desktop settings
             fontSize = 14; // Fixed larger size for desktop
-            spacesNeeded = 14; // More spaces on desktop
+            spacesNeeded = 8; // More spaces on desktop
           }
           
           // Apply the font size directly via JavaScript
