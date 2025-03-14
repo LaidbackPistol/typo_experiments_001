@@ -1,326 +1,176 @@
 /**
- * Floating Heads Animation
- * Creates 3D paper cutout effect for head images that float on screen
+ * SIMPLE MODIFICATION FOR FLOATING-HEADS.JS
+ * 
+ * HOW TO USE:
+ * 1. Find your original floating-heads.js file
+ * 2. Add this code at the end of that file (before any closing brackets or parentheses)
+ * 3. Save the file
  */
 
-// Configuration
-const FLOATING_HEADS_CONFIG = {
-  fps: 0,               // Frames per second (lower = more stop-motion feel; 0 = no restrictions)
-  repulsionRadius: 200,  // How close mouse needs to be to affect heads
-  repulsionForce: 0.8,   // Strength of mouse repulsion
-  shadowBlur: 15,        // Shadow blur amount for 3D effect
-  shadowOffsetX: 10,     // Shadow X offset
-  shadowOffsetY: 10,     // Shadow Y offset
-  minScale: 0.3,         // Minimum size scale
-  maxScale: 0.6,         // Maximum size scale
-  rotationRange: 8,      // Max degrees of rotation (-8 to 8)
-  fallbackImage: '/5_heads/head1.png'  // Default image if none found
-};
-
-// Initialize when DOM is ready
-document.addEventListener('DOMContentLoaded', function() {
-  console.log('Initializing floating heads');
-  
-  // Create container if it doesn't exist
-  let container = document.getElementById('floating-heads-container');
-  if (!container) {
-    container = document.createElement('div');
-    container.id = 'floating-heads-container';
-    container.style.position = 'fixed';
-    container.style.top = '0';
-    container.style.left = '0';
-    container.style.width = '100%';
-    container.style.height = '100%';
-    container.style.zIndex = '5';
-    container.style.pointerEvents = 'none';
-    document.body.appendChild(container);
-  }
-  
-  // Create new floating heads instance
-  new FloatingHeads(container);
-});
-
-// FloatingHeads class
-function FloatingHeads(container) {
-  // Private variables
-  const canvas = document.createElement('canvas');
-  const ctx = canvas.getContext('2d');
-  let heads = [];
-  let mousePos = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
-  let lastFrameTime = 0;
-  let animationId = null;
-  let isInitialized = false;
-  
-  // Initialize
-  this.init = async function() {
-    // Setup canvas
-    canvas.id = 'floating-heads-canvas';
-    canvas.style.position = 'absolute';
-    canvas.style.top = '0';
-    canvas.style.left = '0';
-    canvas.style.width = '100%';
-    canvas.style.height = '100%';
-    canvas.style.pointerEvents = 'none';
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    container.appendChild(canvas);
+// Add spinning functionality to floating heads
+(function addSpinToHeads() {
+    console.log("Adding spin capability to floating heads");
     
-    // Add event listeners
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('resize', handleResize);
+    // Simple configuration
+    const spinConfig = {
+      minInterval: 3000,   // Minimum time between spins (ms)
+      maxInterval: 8000,   // Maximum time between spins (ms)
+      spinDuration: 800,   // Base duration for one spin (ms)
+      maxRotations: 3      // Maximum number of rotations
+    };
     
-    // Load images
-    await loadImagesFromDirectory();
+    // State tracking
+    let isMusicPlaying = false;
+    let spinInterval = null;
     
-    // Begin animation
-    if (heads.length > 0) {
-      isInitialized = true;
-      startAnimation();
+    // Add spin animation CSS if needed
+    function addSpinStyles() {
+      if (document.getElementById('head-spin-styles')) return;
+      
+      const style = document.createElement('style');
+      style.id = 'head-spin-styles';
+      style.textContent = `
+        @keyframes headSpin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+      `;
+      document.head.appendChild(style);
     }
-  };
-  
-  // Load images from directory
-  const loadImagesFromDirectory = async function() {
-    console.log('Loading head images...');
-    try {
-      // Try to fetch from API
-      console.log("Attempting to fetch from /api/floating-heads");
-      const response = await fetch('/api/floating-heads');
-      
-      // Check response status
-      if (!response.ok) {
-        console.warn('API response not OK:', response.status, response.statusText);
-        throw new Error('API response not OK: ' + response.status);
-      }
-      
-      // Check if the response is actually JSON (not HTML)
-      const contentType = response.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/json')) {
-        console.warn('API returned non-JSON response:', contentType);
-        console.log('Switching to direct image loading (bypassing API)');
-        throw new Error('API returned non-JSON response');
-      }
-      
-      const data = await response.json();
-      console.log('API response:', data);
-      
-      if (data.images && data.images.length > 0) {
-        await loadImages(data.images);
-      } else {
-        console.log('No images returned from API, using fallback image');
-        await loadImages([FLOATING_HEADS_CONFIG.fallbackImage]);
-      }
-    } catch (error) {
-      console.warn('Error fetching images from API:', error);
-      
-      // Fallback: try to directly load the image we know exists
-      console.log('Trying fallback image:', FLOATING_HEADS_CONFIG.fallbackImage);
-      
-      // Test if fallback image exists
-      try {
-        const testImage = new Image();
-        testImage.src = FLOATING_HEADS_CONFIG.fallbackImage;
-        await new Promise((resolve, reject) => {
-          testImage.onload = resolve;
-          testImage.onerror = reject;
-        });
-        
-        // If we get here, the image loaded successfully
-        await loadImages([FLOATING_HEADS_CONFIG.fallbackImage]);
-      } catch (imgError) {
-        console.error('Fallback image failed to load:', imgError);
-      }
-    }
-  };
-  
-  // Load specific images
-  const loadImages = async function(imagePaths) {
-    console.log('Loading images:', imagePaths);
     
-    // Create loading promises for all images
-    const loadPromises = imagePaths.map((path, index) => {
-      return new Promise((resolve) => {
-        const img = new Image();
-        img.src = path;
-        
-        img.onload = () => {
-          console.log(`Image loaded: ${path}`);
-          // Create a head object with random properties
-          heads.push({
-            id: index,
-            img: img,
-            x: Math.random() * window.innerWidth * 0.7 + window.innerWidth * 0.15,
-            y: Math.random() * window.innerHeight * 0.7 + window.innerHeight * 0.15,
-            rotation: Math.random() * FLOATING_HEADS_CONFIG.rotationRange * 2 - FLOATING_HEADS_CONFIG.rotationRange,
-            rotationSpeed: (Math.random() * 0.3 - 0.15),
-            scale: FLOATING_HEADS_CONFIG.minScale + Math.random() * (FLOATING_HEADS_CONFIG.maxScale - FLOATING_HEADS_CONFIG.minScale),
-            velocityX: (Math.random() * 0.4 - 0.2),
-            velocityY: (Math.random() * 0.4 - 0.2),
-            lastMoveTime: 0
-          });
-          resolve();
-        };
-        
-        img.onerror = () => {
-          console.error(`Failed to load image: ${path}`);
-          resolve(); // Resolve anyway to not block other images
-        };
+    // Spin a random head
+    function spinRandomHead() {
+      // Check if we have head images
+      const heads = document.querySelectorAll('img[src*="5_heads"]');
+      if (heads.length === 0) return;
+      
+      // Select a random head
+      const head = heads[Math.floor(Math.random() * heads.length)];
+      
+      // Skip if already spinning
+      if (head.dataset.spinning === 'true') return;
+      
+      // Mark as spinning
+      head.dataset.spinning = 'true';
+      
+      // Random number of rotations (1-3)
+      const rotations = Math.floor(Math.random() * spinConfig.maxRotations) + 1;
+      const duration = spinConfig.spinDuration * rotations;
+      
+      // Apply animation
+      const originalTransform = head.style.transform || '';
+      head.style.transition = `transform ${duration}ms ease-in-out`;
+      
+      // Wait for next frame to ensure transition is applied
+      requestAnimationFrame(() => {
+        head.style.transform = `${originalTransform} rotate(${360 * rotations}deg)`;
       });
-    });
+      
+      // Reset after animation completes
+      setTimeout(() => {
+        head.style.transition = '';
+        head.style.transform = originalTransform;
+        head.dataset.spinning = 'false';
+      }, duration + 50);
+    }
     
-    // Wait for all images to load or fail
-    await Promise.all(loadPromises);
-    console.log(`Loaded ${heads.length} images out of ${imagePaths.length} paths`);
-  };
-  
-  // Event handlers
-  const handleMouseMove = function(e) {
-    mousePos = { x: e.clientX, y: e.clientY };
-  };
-  
-  const handleResize = function() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-  };
-  
-  // Animation functions
-  const startAnimation = function() {
-    if (animationId) cancelAnimationFrame(animationId);
-    animationId = requestAnimationFrame(animate);
-  };
-  
-  const animate = function(timestamp) {
-    // Skip frame rate limiting if fps is 0 (unlimited)
-    if (FLOATING_HEADS_CONFIG.fps > 0) {
-      const frameInterval = 1000 / FLOATING_HEADS_CONFIG.fps;
-      if (timestamp - lastFrameTime < frameInterval) {
-        animationId = requestAnimationFrame(animate);
-        return;
+    // Start randomly spinning heads
+    function startRandomSpins() {
+      if (spinInterval) return;
+      
+      // Do initial spin
+      setTimeout(spinRandomHead, 1000);
+      
+      // Schedule next spin
+      spinInterval = setInterval(() => {
+        if (isMusicPlaying) {
+          spinRandomHead();
+        }
+      }, Math.floor(Math.random() * 
+        (spinConfig.maxInterval - spinConfig.minInterval) + 
+        spinConfig.minInterval));
+    }
+    
+    // Stop spinning
+    function stopRandomSpins() {
+      if (spinInterval) {
+        clearInterval(spinInterval);
+        spinInterval = null;
       }
     }
     
-    lastFrameTime = timestamp;
-    
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    // Update and draw each head
-    heads.forEach(head => {
-      // Calculate distance from mouse for repulsion effect
-      const dx = mousePos.x - head.x;
-      const dy = mousePos.y - head.y;
-      const distance = Math.sqrt(dx * dx + dy * dy);
+    // Listen for Soundcloud messages
+    window.addEventListener('message', event => {
+      if (!event.origin.includes('soundcloud.com')) return;
       
-      // Apply mouse repulsion when mouse is close
-      if (distance < FLOATING_HEADS_CONFIG.repulsionRadius) {
-        const repulsionForce = FLOATING_HEADS_CONFIG.repulsionForce * (1 - distance / FLOATING_HEADS_CONFIG.repulsionRadius);
-        head.velocityX -= (dx / distance) * repulsionForce;
-        head.velocityY -= (dy / distance) * repulsionForce;
+      try {
+        if (typeof event.data === 'object' && 
+            event.data.soundcloud && 
+            event.data.soundcloud.playerState) {
+          
+          const isPlaying = event.data.soundcloud.playerState === 'playing';
+          
+          if (isPlaying !== isMusicPlaying) {
+            isMusicPlaying = isPlaying;
+            
+            if (isPlaying) {
+              startRandomSpins();
+            } else {
+              stopRandomSpins();
+            }
+          }
+        }
+      } catch (e) {
+        // Ignore cross-origin errors
       }
-      
-      // Apply slight randomness for natural movement (every 500ms)
-      if (timestamp - head.lastMoveTime > 500) {
-        head.velocityX += (Math.random() * 0.2 - 0.1);
-        head.velocityY += (Math.random() * 0.2 - 0.1);
-        head.lastMoveTime = timestamp;
-      }
-      
-      // Apply velocity (with damping)
-      head.x += head.velocityX;
-      head.y += head.velocityY;
-      head.velocityX *= 0.98;
-      head.velocityY *= 0.98;
-      
-      // Apply rotation
-      head.rotation += head.rotationSpeed;
-      
-      // Boundary checking to keep heads within screen
-      const margin = 50;
-      if (head.x < margin) {
-        head.x = margin;
-        head.velocityX *= -0.5;
-      } else if (head.x > canvas.width - margin) {
-        head.x = canvas.width - margin;
-        head.velocityX *= -0.5;
-      }
-      
-      if (head.y < margin) {
-        head.y = margin;
-        head.velocityY *= -0.5;
-      } else if (head.y > canvas.height - margin) {
-        head.y = canvas.height - margin;
-        head.velocityY *= -0.5;
-      }
-      
-      // Draw the head with shadow for 3D effect
-      ctx.save();
-      ctx.translate(head.x, head.y);
-      ctx.rotate((head.rotation * Math.PI) / 180);
-      ctx.scale(head.scale, head.scale);
-      
-      // Add shadow for 3D paper cutout effect
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
-      ctx.shadowBlur = FLOATING_HEADS_CONFIG.shadowBlur;
-      ctx.shadowOffsetX = FLOATING_HEADS_CONFIG.shadowOffsetX;
-      ctx.shadowOffsetY = FLOATING_HEADS_CONFIG.shadowOffsetY;
-      
-      // Draw the head
-      const imgWidth = head.img.width;
-      const imgHeight = head.img.height;
-      ctx.drawImage(head.img, -imgWidth / 2, -imgHeight / 2, imgWidth, imgHeight);
-      
-      ctx.restore();
     });
     
-    animationId = requestAnimationFrame(animate);
-  };
-  
-  // Cleanup function
-  this.cleanup = function() {
-    if (animationId) cancelAnimationFrame(animationId);
-    window.removeEventListener('mousemove', handleMouseMove);
-    window.removeEventListener('resize', handleResize);
-    container.removeChild(canvas);
-  };
-  
-  // Initialize
-  this.init();
-}
-
-// Add CSS style for container
-const style = document.createElement('style');
-style.textContent = `
-  #floating-heads-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 5;
-    pointer-events: none;
-    overflow: hidden;
-  }
-  
-  #floating-heads-canvas {
-    filter: drop-shadow(0px 5px 15px rgba(0, 0, 0, 0.2));
-  }
-`;
-
-// Attempt to directly load images from common paths if needed
-window.addEventListener('load', function() {
-  setTimeout(() => {
-    const floatingHeadsCanvas = document.getElementById('floating-heads-canvas');
-    const headsContainer = document.getElementById('floating-heads-container');
-    
-    // If no floating heads are visible after 3 seconds, try direct loading
-    if (!floatingHeadsCanvas || headsContainer.childElementCount === 0) {
-      console.log('Floating heads not initialized after timeout, trying direct loading');
+    // Enable API on Soundcloud iframes
+    function enableSoundcloudAPI() {
+      const iframes = document.querySelectorAll('iframe[src*="soundcloud.com"]');
       
-      // Create new instance with direct loading
-      const directInstance = new FloatingHeads(headsContainer || document.body);
-      
-      // Store for debugging
-      window.floatingHeadsDirectInstance = directInstance;
+      iframes.forEach(iframe => {
+        if (!iframe.src.includes('api_widget=1')) {
+          try {
+            iframe.src = iframe.src + (iframe.src.includes('?') ? '&' : '?') + 'api_widget=1';
+          } catch (e) {
+            // Ignore errors
+          }
+        }
+      });
     }
-  }, 3000);
-});
-document.head.appendChild(style);
+    
+    // Initialize
+    function init() {
+      addSpinStyles();
+      enableSoundcloudAPI();
+      
+      // Watch for new Soundcloud iframes
+      const observer = new MutationObserver(enableSoundcloudAPI);
+      observer.observe(document.body, { 
+        childList: true, 
+        subtree: true 
+      });
+      
+      // Add testing functions
+      window.spinHeads = {
+        spin: spinRandomHead,
+        toggleMusic: (state) => {
+          isMusicPlaying = state !== undefined ? !!state : !isMusicPlaying;
+          if (isMusicPlaying) {
+            startRandomSpins();
+          } else {
+            stopRandomSpins();
+          }
+          return `Music ${isMusicPlaying ? 'playing' : 'stopped'}`;
+        }
+      };
+    }
+    
+    // If DOM already loaded, initialize now
+    if (document.readyState !== 'loading') {
+      init();
+    } else {
+      document.addEventListener('DOMContentLoaded', init);
+    }
+  })();
