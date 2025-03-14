@@ -110,7 +110,7 @@ const FLOATING_HEADS_CONFIG = {
           head.rotationSpeed = 0;
           
           // Assign different bobbing amplitude to each head
-          head.bobbingAmplitude = 5 + (index % 5) * 2.5; // Range from 5-15 degrees 
+          head.bobbingAmplitude = 10 + (index % 5) * 2.5; // Range from 5-15 degrees 
                                                           // Based on head index for consistent differences
           
           // Reset spinning state
