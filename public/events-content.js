@@ -151,8 +151,8 @@ document.addEventListener('DOMContentLoaded', function() {
             spacesNeeded = 8; // Less spaces on mobile
           } else {
             // Desktop settings
-            fontSize = 14; // Fixed larger size for desktop
-            spacesNeeded = 8; // More spaces on desktop
+            fontSize = 16; // Fixed larger size for desktop
+            spacesNeeded = 14; // More spaces on desktop
           }
           
           // Apply the font size directly via JavaScript
