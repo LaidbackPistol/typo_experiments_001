@@ -2,19 +2,56 @@
  * Floating Heads Animation
  * Creates 3D paper cutout effect for head images that float on screen
  */
+// Detect mobile devices
+const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
-// Configuration
+// Base configuration with shared parameters
 const FLOATING_HEADS_CONFIG = {
-  fps: 0,               // Frames per second (lower = more stop-motion feel; 0 = no restrictions)
-  repulsionRadius: 200,  // How close mouse needs to be to affect heads
-  repulsionForce: 0.8,   // Strength of mouse repulsion
-  shadowBlur: 15,        // Shadow blur amount for 3D effect
-  shadowOffsetX: 10,     // Shadow X offset
-  shadowOffsetY: 10,     // Shadow Y offset
-  minScale: 0.5,         // Minimum size scale
-  maxScale: 0.7,         // Maximum size scale
-  rotationRange: 8,      // Max degrees of rotation (-8 to 8)
-  fallbackImage: '/5_heads/head1.png'  // Default image if none found
+  fps: 0,                    // 0 means unlimited (no throttling)
+  repulsionRadius: isMobile ? 150 : 200,  // Smaller radius on mobile
+  repulsionForce: 0.8,       // Strength of mouse repulsion
+  shadowBlur: 15,            // Shadow blur amount for 3D effect
+  shadowOffsetX: 10,         // Shadow X offset
+  shadowOffsetY: 10,         // Shadow Y offset
+  rotationRange: 8,          // Max degrees of rotation (-8 to 8)
+  fallbackImage: '/5_heads/head1.png',  // Default image if none found
+  
+  // Device-specific configurations
+  mobile: {
+    minScale: 0.2,           // Smaller minimum scale for mobile
+    maxScale: 0.4,           // Smaller maximum scale for mobile
+    velocityDamping: 0.97,   // Slightly higher damping (slower movement)
+    randomMovementInterval: 800,  // Less frequent random movements
+    randomMovementIntensity: 0.08 // Less intense random movements
+  },
+  
+  desktop: {
+    minScale: 0.3,           // Larger minimum scale for desktop
+    maxScale: 0.7,           // Larger maximum scale for desktop
+    velocityDamping: 0.98,   // Standard damping
+    randomMovementInterval: 500,  // More frequent random movements
+    randomMovementIntensity: 0.1  // More intense random movements
+  },
+  
+  // Function to get the correct scale range based on device
+  getScaleRange: function() {
+    if (isMobile) {
+      return {
+        min: this.mobile.minScale,
+        max: this.mobile.maxScale
+      };
+    } else {
+      return {
+        min: this.desktop.minScale,
+        max: this.desktop.maxScale
+      };
+    }
+  },
+  
+  // Function to get device-specific parameters
+  getDeviceParams: function() {
+    return isMobile ? this.mobile : this.desktop;
+  }
 };
 
 // Initialize when DOM is ready
@@ -69,6 +106,16 @@ function FloatingHeads(container) {
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('resize', handleResize);
     
+    // Add touch event listeners for mobile
+    if (isMobile) {
+      window.addEventListener('touchstart', handleTouchStart);
+      window.addEventListener('touchmove', handleTouchMove);
+      window.addEventListener('touchend', handleTouchEnd);
+      
+      // On mobile, set initial mouse position to center
+      mousePos = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+    }
+    
     // Load images
     await loadImagesFromDirectory();
     
@@ -78,6 +125,48 @@ function FloatingHeads(container) {
       startAnimation();
     }
   };
+  
+  // Add the following touch event handlers
+  const handleTouchStart = function(e) {
+    e.preventDefault(); // Prevent scrolling when touching the canvas
+    if (e.touches.length > 0) {
+      const touch = e.touches[0];
+      mousePos = { x: touch.clientX, y: touch.clientY };
+    }
+  };
+  
+  const handleTouchMove = function(e) {
+    e.preventDefault(); // Prevent scrolling when touching the canvas
+    if (e.touches.length > 0) {
+      const touch = e.touches[0];
+      mousePos = { x: touch.clientX, y: touch.clientY };
+    }
+  };
+  
+  const handleTouchEnd = function(e) {
+    // Optional: You could reset the mouse position or apply some effect when touch ends
+  };
+  
+  // Add cleanup for touch events
+  this.cleanup = function() {
+    if (animationId) cancelAnimationFrame(animationId);
+    window.removeEventListener('mousemove', handleMouseMove);
+    window.removeEventListener('resize', handleResize);
+    
+    if (isMobile) {
+      window.removeEventListener('touchstart', handleTouchStart);
+      window.removeEventListener('touchmove', handleTouchMove);
+      window.removeEventListener('touchend', handleTouchEnd);
+    }
+    
+    container.removeChild(canvas);
+  };
+  
+  // You may also want to add a special handling for mobile orientation changes
+  window.addEventListener('orientationchange', function() {
+    // Wait a moment for the new dimensions to take effect
+    setTimeout(handleResize, 300);
+  });
   
   // Load images from directory
   const loadImagesFromDirectory = async function() {
@@ -145,6 +234,10 @@ function FloatingHeads(container) {
         
         img.onload = () => {
           console.log(`Image loaded: ${path}`);
+          
+          // Get device-specific scale range
+          const scaleRange = FLOATING_HEADS_CONFIG.getScaleRange();
+          
           // Create a head object with random properties
           heads.push({
             id: index,
@@ -153,7 +246,8 @@ function FloatingHeads(container) {
             y: Math.random() * window.innerHeight * 0.7 + window.innerHeight * 0.15,
             rotation: Math.random() * FLOATING_HEADS_CONFIG.rotationRange * 2 - FLOATING_HEADS_CONFIG.rotationRange,
             rotationSpeed: (Math.random() * 0.3 - 0.15),
-            scale: FLOATING_HEADS_CONFIG.minScale + Math.random() * (FLOATING_HEADS_CONFIG.maxScale - FLOATING_HEADS_CONFIG.minScale),
+            // Use device-specific scale range
+            scale: scaleRange.min + Math.random() * (scaleRange.max - scaleRange.min),
             velocityX: (Math.random() * 0.4 - 0.2),
             velocityY: (Math.random() * 0.4 - 0.2),
             lastMoveTime: 0
@@ -203,6 +297,9 @@ function FloatingHeads(container) {
     
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
+    // Get device-specific parameters
+    const deviceParams = FLOATING_HEADS_CONFIG.getDeviceParams();
+    
     // Update and draw each head
     heads.forEach(head => {
       // Calculate distance from mouse for repulsion effect
@@ -217,18 +314,19 @@ function FloatingHeads(container) {
         head.velocityY -= (dy / distance) * repulsionForce;
       }
       
-      // Apply slight randomness for natural movement (every 500ms)
-      if (timestamp - head.lastMoveTime > 500) {
-        head.velocityX += (Math.random() * 0.2 - 0.1);
-        head.velocityY += (Math.random() * 0.2 - 0.1);
+      // Apply slight randomness for natural movement using device-specific parameters
+      if (timestamp - head.lastMoveTime > deviceParams.randomMovementInterval) {
+        const randomIntensity = deviceParams.randomMovementIntensity;
+        head.velocityX += (Math.random() * randomIntensity * 2 - randomIntensity);
+        head.velocityY += (Math.random() * randomIntensity * 2 - randomIntensity);
         head.lastMoveTime = timestamp;
       }
       
-      // Apply velocity (with damping)
+      // Apply velocity with device-specific damping
       head.x += head.velocityX;
       head.y += head.velocityY;
-      head.velocityX *= 0.98;
-      head.velocityY *= 0.98;
+      head.velocityX *= deviceParams.velocityDamping;
+      head.velocityY *= deviceParams.velocityDamping;
       
       // Apply rotation
       head.rotation += head.rotationSpeed;
