@@ -456,12 +456,46 @@
       opacity: 1;
       transform: translateX(5px);
     }
-
-    .menu-item:hover {
-      opacity: 0.6;
-      cursor: pointer;
-    }
     
+    /* Fix for persistent hover states on mobile */
+    @media (hover: hover) {
+      /* Only apply hover effects on devices that actually support hover */
+      .menu-item:hover {
+        opacity: 0.6;
+        cursor: pointer;
+      }
+    }
+
+    @media (hover: none) {
+      /* For touch devices, remove the hover state */
+      .menu-item:hover {
+        opacity: 0.9; /* Same as default */
+      }
+      
+      /* Add a "pressed" state for touch feedback instead */
+      .menu-item:active {
+        opacity: 0.6;
+        transition: opacity 0.1s;
+      }
+      
+      /* Make sure active items maintain their proper opacity */
+      .menu-item.active, 
+      .menu-item.active:hover,
+      .menu-item.active:active {
+        opacity: 1;
+      }
+    }
+
+    /* Additional fix for iOS devices which have known issues with hover states */
+    @supports (-webkit-touch-callout: none) {
+      .menu-item {
+        -webkit-tap-highlight-color: transparent; /* Remove default iOS tap highlight */
+      }
+      
+      .menu-item:hover {
+        opacity: 0.9; /* Reset to default on iOS */
+      }
+    }
     /* Push items away from active item */
     li.active-item ~ li {
       transform: translateY(8px);
