@@ -107,6 +107,20 @@ document.addEventListener('DOMContentLoaded', function() {
       const circularTextSvg = document.getElementById('circular-text-svg');
       
       if (spinningText && circularTextSvg) {
+        // Adjust text spacing based on screen size for better fit
+        function adjustTextSpacing() {
+          const isMobile = window.innerWidth <= 768;
+          spinningText.textContent = isMobile 
+            ? 'STAY TUNED      STAY TUNED      ' 
+            : 'STAY TUNED            STAY TUNED            ';
+        }
+        
+        // Call once immediately
+        adjustTextSpacing();
+        
+        // Then on window resize
+        window.addEventListener('resize', adjustTextSpacing);
+        
         // Reverse direction on hover
         circularTextSvg.addEventListener('mouseenter', () => {
           circularTextSvg.style.animationDirection = 'reverse';

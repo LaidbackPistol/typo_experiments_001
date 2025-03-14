@@ -47,10 +47,11 @@
   #spinning-text {
     fill: #ffff00;
     font-family: monospace;
-    font-size: 9px;
-    letter-spacing: 2px;
+    font-size: 10px;
+    letter-spacing: 4px;
     text-anchor: start;
     dominant-baseline: middle;
+    font-weight: bold;
   }
   
   @keyframes spin {
@@ -76,7 +77,8 @@
     }
     
     #spinning-text {
-      font-size: 12px;
+      font-size: 14px;
+      letter-spacing: 6px;
     }
   }
   
