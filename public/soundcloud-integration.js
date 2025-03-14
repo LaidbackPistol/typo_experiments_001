@@ -1,12 +1,32 @@
-/**
- * SoundCloud Music Detection for Floating Heads
- * 
- * This script detects when SoundCloud tracks are playing
- * and makes the floating heads spin randomly when music is on.
- */
-
-// Load the SoundCloud Widget API
-function loadSoundCloudAPI() {
+// Add a direct stopping method for debugging
+window.stopFloatingHeadsMusic = function() {
+    isMusicPlaying = false;
+    updateFloatingHeadsMode();
+    console.log('Manually stopped floating heads music mode');
+  };
+  
+  // Listen for play/pause button clicks as an additional detection method
+  document.addEventListener('click', function(e) {
+    // Check if we clicked on a SoundCloud play/pause button or waveform
+    const target = e.target;
+    if (target.closest('.playButton') || 
+        target.closest('.playControls') || 
+        target.closest('.sc-button-play') ||
+        target.closest('.sc-button-pause') ||
+        target.closest('.waveform')) {
+      
+      // Give SoundCloud time to update its state
+      setTimeout(checkIfAnyPlaying, 100);
+    }
+  });/**
+   * SoundCloud Music Detection for Floating Heads
+   * 
+   * This script detects when SoundCloud tracks are playing
+   * and makes the floating heads spin randomly when music is on.
+   */
+  
+  // Load the SoundCloud Widget API
+  function loadSoundCloudAPI() {
     if (window.SC) return Promise.resolve(); // Already loaded
     
     return new Promise((resolve, reject) => {
@@ -88,12 +108,23 @@ function loadSoundCloudAPI() {
         
         widget.bind(SC.Widget.Events.PAUSE, () => {
           console.log(`SoundCloud track ${index + 1} paused`);
-          checkIfAnyPlaying();
+          // Immediately check if any other tracks are still playing
+          setTimeout(checkIfAnyPlaying, 50);
         });
         
         widget.bind(SC.Widget.Events.FINISH, () => {
           console.log(`SoundCloud track ${index + 1} finished`);
-          checkIfAnyPlaying();
+          // Immediately check if any other tracks are still playing
+          setTimeout(checkIfAnyPlaying, 50);
+        });
+        
+        // Also listen for PLAY_PROGRESS to catch when tracks are stopped
+        // in other ways (like clicking at the end of the track)
+        widget.bind(SC.Widget.Events.PLAY_PROGRESS, () => {
+          // Only check occasionally to avoid performance issues
+          if (Math.random() < 0.02) { // 2% chance each progress event
+            checkIfAnyPlaying();
+          }
         });
         
         soundCloudWidgets.push(widget);
@@ -106,24 +137,67 @@ function loadSoundCloudAPI() {
   // Check if any track is still playing
   function checkIfAnyPlaying() {
     let anyPlaying = false;
+    let checkCount = 0;
     
-    // Use Promise.all to check all widgets in parallel
-    Promise.all(soundCloudWidgets.map(widget => {
-      return new Promise(resolve => {
-        widget.getPosition(position => {
-          widget.getDuration(duration => {
-            // If position is increasing and not at the end, it's playing
-            if (position > 0 && position < duration) {
-              anyPlaying = true;
-            }
-            resolve();
-          });
-        });
-      });
-    })).then(() => {
-      isMusicPlaying = anyPlaying;
+    // No widgets? Music is definitely not playing
+    if (soundCloudWidgets.length === 0) {
+      isMusicPlaying = false;
       updateFloatingHeadsMode();
+      return;
+    }
+    
+    // Check each widget's state
+    soundCloudWidgets.forEach(widget => {
+      widget.isPaused(isPaused => {
+        checkCount++;
+        
+        // If not paused, music is playing
+        if (!isPaused) {
+          anyPlaying = true;
+        }
+        
+        // After checking all widgets, update state if needed
+        if (checkCount >= soundCloudWidgets.length) {
+          if (isMusicPlaying !== anyPlaying) {
+            isMusicPlaying = anyPlaying;
+            updateFloatingHeadsMode();
+          }
+        }
+      });
     });
+    
+    // Set a backup timeout in case callbacks fail
+    setTimeout(() => {
+      if (checkCount < soundCloudWidgets.length) {
+        console.log('Timeout reached while checking play state - forcing check');
+        if (isMusicPlaying) {
+          // Double-check with getPosition as backup method
+          let stillPlaying = false;
+          let backupCheckCount = 0;
+          
+          soundCloudWidgets.forEach(widget => {
+            widget.getPosition(position => {
+              backupCheckCount++;
+              if (position > 0) {
+                widget.getDuration(duration => {
+                  if (position < duration - 1000) { // Not at the end
+                    stillPlaying = true;
+                  }
+                  
+                  if (backupCheckCount >= soundCloudWidgets.length && !stillPlaying) {
+                    isMusicPlaying = false;
+                    updateFloatingHeadsMode();
+                  }
+                });
+              } else if (backupCheckCount >= soundCloudWidgets.length && !stillPlaying) {
+                isMusicPlaying = false;
+                updateFloatingHeadsMode();
+              }
+            });
+          });
+        }
+      }
+    }, 500);
   }
   
   // Update floating heads mode based on music state
