@@ -7,11 +7,11 @@
 
 // Shake detection configuration
 const SHAKE_CONFIG = {
-    threshold: 15,            // How hard the shake needs to be (lower = more sensitive)
-    timeout: 1000,            // Minimum time between shake triggers (ms)
-    maxSpinHeads: 3,          // Maximum number of heads to spin at once
-    spinDurationMin: 500,     // Minimum spin duration (ms)
-    spinDurationMax: 1200,    // Maximum spin duration (ms)
+    threshold: 12,            // How hard the shake needs to be (lower = more sensitive)
+    timeout: 800,             // Minimum time between shake triggers (ms)
+    maxSpinHeads: 5,          // Maximum number of heads to spin at once
+    spinDurationMin: 800,     // Minimum spin duration (ms)
+    spinDurationMax: 1500,    // Maximum spin duration (ms)
     spinDirectionRandom: true, // Random spin direction (clockwise/counter)
     spinMultipleShakes: true, // Whether multiple shakes add more intensity
     debugMode: false          // Set to true to show acceleration values
@@ -144,41 +144,73 @@ const SHAKE_CONFIG = {
     headIndices.forEach(index => {
       const head = floatingHeads.heads[index];
       
-      // Set up the spin animation parameters
-      head.spinningNow = true;
-      head.spinStartTime = performance.now();
+      // Method 1: Using the existing spin properties
+      if (typeof head.spinningNow !== 'undefined') {
+        // Set up the spin animation parameters
+        head.spinningNow = true;
+        head.spinStartTime = performance.now();
+        
+        // Random duration within configured range
+        head.spinDuration = SHAKE_CONFIG.spinDurationMin + 
+                            Math.random() * (SHAKE_CONFIG.spinDurationMax - SHAKE_CONFIG.spinDurationMin);
+        
+        // Determine spin direction (clockwise=1, counter-clockwise=-1)
+        head.spinDirection = SHAKE_CONFIG.spinDirectionRandom ? 
+                             (Math.random() > 0.5 ? 1 : -1) : 1;
+        
+        head.initialRotation = head.rotation; // Remember starting rotation
+        
+        // Calculate target rotation (full 360° spin)
+        // For stronger shakes, do multiple rotations
+        const rotations = 1 + (shakeCount > 1 ? 1 : 0);
+        head.targetRotation = head.initialRotation + (360 * rotations * head.spinDirection);
+      } 
+      // Method 2: Apply rotation directly
+      else {
+        // Add a big instant rotation bump
+        head.rotation += (Math.random() > 0.5 ? 360 : -360) * (1 + (shakeCount > 1 ? 1 : 0));
+        
+        // Increase rotation speed significantly
+        head.rotationSpeed = (Math.random() > 0.5 ? 1 : -1) * (Math.random() * 5 + 3);
+        
+        // Schedule a reset of rotation speed after the spin
+        setTimeout(() => {
+          if (head) {
+            head.rotationSpeed = (Math.random() * 0.3 - 0.15); // Back to normal
+          }
+        }, SHAKE_CONFIG.spinDurationMax);
+      }
       
-      // Random duration within configured range
-      head.spinDuration = SHAKE_CONFIG.spinDurationMin + 
-                          Math.random() * (SHAKE_CONFIG.spinDurationMax - SHAKE_CONFIG.spinDurationMin);
-      
-      // Determine spin direction (clockwise=1, counter-clockwise=-1)
-      head.spinDirection = SHAKE_CONFIG.spinDirectionRandom ? 
-                           (Math.random() > 0.5 ? 1 : -1) : 1;
-      
-      head.initialRotation = head.rotation; // Remember starting rotation
-      
-      // Calculate target rotation (full 360° spin)
-      // For stronger shakes, do multiple rotations
-      const rotations = 1 + (shakeCount > 1 ? 1 : 0);
-      head.targetRotation = head.initialRotation + (360 * rotations * head.spinDirection);
-      
-      // Add a slight velocity boost
-      head.velocityX += (Math.random() * 2 - 1);
-      head.velocityY += (Math.random() * 2 - 1);
+      // Add a significant velocity boost (works with both methods)
+      head.velocityX += (Math.random() * 6 - 3);
+      head.velocityY += (Math.random() * 6 - 3);
     });
+    
+    // If nothing else worked, try triggering music mode temporarily
+    if (typeof floatingHeads.setMusicMode === 'function') {
+      // Temporarily enable music mode to trigger animations
+      floatingHeads.setMusicMode(true);
+      
+      // Turn it off after a short delay
+      setTimeout(() => {
+        if (typeof floatingHeads.setMusicMode === 'function' && 
+            !window.isMusicPlaying) { // Don't turn off if music is actually playing
+          floatingHeads.setMusicMode(false);
+        }
+      }, 2000);
+    }
   }
   
   // Show visual feedback that shake was detected
   function showShakeFeedback() {
-    // Option 1: Flash the background briefly
+    // Flash the background briefly with white color
     const flash = document.createElement('div');
     flash.style.position = 'fixed';
     flash.style.top = '0';
     flash.style.left = '0';
     flash.style.width = '100%';
     flash.style.height = '100%';
-    flash.style.backgroundColor = 'rgba(255, 255, 0, 0.1)';
+    flash.style.backgroundColor = 'rgba(255, 255, 255, 0.15)'; // Changed to white
     flash.style.zIndex = '1000';
     flash.style.pointerEvents = 'none';
     flash.style.opacity = '0';
