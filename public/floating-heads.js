@@ -12,7 +12,7 @@ const FLOATING_HEADS_CONFIG = {
   shadowOffsetX: 10,     // Shadow X offset
   shadowOffsetY: 10,     // Shadow Y offset
   minScale: 0.3,         // Minimum size scale
-  maxScale: 0.7,         // Maximum size scale
+  maxScale: 0.6,         // Maximum size scale
   rotationRange: 8,      // Max degrees of rotation (-8 to 8)
   fallbackImage: '/5_heads/head1.png'  // Default image if none found
 };
