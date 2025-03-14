@@ -74,22 +74,6 @@ app.get('/api/mixes', (req, res) => {
   }
 });
 
-// For Vercel, we need to export the Express app
-if (process.env.VERCEL) {
-  // Handle all other routes by redirecting to index.html for SPA behavior
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
-  });
-  
-  // Export the Express app for Vercel serverless deployment
-  module.exports = app;
-} else {
-  // Start the server normally in development
-  app.listen(port, () => {
-    console.log(`Server running at http://localhost:${port}`);
-  });
-}
-
 app.get('/api/floating-heads', (req, res) => {
   const headsPath = path.join(__dirname, 'public', '5_heads');
   
@@ -113,3 +97,19 @@ app.get('/api/floating-heads', (req, res) => {
     res.status(500).json({ error: 'Failed to read head images' });
   }
 });
+
+// For Vercel, we need to export the Express app
+if (process.env.VERCEL) {
+  // Handle all other routes by redirecting to index.html for SPA behavior
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  });
+  
+  // Export the Express app for Vercel serverless deployment
+  module.exports = app;
+} else {
+  // Start the server normally in development
+  app.listen(port, () => {
+    console.log(`Server running at http://localhost:${port}`);
+  });
+}
