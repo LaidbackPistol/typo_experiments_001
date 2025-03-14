@@ -54,6 +54,11 @@ const FLOATING_HEADS_CONFIG = {
     let isInitialized = false;
     let isMusicMode = false;
     
+    // Shared music variables for synchronized bobbing
+    const baseBPM = 130; // Constant BPM for all heads
+    const beatDuration = 60000 / baseBPM; // ms per beat
+    let musicStartTime = 0;
+    
     // Make heads accessible for music mode
     this.heads = heads;
     
@@ -93,11 +98,25 @@ const FLOATING_HEADS_CONFIG = {
       isMusicMode = enabled;
       FLOATING_HEADS_CONFIG.musicModeActive = enabled;
       
+      // Set shared start time for synchronized bobbing
+      if (enabled) {
+        musicStartTime = performance.now();
+      }
+      
       // Apply changes to all heads
-      heads.forEach(head => {
+      heads.forEach((head, index) => {
         if (enabled) {
           // Reset any ongoing rotation
           head.rotationSpeed = 0;
+          
+          // Assign different bobbing amplitude to each head
+          head.bobbingAmplitude = 5 + (index % 5) * 2.5; // Range from 5-15 degrees 
+                                                          // Based on head index for consistent differences
+          
+          // Reset spinning state
+          head.spinningNow = false;
+          head.spinStartTime = 0;
+          head.spinDuration = 0;
           
           // Add a bit of initial movement
           head.velocityX += (Math.random() * 0.3 - 0.15);
@@ -115,7 +134,6 @@ const FLOATING_HEADS_CONFIG = {
           head.velocityY *= 0.5; // Slow down
           
           // Reset music-specific properties
-          head.bobbingStartTime = 0;
           head.spinningNow = false;
         }
       });
@@ -270,20 +288,7 @@ const FLOATING_HEADS_CONFIG = {
         
         // Apply music mode effects
         if (isMusicMode || FLOATING_HEADS_CONFIG.musicModeActive) {
-          // Music playing - bobbing at 130 BPM (462ms per beat)
-          
-          // Set up bobbing motion if not already set
-          if (!head.bobbingStartTime) {
-            head.bobbingStartTime = timestamp;
-            head.bobbingOffset = Math.random() * Math.PI * 2; // Random start phase
-            head.spinningNow = false;
-            head.spinStartTime = 0;
-            head.spinDuration = 0;
-            
-            // Each head has slightly different bobbing frequency around 130 BPM
-            head.bpm = 130 + (Math.random() * 10 - 5); // 125-135 BPM range
-            head.beatDuration = 60000 / head.bpm; // ms per beat
-          }
+          // Music playing - synchronized bobbing using shared timing
           
           // Occasionally start a full spin
           if (!head.spinningNow && Math.random() > 0.996) { // About once every few seconds per head
@@ -313,16 +318,16 @@ const FLOATING_HEADS_CONFIG = {
               head.rotation = head.targetRotation % 360; // Normalize rotation
             }
           } else {
-            // Apply bobbing motion based on beat
-            const beatProgress = ((timestamp - head.bobbingStartTime) % head.beatDuration) / head.beatDuration;
-            const bobAmount = 8; // Degrees of bob
+            // Apply synchronized bobbing motion
+            const beatProgress = ((timestamp - musicStartTime) % beatDuration) / beatDuration;
+            const bobAmount = head.bobbingAmplitude || 8; // Use assigned amplitude or default
             
-            // Sine wave bobbing (up and down motion)
-            head.rotation = head.rotation * 0.9 + (Math.sin(beatProgress * Math.PI * 2 + head.bobbingOffset) * bobAmount) * 0.1;
+            // Sine wave bobbing (up and down motion) - all heads move at same rhythm
+            head.rotation = head.rotation * 0.9 + (Math.sin(beatProgress * Math.PI * 2) * bobAmount) * 0.1;
           }
           
           // Add subtle movement with the beat
-          if (timestamp - head.lastMoveTime > head.beatDuration / 2) {
+          if (timestamp - head.lastMoveTime > beatDuration / 2) {
             head.velocityX += (Math.random() * 0.3 - 0.15) * 0.5;
             head.velocityY += (Math.random() * 0.3 - 0.15) * 0.5;
             head.lastMoveTime = timestamp;
@@ -336,7 +341,6 @@ const FLOATING_HEADS_CONFIG = {
           }
           
           // Reset music properties when music stops
-          head.bobbingStartTime = 0;
           head.spinningNow = false;
         }
         
