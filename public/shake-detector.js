@@ -7,7 +7,7 @@
 
 // Shake detection configuration
 const SHAKE_CONFIG = {
-    threshold: 12,            // How hard the shake needs to be (lower = more sensitive)
+    threshold: 20,            // How hard the shake needs to be (lower = more sensitive)
     timeout: 800,             // Minimum time between shake triggers (ms)
     maxSpinHeads: 5,          // Maximum number of heads to spin at once
     spinDurationMin: 800,     // Minimum spin duration (ms)
