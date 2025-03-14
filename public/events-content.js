@@ -147,7 +147,7 @@ document.addEventListener('DOMContentLoaded', function() {
           
           if (isMobile) {
             // Mobile settings
-            fontSize = 8; // Fixed smaller size for mobile
+            fontSize = 14; // Fixed smaller size for mobile
             spacesNeeded = 8; // Less spaces on mobile
           } else {
             // Desktop settings
