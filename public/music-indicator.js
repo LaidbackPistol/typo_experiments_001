@@ -13,6 +13,7 @@ const musicIndicatorStyles = `
     /* Much more subtle margin adjustment */
     margin-right: 5px;
   }
+    
   
   /* Dot indicator - positioned more tightly */
   .menu-item[data-section="mixxs"].music-playing::after {
