@@ -24,6 +24,7 @@
     justify-content: center;
     align-items: center;
     pointer-events: auto;
+    position: relative;
   }
   
   .circular-text-container {
@@ -69,9 +70,14 @@
       box-sizing: border-box;
     }
     
+    .events-placeholder {
+      padding-right: 180px; /* Offset the left padding to center the content */
+    }
+    
     .circular-text-container {
       width: 400px;
       height: 400px;
+      margin: 0 auto;
     }
   }
   
