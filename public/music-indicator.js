@@ -7,7 +7,7 @@ const musicIndicatorStyles = `
     left: 20px;
     width: 36px;
     height: 36px;
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: rgba(0, 0, 0, 0.0);
     border-radius: 50%;
     display: flex;
     align-items: center;
