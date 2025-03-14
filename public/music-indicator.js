@@ -1,6 +1,6 @@
 /**
- * Non-Intrusive Music Menu Indicator with Spacing Fix
- * Creates a visual effect for the mixxs menu without modifying its DOM structure
+ * Non-Intrusive Music Menu Indicator with Minimal Spacing Fix
+ * Creates a visual effect for the mixxs menu without excessive padding
  */
 
 // CSS for creating the music animation without modifying the DOM
@@ -10,30 +10,22 @@ const musicIndicatorStyles = `
     text-shadow: 0 0 8px rgba(255, 255, 0, 0.6);
     position: relative;
     animation: mixxs-pulse 1.2s ease-in-out infinite alternate;
-    /* Add margin-right to compensate for the dot indicator */
-    margin-right: 15px;
+    /* Much more subtle margin adjustment */
+    margin-right: 5px;
   }
   
-  /* Add adequate spacing to the next menu item in mobile views */
-  @media (max-width: 768px) {
-    /* Increase the spacing specifically between mixxs and archives */
-    .menu-item[data-section="mixxs"].music-playing + li .menu-item[data-section="archives"] {
-      margin-left: 8px;
-    }
-  }
-  
-  /* Dot indicator */
+  /* Dot indicator - positioned more tightly */
   .menu-item[data-section="mixxs"].music-playing::after {
     content: '';
     position: absolute;
-    right: -15px;
+    right: -8px; /* Reduced from -15px */
     top: 50%;
     transform: translateY(-50%);
-    width: 8px;
-    height: 8px;
+    width: 5px; /* Smaller dot */
+    height: 5px; /* Smaller dot */
     border-radius: 50%;
     background-color: #ffff00;
-    box-shadow: 0 0 8px rgba(255, 255, 0, 0.8);
+    box-shadow: 0 0 5px rgba(255, 255, 0, 0.7);
     animation: pulse-dot 1.5s ease-in-out infinite;
   }
   
@@ -57,12 +49,16 @@ const musicIndicatorStyles = `
     animation-play-state: paused;
   }
   
-  /* Mobile adjustments */
+  /* Mobile adjustments - keep everything tight */
   @media (max-width: 768px) {
     .menu-item[data-section="mixxs"].music-playing::after {
-      right: -10px;
-      width: 6px;
-      height: 6px;
+      right: -6px;
+      width: 4px;
+      height: 4px;
+    }
+    
+    .menu-item[data-section="mixxs"].music-playing {
+      margin-right: 3px;
     }
   }
 `;
@@ -82,7 +78,7 @@ function toggleMusicAnimation(isPlaying) {
   if (isPlaying) {
     mixxsMenuItem.classList.add('music-playing');
     
-    // Add extra space to the parent list item for better layout
+    // Very minimal adjustment to parent list item
     const parentLi = mixxsMenuItem.closest('li');
     if (parentLi) {
       parentLi.style.marginRight = '2px';
@@ -128,16 +124,6 @@ function initMusicIndicator() {
   if (window.isMusicPlaying) {
     toggleMusicAnimation(true);
   }
-  
-  // Watch for responsive layout changes and adjust spacing accordingly
-  window.addEventListener('resize', function() {
-    if (window.isMusicPlaying) {
-      // Re-apply spacing on resize to account for layout changes
-      setTimeout(function() {
-        toggleMusicAnimation(true);
-      }, 100);
-    }
-  });
 }
 
 // Run when the page loads
