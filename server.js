@@ -11,32 +11,6 @@ app.use(express.static('public'));
 // Change this to look inside the public folder
 app.use('/archive_assets', express.static(path.join(__dirname, 'public', 'archive_assets')));
 
-app.get('/api/heads', (req, res) => {
-  const headsPath = path.join(__dirname, 'public', '5_heads');
-  
-  // Check if 5_heads directory exists
-  if (!fs.existsSync(headsPath)) {
-    console.log('Directory not found:', headsPath);
-    return res.json({ images: [] });
-  }
-  
-  try {
-    // Read all image files in the 5_heads folder
-    const imageFiles = fs.readdirSync(headsPath)
-      .filter(file => {
-        const ext = path.extname(file).toLowerCase();
-        return ['.jpg', '.jpeg', '.png', '.gif', '.webp'].includes(ext);
-      })
-      .map(file => `/5_heads/${encodeURIComponent(file)}`);
-    
-    console.log('Found images:', imageFiles);
-    res.json({ images: imageFiles });
-  } catch (error) {
-    console.error('Error reading 5_heads directory:', error);
-    res.status(500).json({ error: 'Failed to read head images', details: error.message });
-  }
-});
-
 // API endpoint to get all archive albums
 app.get('/api/archives', (req, res) => {
   // Update the path to look in public/archive_assets
@@ -115,3 +89,27 @@ if (process.env.VERCEL) {
     console.log(`Server running at http://localhost:${port}`);
   });
 }
+
+app.get('/api/floating-heads', (req, res) => {
+  const headsPath = path.join(__dirname, 'public', '5_heads');
+  
+  // Check if 5_heads directory exists
+  if (!fs.existsSync(headsPath)) {
+    return res.json({ images: [] });
+  }
+  
+  try {
+    // Read all image files in the 5_heads folder
+    const imageFiles = fs.readdirSync(headsPath)
+      .filter(file => {
+        const ext = path.extname(file).toLowerCase();
+        return ['.jpg', '.jpeg', '.png', '.gif', '.webp'].includes(ext);
+      })
+      .map(file => `/5_heads/${file}`);
+    
+    res.json({ images: imageFiles });
+  } catch (error) {
+    console.error('Error reading 5_heads directory:', error);
+    res.status(500).json({ error: 'Failed to read head images' });
+  }
+});
