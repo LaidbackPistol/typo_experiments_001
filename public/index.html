@@ -456,7 +456,7 @@
       opacity: 1;
       transform: translateX(5px);
     }
-    
+
     /* Fix for persistent hover states on mobile */
     @media (hover: hover) {
       /* Only apply hover effects on devices that actually support hover */
@@ -1131,11 +1131,28 @@
     }   
   </style>
   <link rel="stylesheet" href="/floating-heads.css">
+  <link rel="stylesheet" href="/future-events.css">
 </head>
 <body>
   <div id="canvas-container">
     <canvas id="feedback-canvas"></canvas>
     <canvas id="typography-canvas"></canvas>
+  </div>
+  <!-- Events gallery -->
+  <div id="events-gallery" class="events-gallery">
+    <div class="gallery-container">
+      <div class="events-placeholder">
+        <div class="circular-text-container">
+          <svg id="circular-text-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <path id="circular-text-path" d="M50,90 a40,40 0 1,1 0,-80 a40,40 0 1,1 0,80z"/>
+            <text>
+              <textPath href="#circular-text-path" id="spinning-text">Stay tuned Stay tuned Stay tuned Stay tuned Stay tuned Stay tuned </textPath>
+            </text>
+          </svg>
+        </div>
+      </div>
+      <!-- Future events will be loaded here dynamically -->
+    </div>
   </div>
   <!-- Archive gallery -->
   <div id="archive-gallery" class="archive-gallery">
@@ -4099,6 +4116,7 @@
 <script src="/floating-heads.js"></script>
 <script src="/soundcloud-integration.js"></script>
 <script src="/music-indicator.js"></script>
+<script src="/events-content.js"></script>
 
 </body>
 </html>

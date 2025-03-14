@@ -117,6 +117,27 @@ app.get('/api/floating-heads', (req, res) => {
   }
 });
 
+// API endpoint to get future events
+app.get('/api/events', (req, res) => {
+  const eventsPath = path.join(__dirname, 'public', 'future_events.json');
+  
+  // Check if future_events.json file exists
+  if (!fs.existsSync(eventsPath)) {
+    return res.json({ status: "coming_soon", events: [] });
+  }
+  
+  try {
+    // Read the events JSON file
+    const eventsData = fs.readFileSync(eventsPath, 'utf8');
+    const events = JSON.parse(eventsData);
+    
+    res.json(events);
+  } catch (error) {
+    console.error('Error reading events data:', error);
+    res.status(500).json({ error: 'Failed to read events data' });
+  }
+});
+
 // For Vercel, we need to export the Express app
 if (process.env.VERCEL) {
   // Handle all other routes by redirecting to index.html for SPA behavior
