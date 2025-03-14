@@ -1,0 +1,54 @@
+.floating-heads-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 50; /* Above canvas but below UI elements */
+    transition: opacity 0.5s ease;
+  }
+  
+  .floating-head {
+    position: absolute;
+    top: 0;
+    left: 0;
+    will-change: transform;
+    transform-origin: center center;
+    transition: transform 0.05s ease-out; /* Quick transition for stop-motion feel */
+  }
+  
+  .floating-head img {
+    display: block;
+    width: auto;
+    max-width: 350px;
+    height: auto;
+    filter: drop-shadow(0 3px 10px rgba(0, 0, 0, 0.3));
+  }
+  
+  /* Hide heads when fullscreen viewer is active */
+  .fullscreen-viewer.active ~ .floating-heads-container {
+    visibility: hidden !important;
+    opacity: 0 !important;
+  }
+  
+  /* Hide heads when archive gallery is active */
+  .archive-gallery.active ~ .floating-heads-container,
+  .mixes-gallery.active ~ .floating-heads-container {
+    visibility: hidden !important;
+    opacity: 0 !important;
+  }
+  
+  /* Media query for mobile */
+  @media (max-width: 768px) {
+    .floating-head img {
+      max-width: 180px; /* Smaller on mobile */
+    }
+  }
+  
+  /* Customizable CSS Variables - can be added to :root in existing CSS */
+  :root {
+    --floating-head-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+    --floating-head-transition: 0.05s;
+  }

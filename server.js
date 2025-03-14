@@ -90,26 +90,27 @@ if (process.env.VERCEL) {
   });
 }
 
-app.get('/api/floating-heads', (req, res) => {
-  const headsPath = path.join(__dirname, 'public', '5_heads');
+app.get('/api/heads', (req, res) => {
+  // The path to the 5_heads directory
+  const headsPath = path.join(__dirname, 'public', 'archive_assets', '5_heads');
   
-  // Check if 5_heads directory exists
+  // Check if the directory exists
   if (!fs.existsSync(headsPath)) {
     return res.json({ images: [] });
   }
   
   try {
-    // Read all image files in the 5_heads folder
+    // Read all image files in the directory
     const imageFiles = fs.readdirSync(headsPath)
       .filter(file => {
         const ext = path.extname(file).toLowerCase();
         return ['.jpg', '.jpeg', '.png', '.gif', '.webp'].includes(ext);
       })
-      .map(file => `/5_heads/${file}`);
+      .map(file => `/archive_assets/5_heads/${encodeURIComponent(file)}`);
     
     res.json({ images: imageFiles });
   } catch (error) {
     console.error('Error reading 5_heads directory:', error);
-    res.status(500).json({ error: 'Failed to read head images' });
+    res.status(500).json({ error: 'Failed to read 5_heads directory' });
   }
 });
