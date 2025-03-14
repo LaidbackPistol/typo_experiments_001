@@ -110,66 +110,45 @@ document.addEventListener('DOMContentLoaded', function() {
       if (spinningText && circularTextSvg) {
         // Function to optimize text spacing based on circle size
         function optimizeCircularText() {
-          // Get the dimensions of the SVG container
-          const svgWidth = circularTextSvg.clientWidth || 300;
-          const svgHeight = circularTextSvg.clientHeight || 300;
+          // Check if we're on mobile or desktop
+          const isMobile = window.innerWidth <= 768;
           
-          // Calculate the radius (from our path: M50,90 a40,40 0 1,1 0,-80 a40,40 0 1,1 0,80z)
-          // The radius in the viewBox coordinates is 40
-          const viewBoxSize = 100; // The viewBox is 100x100
-          const pathRadius = 40; // From the path definition
+          // Set base font size based on device type
+          let fontSize, spacesNeeded;
           
-          // Convert the viewBox radius to actual pixels
-          const actualRadius = (svgWidth / viewBoxSize) * pathRadius;
+          if (isMobile) {
+            // Mobile settings
+            fontSize = 8; // Fixed smaller size for mobile
+            spacesNeeded = 8; // Less spaces on mobile
+          } else {
+            // Desktop settings
+            fontSize = 14; // Fixed larger size for desktop
+            spacesNeeded = 14; // More spaces on desktop
+          }
           
-          // Calculate the circumference of the path
-          const circumference = 2 * Math.PI * actualRadius;
-          
-          // Base text size on container size
-          let fontSize = Math.max(10, Math.floor(svgWidth / 25));
-          let letterSpacing = Math.max(2, Math.floor(svgWidth / 80));
-          
-          // Set the font size and letter spacing
+          // Apply the font size directly via JavaScript
           spinningText.style.fontSize = `${fontSize}px`;
-          spinningText.style.letterSpacing = `${letterSpacing}px`;
+          spinningText.style.letterSpacing = `${Math.floor(fontSize / 4)}px`;
           
-          // Measure text "STAY TUNED" with current styles
-          const tempSpan = document.createElement('span');
-          tempSpan.style.fontFamily = 'monospace';
-          tempSpan.style.fontSize = `${fontSize}px`;
-          tempSpan.style.letterSpacing = `${letterSpacing}px`;
-          tempSpan.style.fontWeight = 'bold';
-          tempSpan.style.visibility = 'hidden';
-          tempSpan.style.position = 'absolute';
-          tempSpan.textContent = "STAY TUNED";
-          document.body.appendChild(tempSpan);
+          // Create spaced text
+          const spacing = ' '.repeat(spacesNeeded);
+          spinningText.textContent = `STAY TUNED${spacing}STAY TUNED${spacing}`;
           
-          // Get the width of the text
-          const textWidth = tempSpan.offsetWidth;
-          document.body.removeChild(tempSpan);
-          
-          // Calculate spacing needed for perfect distribution (half the circumference minus text width)
-          const halfCircumference = circumference / 2;
-          const emptySpace = halfCircumference - textWidth;
-          
-          // Convert empty space to equivalent number of space characters
-          const approximateSpaceWidth = fontSize * 0.6; // Monospace space is about 60% of font size
-          const spacesNeeded = Math.max(4, Math.round(emptySpace / approximateSpaceWidth));
-          
-          // Set the text with calculated spacing
-          spinningText.textContent = `STAY TUNED${' '.repeat(spacesNeeded)}STAY TUNED${' '.repeat(spacesNeeded)}`;
-          
-          console.log(`Circular text optimized: fontSize=${fontSize}px, spaces=${spacesNeeded}, circumference=${Math.round(circumference)}px`);
+          console.log(`Circular text set: fontSize=${fontSize}px, spaces=${spacesNeeded}, mobile=${isMobile}`);
         }
         
         // Call once immediately
         optimizeCircularText();
         
-        // Call again after a short delay to ensure accurate measurements
-        setTimeout(optimizeCircularText, 200);
+        // Then again after a short delay to ensure rendering
+        setTimeout(optimizeCircularText, 300);
         
-        // Then on window resize
-        window.addEventListener('resize', optimizeCircularText);
+        // Listen for window resize
+        window.addEventListener('resize', function() {
+          // Use debounce to avoid too many calculations
+          clearTimeout(window.resizeTimer);
+          window.resizeTimer = setTimeout(optimizeCircularText, 100);
+        });
         
         // Reverse direction on hover
         circularTextSvg.addEventListener('mouseenter', () => {
