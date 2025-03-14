@@ -1,36 +1,63 @@
 /**
- * SIMPLE MODIFICATION FOR FLOATING-HEADS.JS
- * 
- * HOW TO USE:
- * 1. Find your original floating-heads.js file
- * 2. Add this code at the end of that file (before any closing brackets or parentheses)
- * 3. Save the file
+ * SOLUTION AUTONOME POUR FAIRE TOURNER LES TÊTES FLOTTANTES
+ * Ce script s'exécute indépendamment du code floating-heads.js original
  */
 
-// Add spinning functionality to floating heads
-(function addSpinToHeads() {
-    console.log("Adding spin capability to floating heads");
+(function() {
+    console.log("🎵 EN5EMBLE: Initialisation du script de rotation des têtes");
     
-    // Simple configuration
-    const spinConfig = {
-      minInterval: 3000,   // Minimum time between spins (ms)
-      maxInterval: 8000,   // Maximum time between spins (ms)
-      spinDuration: 800,   // Base duration for one spin (ms)
-      maxRotations: 3      // Maximum number of rotations
+    // Configuration
+    const config = {
+      minInterval: 3000,   // Temps minimum entre les rotations (ms)
+      maxInterval: 8000,   // Temps maximum entre les rotations (ms)
+      spinDuration: 800,   // Durée de base pour une rotation (ms)
+      maxRotations: 3      // Nombre maximum de rotations
     };
     
-    // State tracking
+    // Variables d'état
     let isMusicPlaying = false;
     let spinInterval = null;
+    let initialized = false;
     
-    // Add spin animation CSS if needed
+    // Fonction principale d'initialisation
+    function init() {
+      if (initialized) return;
+      
+      // Ajouter les styles CSS pour la rotation
+      addSpinStyles();
+      
+      // Configurer la détection de la musique Soundcloud
+      setupSoundcloudDetection();
+      
+      // Exposer les fonctions de test
+      window.spinHeads = {
+        spin: spinRandomHead,
+        toggleMusic: toggleMusic,
+        status: getStatus
+      };
+      
+      initialized = true;
+      console.log("🎵 EN5EMBLE: Script de rotation initialisé");
+    }
+    
+    // Obtenir l'état actuel
+    function getStatus() {
+      const heads = document.querySelectorAll('img[src*="5_heads"]');
+      return {
+        headsFound: heads.length,
+        musicPlaying: isMusicPlaying,
+        spinInterval: !!spinInterval
+      };
+    }
+    
+    // Ajouter les styles CSS pour l'animation de rotation
     function addSpinStyles() {
       if (document.getElementById('head-spin-styles')) return;
       
       const style = document.createElement('style');
       style.id = 'head-spin-styles';
       style.textContent = `
-        @keyframes headSpin {
+        @keyframes en5embleSpin {
           from { transform: rotate(0deg); }
           to { transform: rotate(360deg); }
         }
@@ -38,139 +65,205 @@
       document.head.appendChild(style);
     }
     
-    // Spin a random head
-    function spinRandomHead() {
-      // Check if we have head images
-      const heads = document.querySelectorAll('img[src*="5_heads"]');
-      if (heads.length === 0) return;
+    // Configurer la détection de la lecture Soundcloud
+    function setupSoundcloudDetection() {
+      console.log("🎵 EN5EMBLE: Configuration de la détection Soundcloud");
       
-      // Select a random head
-      const head = heads[Math.floor(Math.random() * heads.length)];
-      
-      // Skip if already spinning
-      if (head.dataset.spinning === 'true') return;
-      
-      // Mark as spinning
-      head.dataset.spinning = 'true';
-      
-      // Random number of rotations (1-3)
-      const rotations = Math.floor(Math.random() * spinConfig.maxRotations) + 1;
-      const duration = spinConfig.spinDuration * rotations;
-      
-      // Apply animation
-      const originalTransform = head.style.transform || '';
-      head.style.transition = `transform ${duration}ms ease-in-out`;
-      
-      // Wait for next frame to ensure transition is applied
-      requestAnimationFrame(() => {
-        head.style.transform = `${originalTransform} rotate(${360 * rotations}deg)`;
+      // Écouter les messages de Soundcloud
+      window.addEventListener('message', (event) => {
+        // Ne traiter que les messages de Soundcloud
+        if (!event.origin.includes('soundcloud.com')) return;
+        
+        try {
+          // Vérifier les messages d'état du lecteur
+          if (typeof event.data === 'object' && 
+              event.data.soundcloud && 
+              event.data.soundcloud.playerState) {
+            
+            const newState = event.data.soundcloud.playerState === 'playing';
+            
+            // Mettre à jour seulement si l'état a changé
+            if (newState !== isMusicPlaying) {
+              console.log(`🎵 EN5EMBLE: Musique ${newState ? 'démarrée' : 'arrêtée'}`);
+              toggleMusic(newState);
+            }
+          }
+        } catch (e) {
+          // Ignorer les erreurs cross-origin
+        }
       });
       
-      // Reset after animation completes
-      setTimeout(() => {
-        head.style.transition = '';
-        head.style.transform = originalTransform;
-        head.dataset.spinning = 'false';
-      }, duration + 50);
-    }
-    
-    // Start randomly spinning heads
-    function startRandomSpins() {
-      if (spinInterval) return;
+      // Activer l'API sur les iframes Soundcloud
+      updateSoundcloudIframes();
       
-      // Do initial spin
-      setTimeout(spinRandomHead, 1000);
-      
-      // Schedule next spin
-      spinInterval = setInterval(() => {
-        if (isMusicPlaying) {
-          spinRandomHead();
-        }
-      }, Math.floor(Math.random() * 
-        (spinConfig.maxInterval - spinConfig.minInterval) + 
-        spinConfig.minInterval));
-    }
-    
-    // Stop spinning
-    function stopRandomSpins() {
-      if (spinInterval) {
-        clearInterval(spinInterval);
-        spinInterval = null;
-      }
-    }
-    
-    // Listen for Soundcloud messages
-    window.addEventListener('message', event => {
-      if (!event.origin.includes('soundcloud.com')) return;
-      
-      try {
-        if (typeof event.data === 'object' && 
-            event.data.soundcloud && 
-            event.data.soundcloud.playerState) {
-          
-          const isPlaying = event.data.soundcloud.playerState === 'playing';
-          
-          if (isPlaying !== isMusicPlaying) {
-            isMusicPlaying = isPlaying;
+      // Observer les nouveaux iframes
+      const observer = new MutationObserver((mutations) => {
+        for (const mutation of mutations) {
+          if (mutation.type === 'childList' && mutation.addedNodes.length) {
+            // Vérifier pour de nouveaux iframes
+            const hasNewIframes = Array.from(mutation.addedNodes).some(node => {
+              return node.tagName === 'IFRAME' && node.src && node.src.includes('soundcloud.com');
+            });
             
-            if (isPlaying) {
-              startRandomSpins();
-            } else {
-              stopRandomSpins();
+            if (hasNewIframes) {
+              updateSoundcloudIframes();
             }
           }
         }
-      } catch (e) {
-        // Ignore cross-origin errors
-      }
-    });
+      });
+      
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true
+      });
+    }
     
-    // Enable API on Soundcloud iframes
-    function enableSoundcloudAPI() {
+    // Mettre à jour les iframes Soundcloud pour activer l'API
+    function updateSoundcloudIframes() {
       const iframes = document.querySelectorAll('iframe[src*="soundcloud.com"]');
+      let updated = 0;
       
       iframes.forEach(iframe => {
-        if (!iframe.src.includes('api_widget=1')) {
+        if (!iframe.src.includes('api_widget=1') && !iframe.dataset.apiEnabled) {
           try {
-            iframe.src = iframe.src + (iframe.src.includes('?') ? '&' : '?') + 'api_widget=1';
+            const newSrc = iframe.src + (iframe.src.includes('?') ? '&' : '?') + 'api_widget=1';
+            iframe.src = newSrc;
+            iframe.dataset.apiEnabled = 'true';
+            updated++;
           } catch (e) {
-            // Ignore errors
+            // Ignorer les erreurs
           }
         }
       });
+      
+      if (updated > 0) {
+        console.log(`🎵 EN5EMBLE: API activée sur ${updated} iframes Soundcloud`);
+      }
+      
+      return iframes.length;
     }
     
-    // Initialize
-    function init() {
-      addSpinStyles();
-      enableSoundcloudAPI();
+    // Activer/désactiver l'état de lecture de musique
+    function toggleMusic(state) {
+      isMusicPlaying = (state !== undefined) ? !!state : !isMusicPlaying;
       
-      // Watch for new Soundcloud iframes
-      const observer = new MutationObserver(enableSoundcloudAPI);
-      observer.observe(document.body, { 
-        childList: true, 
-        subtree: true 
-      });
+      if (isMusicPlaying) {
+        startRandomSpins();
+      } else {
+        stopRandomSpins();
+      }
       
-      // Add testing functions
-      window.spinHeads = {
-        spin: spinRandomHead,
-        toggleMusic: (state) => {
-          isMusicPlaying = state !== undefined ? !!state : !isMusicPlaying;
-          if (isMusicPlaying) {
-            startRandomSpins();
-          } else {
-            stopRandomSpins();
-          }
-          return `Music ${isMusicPlaying ? 'playing' : 'stopped'}`;
+      return `Musique ${isMusicPlaying ? 'en lecture' : 'arrêtée'}`;
+    }
+    
+    // Démarrer les rotations aléatoires
+    function startRandomSpins() {
+      if (spinInterval) return;
+      
+      console.log("🎵 EN5EMBLE: Démarrage des rotations aléatoires");
+      
+      // Faire une première rotation après un court délai
+      setTimeout(spinRandomHead, 1000);
+      
+      // Planifier la prochaine rotation avec un intervalle aléatoire
+      scheduleNextSpin();
+    }
+    
+    // Planifier la prochaine rotation
+    function scheduleNextSpin() {
+      if (spinInterval) {
+        clearTimeout(spinInterval);
+      }
+      
+      const delay = Math.floor(
+        Math.random() * (config.maxInterval - config.minInterval) + 
+        config.minInterval
+      );
+      
+      spinInterval = setTimeout(() => {
+        if (isMusicPlaying) {
+          spinRandomHead();
+          scheduleNextSpin();
         }
-      };
+      }, delay);
     }
     
-    // If DOM already loaded, initialize now
-    if (document.readyState !== 'loading') {
-      init();
-    } else {
+    // Arrêter les rotations aléatoires
+    function stopRandomSpins() {
+      if (spinInterval) {
+        clearTimeout(spinInterval);
+        spinInterval = null;
+        console.log("🎵 EN5EMBLE: Arrêt des rotations aléatoires");
+      }
+    }
+    
+    // Faire tourner une tête aléatoire
+    function spinRandomHead() {
+      // Chercher toutes les têtes à chaque fois pour s'assurer d'avoir les plus récentes
+      const heads = document.querySelectorAll('img[src*="5_heads"]');
+      
+      if (heads.length === 0) {
+        console.log("🎵 EN5EMBLE: Aucune tête trouvée pour la rotation");
+        return false;
+      }
+      
+      // Sélectionner une tête aléatoire
+      const index = Math.floor(Math.random() * heads.length);
+      const head = heads[index];
+      
+      // Ignorer si déjà en rotation
+      if (head.dataset.spinning === 'true') {
+        console.log("🎵 EN5EMBLE: Tête déjà en rotation, essai d'une autre");
+        if (heads.length > 1) {
+          return spinRandomHead();
+        }
+        return false;
+      }
+      
+      // Marquer comme en rotation
+      head.dataset.spinning = 'true';
+      
+      // Déterminer le nombre de rotations (1-3)
+      const rotations = Math.floor(Math.random() * config.maxRotations) + 1;
+      const duration = config.spinDuration * rotations;
+      
+      console.log(`🎵 EN5EMBLE: Rotation de la tête ${index} (${rotations} tours)`);
+      
+      // Sauvegarder les styles originaux
+      const originalTransform = head.style.transform || '';
+      
+      // Appliquer la rotation
+      // Utiliser animation si disponible pour une meilleure performance
+      try {
+        head.style.animation = `en5embleSpin ${duration}ms ease-in-out`;
+      } catch (e) {
+        // Fallback sur transform en cas d'erreur
+        head.style.transition = `transform ${duration}ms ease-in-out`;
+        
+        // Forcer un reflow pour s'assurer que la transition s'applique
+        head.offsetHeight;
+        
+        // Appliquer la rotation
+        head.style.transform = `${originalTransform} rotate(${360 * rotations}deg)`;
+      }
+      
+      // Réinitialiser après la fin de l'animation
+      setTimeout(() => {
+        head.style.animation = '';
+        head.style.transition = '';
+        head.style.transform = originalTransform;
+        head.dataset.spinning = 'false';
+        
+        console.log(`🎵 EN5EMBLE: Rotation de la tête ${index} terminée`);
+      }, duration + 50);
+      
+      return true;
+    }
+    
+    // Initialiser lorsque le DOM est prêt
+    if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
     }
   })();
