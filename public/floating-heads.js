@@ -13,7 +13,7 @@ const FLOATING_HEADS_CONFIG = {
     shadowBlur: 15,        // Shadow blur amount for 3D effect
     shadowOffsetX: 10,     // Shadow X offset
     shadowOffsetY: 10,     // Shadow Y offset
-    minScale: 0.3,         // Minimum size scale
+    minScale: 0.5,         // Minimum size scale
     maxScale: 0.6,         // Maximum size scale
     rotationRange: 8,      // Max degrees of rotation (-8 to 8)
     fallbackImage: '/5_heads/head1.png',  // Default image if none found
@@ -21,8 +21,8 @@ const FLOATING_HEADS_CONFIG = {
     // Music mode settings
     musicModeActive: false, // Whether music mode is active
     musicBPM: 130,          // Base beats per minute
-    minBobbingAmplitude: 10, // Minimum angle to bob (degrees)
-    maxBobbingAmplitude: 30, // Maximum angle to bob (degrees)
+    minBobbingAmplitude: 3, // Minimum angle to bob (degrees)
+    maxBobbingAmplitude: 10, // Maximum angle to bob (degrees)
     spinChance: 0.001,      // Chance of starting a spin on each frame (0.004 = 0.4%)
     spinDurationMin: 500,   // Minimum spin duration (ms)
     spinDurationMax: 1000   // Maximum spin duration (ms)
