@@ -12,6 +12,32 @@ document.addEventListener('DOMContentLoaded', function() {
     
     let eventsContentLoaded = false;
   
+    // Immediately hide events gallery on page load if not active
+    if (eventsGallery && !eventsMenuItem?.classList.contains('active')) {
+      eventsGallery.classList.remove('active');
+      eventsGallery.style.display = 'none';
+    }
+  
+    // Fix for menu transitions - ensure that events gallery is properly hidden
+    document.querySelectorAll('.menu-item').forEach(item => {
+      item.addEventListener('click', () => {
+        // If clicking any menu item other than events, hide the events gallery
+        if (item.getAttribute('data-section') !== 'events' && eventsGallery) {
+          eventsGallery.classList.remove('active');
+          eventsGallery.style.display = 'none';
+        }
+        
+        // If clicking events menu item, ensure events gallery displays properly
+        if (item.getAttribute('data-section') === 'events' && eventsGallery) {
+          // Only if the events menu is becoming active
+          if (item.classList.contains('active')) {
+            eventsGallery.style.display = 'block';
+            eventsGallery.classList.add('active');
+          }
+        }
+      });
+    });
+  
     // If events menu item exists, set up click handler
     if (eventsMenuItem) {
       eventsMenuItem.addEventListener('click', (e) => {
@@ -20,6 +46,7 @@ document.addEventListener('DOMContentLoaded', function() {
           // Make sure events gallery has both proper visibility and active class
           if (eventsGallery) {
             eventsGallery.style.visibility = 'visible';
+            eventsGallery.style.display = 'block';
             eventsGallery.classList.add('active');
             
             // Only load content the first time, not on subsequent visits
@@ -44,6 +71,7 @@ document.addEventListener('DOMContentLoaded', function() {
           // Hide the events gallery when section is deactivated
           if (eventsGallery) {
             eventsGallery.classList.remove('active');
+            eventsGallery.style.display = 'none';
           }
         }
       });
@@ -97,6 +125,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Check if events is already active on page load
     if (eventsMenuItem && eventsMenuItem.classList.contains('active') && eventsGallery) {
       eventsGallery.classList.add('active');
+      eventsGallery.style.display = 'block';
       loadEventsContent();
       eventsContentLoaded = true;
     }
@@ -118,7 +147,7 @@ document.addEventListener('DOMContentLoaded', function() {
           
           if (isMobile) {
             // Mobile settings
-            fontSize = 14; // Fixed smaller size for mobile
+            fontSize = 8; // Fixed smaller size for mobile
             spacesNeeded = 8; // Less spaces on mobile
           } else {
             // Desktop settings

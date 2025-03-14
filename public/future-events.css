@@ -72,6 +72,7 @@
     
     .events-placeholder {
       padding-right: 180px; /* Offset the left padding to center the content */
+      margin-top: 5vh; /* Move it lower on desktop screens */
     }
     
     .circular-text-container {
