@@ -3026,7 +3026,10 @@
       checkUrlHash();
 
       //mixxs soudcloud
-      // Modify the existing menu click handler for mixxs
+
+      let mixesContentLoaded = false; // Add this at the top with your other variables
+
+      // Modified menu click handler for mixxs
       if (mixxsMenuItem) {
         mixxsMenuItem.addEventListener('click', (e) => {
           // If mixxs section becomes active, show the gallery
@@ -3034,8 +3037,12 @@
             // Make sure mixes gallery has both proper visibility and active class
             mixesGallery.style.visibility = 'visible';
             mixesGallery.classList.add('active');
-            // Always reload content to ensure it's displayed properly
-            loadMixesContent();
+            
+            // Only load content the first time, not on subsequent visits
+            if (!mixesContentLoaded) {
+              loadMixesContent();
+              mixesContentLoaded = true;
+            }
             
             // Make sure archive gallery is hidden to avoid conflicts
             if (archiveGallery) {
@@ -3045,7 +3052,7 @@
             mixesGallery.classList.remove('active');
           }
         });
-      }
+      } 
 
       // Function to load mixes content from the server
       async function loadMixesContent() {
@@ -3300,6 +3307,15 @@
             
             // Apply the corresponding preset with instant transitions
             applyPresetForSection(section);
+            
+            // Load content if needed - but don't reload existing content
+            if (section === 'mixxs' && !mixesContentLoaded) {
+              loadMixesContent();
+              mixesContentLoaded = true;
+            } else if (section === 'archives' && !archiveContentLoaded) {
+              loadArchiveContent();
+              archiveContentLoaded = true;
+            }
           }
         } else {
           // If no hash, apply the default "Unsure" preset with instant transitions
@@ -3400,12 +3416,16 @@
         console.warn('Gallery close button not found!');
       }
 
-      // Modify the existing menu click handler for archives
+      let archiveContentLoaded = false;
+
       if (archiveMenuItem) {
         archiveMenuItem.addEventListener('click', (e) => {
           // If archives section becomes active, show the gallery
           if (archiveMenuItem.classList.contains('active')) {
-            loadArchiveContent();
+            if (!archiveContentLoaded) {
+              loadArchiveContent();
+              archiveContentLoaded = true;
+            }
             archiveGallery.classList.add('active');
           } else {
             archiveGallery.classList.remove('active');
