@@ -6,6 +6,7 @@
 
 // Configuration
 const FLOATING_HEADS_CONFIG = {
+    // General settings
     fps: 0,               // Frames per second (lower = more stop-motion feel; 0 = no restrictions)
     repulsionRadius: 200,  // How close mouse needs to be to affect heads
     repulsionForce: 0.8,   // Strength of mouse repulsion
@@ -16,7 +17,15 @@ const FLOATING_HEADS_CONFIG = {
     maxScale: 0.6,         // Maximum size scale
     rotationRange: 8,      // Max degrees of rotation (-8 to 8)
     fallbackImage: '/5_heads/head1.png',  // Default image if none found
-    musicModeActive: false // Whether music mode is active
+    
+    // Music mode settings
+    musicModeActive: false, // Whether music mode is active
+    musicBPM: 130,          // Base beats per minute
+    minBobbingAmplitude: 5, // Minimum angle to bob (degrees)
+    maxBobbingAmplitude: 15, // Maximum angle to bob (degrees)
+    spinChance: 0.004,      // Chance of starting a spin on each frame (0.004 = 0.4%)
+    spinDurationMin: 500,   // Minimum spin duration (ms)
+    spinDurationMax: 1000   // Maximum spin duration (ms)
   };
   
   // Initialize when DOM is ready
@@ -55,7 +64,7 @@ const FLOATING_HEADS_CONFIG = {
     let isMusicMode = false;
     
     // Shared music variables for synchronized bobbing
-    const baseBPM = 130; // Constant BPM for all heads
+    const baseBPM = FLOATING_HEADS_CONFIG.musicBPM; 
     const beatDuration = 60000 / baseBPM; // ms per beat
     let musicStartTime = 0;
     
@@ -103,15 +112,21 @@ const FLOATING_HEADS_CONFIG = {
         musicStartTime = performance.now();
       }
       
+      // Calculate amplitude range
+      const minAmp = FLOATING_HEADS_CONFIG.minBobbingAmplitude;
+      const maxAmp = FLOATING_HEADS_CONFIG.maxBobbingAmplitude;
+      const ampRange = maxAmp - minAmp;
+      
       // Apply changes to all heads
       heads.forEach((head, index) => {
         if (enabled) {
           // Reset any ongoing rotation
           head.rotationSpeed = 0;
           
-          // Assign different bobbing amplitude to each head
-          head.bobbingAmplitude = 10 + (index % 5) * 2.5; // Range from 5-15 degrees 
-                                                          // Based on head index for consistent differences
+          // Assign different bobbing amplitude to each head, evenly distributed
+          const headCount = heads.length || 1;
+          const ampPosition = (index / (headCount - 1 || 1)); // 0 to 1 based on position
+          head.bobbingAmplitude = minAmp + (ampPosition * ampRange);
           
           // Reset spinning state
           head.spinningNow = false;
@@ -290,11 +305,16 @@ const FLOATING_HEADS_CONFIG = {
         if (isMusicMode || FLOATING_HEADS_CONFIG.musicModeActive) {
           // Music playing - synchronized bobbing using shared timing
           
-          // Occasionally start a full spin
-          if (!head.spinningNow && Math.random() > 0.996) { // About once every few seconds per head
+          // Occasionally start a full spin based on configured probability
+          if (!head.spinningNow && Math.random() < FLOATING_HEADS_CONFIG.spinChance) {
             head.spinningNow = true;
             head.spinStartTime = timestamp;
-            head.spinDuration = 500 + Math.random() * 500; // 0.5 to 1 second spin
+            
+            // Use configured spin duration range
+            const spinDurationMin = FLOATING_HEADS_CONFIG.spinDurationMin;
+            const spinDurationMax = FLOATING_HEADS_CONFIG.spinDurationMax;
+            head.spinDuration = spinDurationMin + Math.random() * (spinDurationMax - spinDurationMin);
+            
             head.spinDirection = Math.random() > 0.5 ? 1 : -1; // Clockwise or counter-clockwise
             head.initialRotation = head.rotation; // Remember starting rotation
             head.targetRotation = head.initialRotation + (360 * head.spinDirection); // Full 360 spin
@@ -320,7 +340,7 @@ const FLOATING_HEADS_CONFIG = {
           } else {
             // Apply synchronized bobbing motion
             const beatProgress = ((timestamp - musicStartTime) % beatDuration) / beatDuration;
-            const bobAmount = head.bobbingAmplitude || 8; // Use assigned amplitude or default
+            const bobAmount = head.bobbingAmplitude || FLOATING_HEADS_CONFIG.minBobbingAmplitude; // Use assigned amplitude or default
             
             // Sine wave bobbing (up and down motion) - all heads move at same rhythm
             head.rotation = head.rotation * 0.9 + (Math.sin(beatProgress * Math.PI * 2) * bobAmount) * 0.1;
