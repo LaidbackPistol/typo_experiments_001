@@ -1,415 +1,469 @@
 /**
- * FLOATING HEADS PATCHER
- * This script patches the existing floating-heads.js implementation
- * with music reactive spinning functionality
+ * DIRECT DOM INSPECTOR FOR FLOATING HEADS
+ * This script directly inspects the DOM structure to find the floating heads
+ * and adds spinning capability when music plays
  */
 
 (function() {
-    console.log("🎧 EN5EMBLE Patcher: Loading");
+  // Start with an immediate self-check
+  console.log("🔍 Inspector: Starting DOM analysis");
+  
+  // Configuration
+  const config = {
+    debug: true,
+    spinDuration: 800,        // Duration of one spin in ms
+    spinRotations: [1, 2, 3], // Possible number of rotations
+    checkInterval: 500,       // How often to check for new elements (ms)
+    musicCheckInterval: 1000  // How often to check for playing music (ms)
+  };
+  
+  // State tracking
+  let headElements = [];
+  let isMusicPlaying = false;
+  let nextSpinTime = 0;
+  let musicCheckTimer = null;
+  
+  // Examine the entire DOM for potential floating head elements
+  function inspectDOM() {
+    console.log("🔍 Inspector: Searching entire DOM for floating heads");
     
-    // Configuration
-    const config = {
-      minSpinInterval: 3000,   // Min time between spins (ms)
-      maxSpinInterval: 8000,   // Max time between spins (ms)
-      spinChance: 0.7,         // Chance of spinning when triggered
-      debug: true              // Enable debug logs
+    // 1. Try common selectors first
+    const commonSelectors = [
+      'img[src*="head"]',
+      'img[src*="5_heads"]',
+      '.floating-head',
+      '#floating-heads img',
+      '[style*="position: absolute"]'
+    ];
+    
+    for (const selector of commonSelectors) {
+      const elements = document.querySelectorAll(selector);
+      if (elements.length > 0) {
+        console.log(`🔍 Inspector: Found ${elements.length} potential elements with selector "${selector}"`);
+        
+        elements.forEach(examineElement);
+      }
+    }
+    
+    // 2. Check ALL images
+    const allImages = document.querySelectorAll('img');
+    console.log(`🔍 Inspector: Examining ${allImages.length} total images on page`);
+    
+    allImages.forEach(examineElement);
+    
+    // 3. Check for absolutely positioned elements that might be heads
+    const allAbsolute = document.querySelectorAll('[style*="position: absolute"], [style*="position:absolute"]');
+    console.log(`🔍 Inspector: Examining ${allAbsolute.length} absolutely positioned elements`);
+    
+    allAbsolute.forEach(examineElement);
+    
+    // Final report
+    if (headElements.length > 0) {
+      console.log(`🔍 Inspector: Successfully identified ${headElements.length} floating head elements`);
+    } else {
+      console.log("🔍 Inspector: Could not automatically identify floating heads");
+      
+      // Look for the container based on known path structure
+      if (window.floatingHeadsContainer) {
+        console.log("🔍 Inspector: Found floating heads container in global scope");
+        setupManualHeadFinding();
+      } else {
+        // Try to find the container
+        const containers = Array.from(document.querySelectorAll('div')).filter(div => {
+          // Check if this div might be the container
+          const hasAbsoluteChildren = div.querySelectorAll('[style*="position: absolute"]').length > 0;
+          const hasImgChildren = div.querySelectorAll('img').length > 0;
+          return hasAbsoluteChildren || hasImgChildren;
+        });
+        
+        console.log(`🔍 Inspector: Found ${containers.length} potential containers`);
+        
+        if (containers.length > 0) {
+          window.floatingHeadsContainer = containers[0];
+          setupManualHeadFinding();
+        }
+      }
+    }
+    
+    return headElements.length;
+  }
+  
+  // Examine a single element to determine if it's a floating head
+  function examineElement(element) {
+    // Skip if already registered
+    if (headElements.includes(element) || element.dataset.headInspected) {
+      return false;
+    }
+    
+    // Mark as inspected to avoid re-processing
+    element.dataset.headInspected = 'true';
+    
+    // Criteria that suggest this might be a floating head
+    let score = 0;
+    const styles = window.getComputedStyle(element);
+    
+    // Check src attribute for images
+    if (element.tagName === 'IMG') {
+      if (element.src && (element.src.includes('head') || element.src.includes('5_heads'))) {
+        score += 5;
+      }
+    }
+    
+    // Check position and styles
+    if (styles.position === 'absolute' || styles.position === 'fixed') {
+      score += 2;
+    }
+    
+    // Check for animation or transition properties
+    if (styles.animation || styles.transition) {
+      score += 1;
+    }
+    
+    // Check size - floating heads are typically not too large
+    const width = parseInt(styles.width);
+    if (width > 0 && width < 200) {
+      score += 1;
+    }
+    
+    // If it has a high confidence score, register it as a head
+    if (score >= 3) {
+      registerHeadElement(element);
+      return true;
+    }
+    
+    return false;
+  }
+  
+  // Register an element as a floating head
+  function registerHeadElement(element) {
+    // Skip if already registered
+    if (headElements.includes(element)) {
+      return;
+    }
+    
+    headElements.push(element);
+    console.log(`🔍 Inspector: Registered new floating head (total: ${headElements.length})`);
+    
+    // Ensure we have the CSS for spinning
+    ensureSpinCSS();
+    
+    // Return the element for chaining
+    return element;
+  }
+  
+  // Inject CSS for spinning animation if needed
+  function ensureSpinCSS() {
+    if (document.getElementById('head-spin-styles')) {
+      return;
+    }
+    
+    const style = document.createElement('style');
+    style.id = 'head-spin-styles';
+    style.textContent = `
+      @keyframes headSpin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+      }
+      
+      .spinning-head {
+        animation: headSpin var(--spin-duration, 0.8s) ease-in-out;
+      }
+    `;
+    
+    document.head.appendChild(style);
+    console.log("🔍 Inspector: Added spin animation CSS");
+  }
+  
+  // Setup manual head finding method
+  function setupManualHeadFinding() {
+    // Look for elements added to the container
+    const container = window.floatingHeadsContainer;
+    
+    if (!container) {
+      console.log("🔍 Inspector: No container found for manual inspection");
+      return;
+    }
+    
+    // Check all children of the container
+    Array.from(container.children).forEach(child => {
+      // If it's an image or absolutely positioned, it's likely a head
+      if (child.tagName === 'IMG' || 
+          window.getComputedStyle(child).position === 'absolute') {
+        registerHeadElement(child);
+      }
+    });
+    
+    // Set up an observer for new elements
+    const observer = new MutationObserver(mutations => {
+      mutations.forEach(mutation => {
+        if (mutation.type === 'childList' && mutation.addedNodes.length) {
+          mutation.addedNodes.forEach(node => {
+            if (node.nodeType === Node.ELEMENT_NODE) {
+              examineElement(node);
+            }
+          });
+        }
+      });
+    });
+    
+    observer.observe(container, {
+      childList: true,
+      subtree: true
+    });
+    
+    console.log("🔍 Inspector: Set up manual container monitoring");
+  }
+  
+  // Start monitoring for music playback
+  function startMusicMonitoring() {
+    console.log("🔍 Inspector: Starting music monitoring");
+    
+    // 1. Monitor Soundcloud via messaging
+    window.addEventListener('message', event => {
+      // Only process Soundcloud messages
+      if (!event.origin.includes('soundcloud.com')) {
+        return;
+      }
+      
+      try {
+        // Look for playerState messages
+        if (typeof event.data === 'object' && 
+            event.data.soundcloud && 
+            event.data.soundcloud.playerState) {
+          const newState = event.data.soundcloud.playerState === 'playing';
+          
+          if (newState !== isMusicPlaying) {
+            console.log(`🔍 Inspector: Music ${newState ? 'started' : 'stopped'} playing`);
+            setMusicPlaying(newState);
+          }
+        }
+      } catch (e) {
+        // Silently handle cross-origin errors
+      }
+    });
+    
+    // 2. Update Soundcloud iframes to enable API
+    const updateIframes = () => {
+      const iframes = document.querySelectorAll('iframe[src*="soundcloud.com"]');
+      let updated = 0;
+      
+      iframes.forEach(iframe => {
+        if (!iframe.dataset.apiEnabled && !iframe.src.includes('api_widget=1')) {
+          try {
+            const newSrc = iframe.src + (iframe.src.includes('?') ? '&' : '?') + 'api_widget=1';
+            iframe.src = newSrc;
+            iframe.dataset.apiEnabled = 'true';
+            updated++;
+          } catch (e) {
+            // Ignore errors updating iframe
+          }
+        }
+      });
+      
+      if (updated > 0) {
+        console.log(`🔍 Inspector: Enabled API for ${updated} Soundcloud iframes`);
+      }
+      
+      return iframes.length;
     };
     
-    // State tracking
-    let isMusicPlaying = false;
-    let spinInterval = null;
-    let originalCreateHeads = null;
-    let headElements = [];
+    // Do initial update
+    updateIframes();
     
-    // Wait for the original floating-heads.js to load and patch it
-    function patchFloatingHeads() {
-      // Check if it's already loaded
-      if (window.floatingHeadsSystem) {
-        console.log("🎧 EN5EMBLE Patcher: Found existing floating heads system");
-        attachToExistingSystem();
-        return;
-      }
-      
-      // No existing system, need to patch the loading process
-      console.log("🎧 EN5EMBLE Patcher: Waiting for floating-heads.js to load");
-      
-      // Function to hook when image elements are added to the DOM
-      const observer = new MutationObserver((mutations) => {
-        for (const mutation of mutations) {
-          if (mutation.type === 'childList' && mutation.addedNodes.length) {
-            // Check each added node for floating head images
-            mutation.addedNodes.forEach(node => {
-              // If this is an element node
-              if (node.nodeType === Node.ELEMENT_NODE) {
-                // If it's an image with src containing 5_heads
-                if (node.tagName === 'IMG' && 
-                    node.src && node.src.includes('5_heads')) {
-                  console.log("🎧 EN5EMBLE Patcher: Found a head image being added to DOM");
-                  registerHeadElement(node);
-                }
-                
-                // Check for contained images as well (if it's a container)
-                const containedHeads = node.querySelectorAll('img[src*="5_heads"]');
-                if (containedHeads.length > 0) {
-                  console.log(`🎧 EN5EMBLE Patcher: Found ${containedHeads.length} head images in a container`);
-                  containedHeads.forEach(registerHeadElement);
-                }
-              }
-            });
-          }
-        }
-      });
-      
-      // Start observing the entire document
-      observer.observe(document.body, {
-        childList: true,
-        subtree: true
-      });
-      
-      // Also check for existing head images
-      const existingHeads = document.querySelectorAll('img[src*="5_heads"]');
-      if (existingHeads.length > 0) {
-        console.log(`🎧 EN5EMBLE Patcher: Found ${existingHeads.length} existing head images`);
-        existingHeads.forEach(registerHeadElement);
-      }
-    }
+    // Watch for new iframes
+    const observer = new MutationObserver(() => {
+      updateIframes();
+    });
     
-    // Register a head element for spinning
-    function registerHeadElement(element) {
-      // Skip if we've already registered this element
-      if (headElements.includes(element) || element.dataset.spinRegistered) {
-        return;
-      }
-      
-      // Mark as registered to avoid duplicates
-      element.dataset.spinRegistered = 'true';
-      headElements.push(element);
-      
-      console.log(`🎧 EN5EMBLE Patcher: Registered head (total: ${headElements.length})`);
-      
-      // Make sure we have the required CSS
-      ensureSpinCSS();
-    }
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true
+    });
     
-    // Attach to an existing floating heads system
-    function attachToExistingSystem() {
-      const system = window.floatingHeadsSystem;
+    // 3. Periodically check audio/video elements
+    musicCheckTimer = setInterval(() => {
+      const mediaElements = document.querySelectorAll('audio, video');
       
-      // If the system has heads, register them
-      if (system.heads && system.heads.length > 0) {
-        system.heads.forEach(head => {
-          if (head instanceof HTMLElement) {
-            registerHeadElement(head);
-          } else if (head.element instanceof HTMLElement) {
-            registerHeadElement(head.element);
-          }
-        });
-      }
-      
-      // If it's a class/object with a createHeads method, patch that too
-      if (typeof system.createHeads === 'function' && !originalCreateHeads) {
-        originalCreateHeads = system.createHeads;
-        system.createHeads = function(...args) {
-          const result = originalCreateHeads.apply(this, args);
-          
-          // After creating heads, register them for spinning
-          if (this.heads && this.heads.length > 0) {
-            this.heads.forEach(head => {
-              if (head instanceof HTMLElement) {
-                registerHeadElement(head);
-              } else if (head.element instanceof HTMLElement) {
-                registerHeadElement(head.element);
-              }
-            });
-          }
-          
-          return result;
-        };
-        
-        console.log("🎧 EN5EMBLE Patcher: Patched createHeads method");
-      }
-    }
-    
-    // Ensure the spin animation CSS exists
-    function ensureSpinCSS() {
-      if (document.getElementById('floating-heads-spin-css')) {
-        return;
-      }
-      
-      const style = document.createElement('style');
-      style.id = 'floating-heads-spin-css';
-      style.textContent = `
-        @keyframes head-spin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-        
-        img[data-spinning="true"] {
-          animation: head-spin var(--spin-duration, 0.8s) ease-in-out;
-        }
-      `;
-      
-      document.head.appendChild(style);
-      console.log("🎧 EN5EMBLE Patcher: Added spin animation CSS");
-    }
-    
-    // Set up music detection
-    function setupMusicDetection() {
-      console.log("🎧 EN5EMBLE Patcher: Setting up music detection");
-      
-      // Listen for messages from Soundcloud iframes
-      window.addEventListener('message', (event) => {
-        // Skip messages not from Soundcloud
-        if (!event.origin.includes('soundcloud.com')) {
-          return;
-        }
-        
-        try {
-          // Check for player state messages
-          if (typeof event.data === 'object' && 
-              event.data.soundcloud && 
-              event.data.soundcloud.playerState) {
-            
-            const newState = event.data.soundcloud.playerState === 'playing';
-            
-            // Only update if state changed
-            if (newState !== isMusicPlaying) {
-              console.log(`🎧 EN5EMBLE Patcher: Music ${newState ? 'started' : 'stopped'} playing`);
-              isMusicPlaying = newState;
-              
-              if (newState) {
-                startRandomSpins();
-              } else {
-                stopRandomSpins();
-              }
-            }
-          }
-        } catch (e) {
-          // Silently handle cross-origin errors
-          if (!e.toString().includes('cross-origin')) {
-            console.error("Error processing Soundcloud message:", e);
-          }
-        }
-      });
-      
-      // Find and update Soundcloud iframes to enable messages
-      function updateSoundcloudIframes() {
-        const iframes = document.querySelectorAll('iframe[src*="soundcloud.com"]');
-        let updated = 0;
-        
-        iframes.forEach(iframe => {
-          // Skip if already processed
-          if (iframe.dataset.apiEnabled) {
-            return;
-          }
-          
-          try {
-            // Check if API widget parameter is missing
-            if (!iframe.src.includes('api_widget=1')) {
-              const newSrc = iframe.src + (iframe.src.includes('?') ? '&' : '?') + 'api_widget=1';
-              iframe.src = newSrc;
-              iframe.dataset.apiEnabled = 'true';
-              updated++;
-            }
-          } catch (e) {
-            console.log("🎧 EN5EMBLE Patcher: Couldn't update iframe", e);
-          }
-        });
-        
-        if (updated > 0) {
-          console.log(`🎧 EN5EMBLE Patcher: Enabled API for ${updated} Soundcloud iframes`);
-        }
-        
-        return iframes.length;
-      }
-      
-      // Initial update
-      const initialCount = updateSoundcloudIframes();
-      console.log(`🎧 EN5EMBLE Patcher: Found ${initialCount} Soundcloud iframes initially`);
-      
-      // Watch for new iframes
-      const observer = new MutationObserver(() => {
-        updateSoundcloudIframes();
-      });
-      
-      observer.observe(document.body, {
-        childList: true,
-        subtree: true
-      });
-    }
-    
-    // Start random spinning
-    function startRandomSpins() {
-      if (spinInterval) {
-        return;
-      }
-      
-      console.log("🎧 EN5EMBLE Patcher: Starting random spins");
-      
-      // Do an initial spin after a short delay
-      setTimeout(spinRandomHead, 1000);
-      
-      // Schedule next spin
-      scheduleNextSpin();
-    }
-    
-    // Stop random spinning
-    function stopRandomSpins() {
-      if (spinInterval) {
-        clearTimeout(spinInterval);
-        spinInterval = null;
-        console.log("🎧 EN5EMBLE Patcher: Stopped random spins");
-      }
-    }
-    
-    // Schedule the next potential spin
-    function scheduleNextSpin() {
-      if (spinInterval) {
-        clearTimeout(spinInterval);
-      }
-      
-      const delay = Math.floor(
-        Math.random() * (config.maxSpinInterval - config.minSpinInterval) + 
-        config.minSpinInterval
+      // Check if any are playing
+      const anyPlaying = Array.from(mediaElements).some(media => 
+        !media.paused && !media.ended && media.currentTime > 0
       );
       
-      console.log(`🎧 EN5EMBLE Patcher: Next potential spin in ${Math.round(delay/1000)}s`);
+      if (anyPlaying && !isMusicPlaying) {
+        console.log("🔍 Inspector: Detected playing media element");
+        setMusicPlaying(true);
+      } else if (!anyPlaying && isMusicPlaying) {
+        // Don't automatically set to false - could be playing via Soundcloud
+      }
+    }, config.musicCheckInterval);
+  }
+  
+  // Set music playing state
+  function setMusicPlaying(isPlaying) {
+    isMusicPlaying = isPlaying;
+    
+    if (isPlaying) {
+      // Schedule first spin
+      nextSpinTime = Date.now() + Math.random() * 2000;
       
-      spinInterval = setTimeout(() => {
-        if (isMusicPlaying) {
-          // Random chance to trigger spin
-          if (Math.random() < config.spinChance) {
-            spinRandomHead();
-          } else {
-            console.log("🎧 EN5EMBLE Patcher: Spin skipped (random chance)");
+      // Start checking for spin time
+      requestAnimationFrame(checkSpinTime);
+    }
+  }
+  
+  // Check if it's time to spin a head
+  function checkSpinTime() {
+    if (!isMusicPlaying) {
+      return;
+    }
+    
+    const now = Date.now();
+    
+    if (now >= nextSpinTime) {
+      // Time to spin!
+      spinRandomHead();
+      
+      // Schedule next spin (3-8 seconds)
+      nextSpinTime = now + 3000 + Math.random() * 5000;
+    }
+    
+    // Continue checking
+    requestAnimationFrame(checkSpinTime);
+  }
+  
+  // Spin a random head
+  function spinRandomHead() {
+    if (headElements.length === 0) {
+      console.log("🔍 Inspector: No heads to spin");
+      return false;
+    }
+    
+    // Choose a random head
+    const index = Math.floor(Math.random() * headElements.length);
+    const head = headElements[index];
+    
+    // Skip if already spinning
+    if (head.dataset.spinning === 'true' || head.classList.contains('spinning-head')) {
+      console.log("🔍 Inspector: Head already spinning, trying another");
+      
+      if (headElements.length > 1) {
+        return spinRandomHead();
+      }
+      return false;
+    }
+    
+    // Mark as spinning
+    head.dataset.spinning = 'true';
+    
+    // Choose number of rotations (1-3)
+    const rotations = config.spinRotations[Math.floor(Math.random() * config.spinRotations.length)];
+    const duration = config.spinDuration * rotations;
+    
+    console.log(`🔍 Inspector: Spinning head #${index} (${rotations} rotations)`);
+    
+    // Store original transform/transition
+    const originalTransform = head.style.transform || '';
+    const originalTransition = head.style.transition || '';
+    
+    // Set spin duration
+    head.style.setProperty('--spin-duration', `${duration}ms`);
+    
+    // Try multiple animation methods for compatibility
+    
+    // Method 1: CSS class
+    head.classList.add('spinning-head');
+    
+    // Method 2: Direct animation style
+    if (!head.classList.contains('spinning-head') || 
+        window.getComputedStyle(head).animationName !== 'headSpin') {
+      head.style.animation = `headSpin ${duration}ms ease-in-out`;
+    }
+    
+    // Method 3: Transform rotation
+    if (!head.style.animation) {
+      head.style.transition = `transform ${duration}ms ease-in-out`;
+      
+      // Force reflow
+      head.offsetHeight;
+      
+      head.style.transform = `${originalTransform} rotate(${360 * rotations}deg)`;
+    }
+    
+    // Reset after animation completes
+    setTimeout(() => {
+      head.classList.remove('spinning-head');
+      head.style.animation = '';
+      head.style.transform = originalTransform;
+      head.style.transition = originalTransition;
+      head.dataset.spinning = 'false';
+      
+      console.log(`🔍 Inspector: Head #${index} spin complete`);
+    }, duration + 50);
+    
+    return true;
+  }
+  
+  // Public methods for testing
+  window.headInspector = {
+    // Manually inspect the DOM
+    inspect: function() {
+      return inspectDOM();
+    },
+    
+    // Get current status
+    status: function() {
+      return {
+        headCount: headElements.length,
+        isMusicPlaying: isMusicPlaying,
+        nextSpinIn: nextSpinTime > 0 ? Math.max(0, (nextSpinTime - Date.now()) / 1000).toFixed(1) + 's' : 'not scheduled'
+      };
+    },
+    
+    // Toggle music state
+    toggleMusic: function(state) {
+      setMusicPlaying(state !== undefined ? !!state : !isMusicPlaying);
+      return `Music ${isMusicPlaying ? 'playing' : 'stopped'}`;
+    },
+    
+    // Manually trigger a spin
+    spin: function() {
+      const result = spinRandomHead();
+      return result ? "Spinning a head" : "Failed to spin (no heads available)";
+    },
+    
+    // Add an element manually
+    addHead: function(selector) {
+      try {
+        const elements = document.querySelectorAll(selector);
+        let added = 0;
+        
+        elements.forEach(el => {
+          if (!headElements.includes(el)) {
+            registerHeadElement(el);
+            added++;
           }
-          
-          // Schedule next spin
-          scheduleNextSpin();
-        }
-      }, delay);
-    }
-    
-    // Spin a random head
-    function spinRandomHead() {
-      // Make sure we have heads to spin
-      if (headElements.length === 0) {
-        console.log("🎧 EN5EMBLE Patcher: No heads to spin");
-        return;
+        });
+        
+        return `Added ${added} elements as heads`;
+      } catch (e) {
+        return `Error: ${e.message}`;
       }
-      
-      // Pick a random head
-      const index = Math.floor(Math.random() * headElements.length);
-      const head = headElements[index];
-      
-      // Skip if already spinning
-      if (head.dataset.spinning === 'true') {
-        console.log("🎧 EN5EMBLE Patcher: Head already spinning, trying another");
-        if (headElements.length > 1) {
-          spinRandomHead();
-        }
-        return;
-      }
-      
-      // Track spinning state
-      head.dataset.spinning = 'true';
-      
-      // Determine spin parameters
-      const rotations = Math.floor(Math.random() * 3) + 1; // 1-3 rotations
-      const duration = 800 * rotations; // 800ms per rotation
-      
-      console.log(`🎧 EN5EMBLE Patcher: Spinning head ${index} (${rotations} rotations)`);
-      
-      // Store original transform to restore later
-      const originalTransform = head.style.transform || '';
-      const originalTransition = head.style.transition || '';
-      
-      // Apply the spin using the cleanest method
-      head.style.setProperty('--spin-duration', `${duration}ms`);
-      
-      // Try multiple approaches for maximum browser compatibility
-      
-      // Approach 1: CSS animation (preferred)
-      head.style.animation = `head-spin ${duration}ms ease-in-out`;
-      
-      // Approach 2: If animation doesn't apply, use transform
-      if (!head.style.animation) {
-        head.style.transition = `transform ${duration}ms ease-in-out`;
-        
-        // Force a reflow to ensure the transition applies
-        head.offsetHeight; 
-        
-        head.style.transform = `${originalTransform} rotate(${360 * rotations}deg)`;
-      }
-      
-      // Reset after animation completes
-      setTimeout(() => {
-        head.style.animation = '';
-        head.style.transform = originalTransform;
-        head.style.transition = originalTransition;
-        head.dataset.spinning = 'false';
-        
-        console.log(`🎧 EN5EMBLE Patcher: Head ${index} spin complete`);
-      }, duration + 50);
     }
-    
-    // Export test functions
-    window.headSpinner = {
-      toggleMusic: function(state) {
-        isMusicPlaying = (state !== undefined) ? !!state : !isMusicPlaying;
-        
-        if (isMusicPlaying) {
-          startRandomSpins();
-        } else {
-          stopRandomSpins();
-        }
-        
-        return `Music ${isMusicPlaying ? 'playing' : 'stopped'}`;
-      },
-      
-      spin: function() {
-        spinRandomHead();
-        return "Spinning a random head";
-      },
-      
-      status: function() {
-        return {
-          headCount: headElements.length,
-          isMusicPlaying: isMusicPlaying,
-          hasSpinInterval: !!spinInterval
-        };
-      },
-      
-      findHeads: function() {
-        const existingHeads = document.querySelectorAll('img[src*="5_heads"]');
-        console.log(`Found ${existingHeads.length} heads in DOM`);
-        
-        if (existingHeads.length > 0) {
-          existingHeads.forEach(registerHeadElement);
-        }
-        
-        return `Now tracking ${headElements.length} heads`;
-      }
-    };
-    
-    // Initialize
-    function init() {
-      console.log("🎧 EN5EMBLE Patcher: Initializing");
-      
-      // Set up music detection
-      setupMusicDetection();
-      
-      // Patch the floating heads system
-      patchFloatingHeads();
-      
-      // Ensure spin CSS is added
-      ensureSpinCSS();
+  };
+  
+  // Run initial inspection
+  inspectDOM();
+  
+  // Start music monitoring
+  startMusicMonitoring();
+  
+  // Re-check DOM periodically for new heads
+  setInterval(() => {
+    // Only search again if we haven't found any heads yet
+    if (headElements.length === 0) {
+      inspectDOM();
     }
-    
-    // Start initialization
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', init);
-    } else {
-      init();
-    }
-  })();
+  }, config.checkInterval);
+  
+  console.log("🔍 Inspector: Initialization complete");
+})();
