@@ -132,6 +132,7 @@ document.addEventListener('DOMContentLoaded', function() {
   
     // Custom animations for the spinning text (optional enhancements)
     function enhanceSpinningText() {
+      
       const spinningText = document.getElementById('spinning-text');
       const circularTextSvg = document.getElementById('circular-text-svg');
       const circularTextPath = document.getElementById('circular-text-path');
