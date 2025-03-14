@@ -1,5 +1,5 @@
 /**
- * Non-Intrusive Music Menu Indicator
+ * Non-Intrusive Music Menu Indicator with Spacing Fix
  * Creates a visual effect for the mixxs menu without modifying its DOM structure
  */
 
@@ -10,6 +10,16 @@ const musicIndicatorStyles = `
     text-shadow: 0 0 8px rgba(255, 255, 0, 0.6);
     position: relative;
     animation: mixxs-pulse 1.2s ease-in-out infinite alternate;
+    /* Add margin-right to compensate for the dot indicator */
+    margin-right: 15px;
+  }
+  
+  /* Add adequate spacing to the next menu item in mobile views */
+  @media (max-width: 768px) {
+    /* Increase the spacing specifically between mixxs and archives */
+    .menu-item[data-section="mixxs"].music-playing + li .menu-item[data-section="archives"] {
+      margin-left: 8px;
+    }
   }
   
   /* Dot indicator */
@@ -71,8 +81,21 @@ function toggleMusicAnimation(isPlaying) {
   
   if (isPlaying) {
     mixxsMenuItem.classList.add('music-playing');
+    
+    // Add extra space to the parent list item for better layout
+    const parentLi = mixxsMenuItem.closest('li');
+    if (parentLi) {
+      parentLi.style.marginRight = '8px';
+    }
+    
   } else {
     mixxsMenuItem.classList.remove('music-playing');
+    
+    // Remove the extra space when not playing
+    const parentLi = mixxsMenuItem.closest('li');
+    if (parentLi) {
+      parentLi.style.marginRight = '';
+    }
   }
 }
 
@@ -105,6 +128,16 @@ function initMusicIndicator() {
   if (window.isMusicPlaying) {
     toggleMusicAnimation(true);
   }
+  
+  // Watch for responsive layout changes and adjust spacing accordingly
+  window.addEventListener('resize', function() {
+    if (window.isMusicPlaying) {
+      // Re-apply spacing on resize to account for layout changes
+      setTimeout(function() {
+        toggleMusicAnimation(true);
+      }, 100);
+    }
+  });
 }
 
 // Run when the page loads
