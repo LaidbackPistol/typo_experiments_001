@@ -84,8 +84,8 @@ function FloatingHeads(container) {
     console.log('Loading head images...');
     try {
       // Try to fetch from API
-      console.log('Attempting to fetch from /api/heads');
-      const response = await fetch('/api/heads');
+      console.log("Attempting to fetch from /api/floating-heads");
+      const response = await fetch('/api/floating-heads');
       
       // Check response status
       if (!response.ok) {
