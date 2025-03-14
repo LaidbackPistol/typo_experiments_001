@@ -85,7 +85,7 @@ function toggleMusicAnimation(isPlaying) {
     // Add extra space to the parent list item for better layout
     const parentLi = mixxsMenuItem.closest('li');
     if (parentLi) {
-      parentLi.style.marginRight = '8px';
+      parentLi.style.marginRight = '2px';
     }
     
   } else {
