@@ -20,7 +20,7 @@ const FLOATING_HEADS_CONFIG = {
     
     // Music mode settings
     musicModeActive: false, // Whether music mode is active
-    musicBPM: 130,          // Base beats per minute
+    musicBPM: 120,          // Base beats per minute
     minBobbingAmplitude: 3, // Minimum angle to bob (degrees)
     maxBobbingAmplitude: 10, // Maximum angle to bob (degrees)
     spinChance: 0.001,      // Chance of starting a spin on each frame (0.004 = 0.4%)
