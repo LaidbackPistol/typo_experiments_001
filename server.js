@@ -75,14 +75,32 @@ app.get('/api/mixes', (req, res) => {
 });
 
 app.get('/api/floating-heads', (req, res) => {
-  const headsPath = path.join(__dirname, 'public', '5_heads');
-  
-  // Check if 5_heads directory exists
-  if (!fs.existsSync(headsPath)) {
-    return res.json({ images: [] });
-  }
-  
   try {
+    // Pour les déploiements Vercel, utiliser une approche différente
+    if (process.env.VERCEL) {
+      // Puisque nous ne pouvons pas accéder au système de fichiers directement dans les fonctions Vercel,
+      // nous pouvons lister manuellement les images qui devraient être disponibles
+      const imageFiles = [
+        '/5_heads/head1.png',
+        '/5_heads/head2.png',
+        '/5_heads/head3.png',
+        '/5_heads/head4.png',
+        '/5_heads/head5.png'
+        // Ajoutez tous vos noms de fichiers ici
+      ];
+      
+      return res.json({ images: imageFiles });
+    }
+    
+    // Approche normale pour le développement local
+    const headsPath = path.join(__dirname, 'public', '5_heads');
+    
+    // Check if 5_heads directory exists
+    if (!fs.existsSync(headsPath)) {
+      console.log('5_heads directory not found');
+      return res.json({ images: [] });
+    }
+    
     // Read all image files in the 5_heads folder
     const imageFiles = fs.readdirSync(headsPath)
       .filter(file => {
@@ -94,7 +112,8 @@ app.get('/api/floating-heads', (req, res) => {
     res.json({ images: imageFiles });
   } catch (error) {
     console.error('Error reading 5_heads directory:', error);
-    res.status(500).json({ error: 'Failed to read head images' });
+    // Retourner un tableau vide au lieu d'une erreur 500
+    res.json({ images: [] });
   }
 });
 
