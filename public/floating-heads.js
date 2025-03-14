@@ -1,269 +1,326 @@
 /**
- * SOLUTION AUTONOME POUR FAIRE TOURNER LES TÊTES FLOTTANTES
- * Ce script s'exécute indépendamment du code floating-heads.js original
+ * Floating Heads Animation
+ * Creates 3D paper cutout effect for head images that float on screen
  */
 
-(function() {
-    console.log("🎵 EN5EMBLE: Initialisation du script de rotation des têtes");
+// Configuration
+const FLOATING_HEADS_CONFIG = {
+  fps: 0,               // Frames per second (lower = more stop-motion feel; 0 = no restrictions)
+  repulsionRadius: 200,  // How close mouse needs to be to affect heads
+  repulsionForce: 0.8,   // Strength of mouse repulsion
+  shadowBlur: 15,        // Shadow blur amount for 3D effect
+  shadowOffsetX: 10,     // Shadow X offset
+  shadowOffsetY: 10,     // Shadow Y offset
+  minScale: 0.3,         // Minimum size scale
+  maxScale: 0.6,         // Maximum size scale
+  rotationRange: 8,      // Max degrees of rotation (-8 to 8)
+  fallbackImage: '/5_heads/head1.png'  // Default image if none found
+};
+
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('Initializing floating heads');
+  
+  // Create container if it doesn't exist
+  let container = document.getElementById('floating-heads-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'floating-heads-container';
+    container.style.position = 'fixed';
+    container.style.top = '0';
+    container.style.left = '0';
+    container.style.width = '100%';
+    container.style.height = '100%';
+    container.style.zIndex = '5';
+    container.style.pointerEvents = 'none';
+    document.body.appendChild(container);
+  }
+  
+  // Create new floating heads instance
+  new FloatingHeads(container);
+});
+
+// FloatingHeads class
+function FloatingHeads(container) {
+  // Private variables
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  let heads = [];
+  let mousePos = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+  let lastFrameTime = 0;
+  let animationId = null;
+  let isInitialized = false;
+  
+  // Initialize
+  this.init = async function() {
+    // Setup canvas
+    canvas.id = 'floating-heads-canvas';
+    canvas.style.position = 'absolute';
+    canvas.style.top = '0';
+    canvas.style.left = '0';
+    canvas.style.width = '100%';
+    canvas.style.height = '100%';
+    canvas.style.pointerEvents = 'none';
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    container.appendChild(canvas);
     
-    // Configuration
-    const config = {
-      minInterval: 3000,   // Temps minimum entre les rotations (ms)
-      maxInterval: 8000,   // Temps maximum entre les rotations (ms)
-      spinDuration: 800,   // Durée de base pour une rotation (ms)
-      maxRotations: 3      // Nombre maximum de rotations
-    };
+    // Add event listeners
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('resize', handleResize);
     
-    // Variables d'état
-    let isMusicPlaying = false;
-    let spinInterval = null;
-    let initialized = false;
+    // Load images
+    await loadImagesFromDirectory();
     
-    // Fonction principale d'initialisation
-    function init() {
-      if (initialized) return;
-      
-      // Ajouter les styles CSS pour la rotation
-      addSpinStyles();
-      
-      // Configurer la détection de la musique Soundcloud
-      setupSoundcloudDetection();
-      
-      // Exposer les fonctions de test
-      window.spinHeads = {
-        spin: spinRandomHead,
-        toggleMusic: toggleMusic,
-        status: getStatus
-      };
-      
-      initialized = true;
-      console.log("🎵 EN5EMBLE: Script de rotation initialisé");
+    // Begin animation
+    if (heads.length > 0) {
+      isInitialized = true;
+      startAnimation();
     }
-    
-    // Obtenir l'état actuel
-    function getStatus() {
-      const heads = document.querySelectorAll('img[src*="5_heads"]');
-      return {
-        headsFound: heads.length,
-        musicPlaying: isMusicPlaying,
-        spinInterval: !!spinInterval
-      };
-    }
-    
-    // Ajouter les styles CSS pour l'animation de rotation
-    function addSpinStyles() {
-      if (document.getElementById('head-spin-styles')) return;
+  };
+  
+  // Load images from directory
+  const loadImagesFromDirectory = async function() {
+    console.log('Loading head images...');
+    try {
+      // Try to fetch from API
+      console.log("Attempting to fetch from /api/floating-heads");
+      const response = await fetch('/api/floating-heads');
       
-      const style = document.createElement('style');
-      style.id = 'head-spin-styles';
-      style.textContent = `
-        @keyframes en5embleSpin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-      `;
-      document.head.appendChild(style);
-    }
-    
-    // Configurer la détection de la lecture Soundcloud
-    function setupSoundcloudDetection() {
-      console.log("🎵 EN5EMBLE: Configuration de la détection Soundcloud");
-      
-      // Écouter les messages de Soundcloud
-      window.addEventListener('message', (event) => {
-        // Ne traiter que les messages de Soundcloud
-        if (!event.origin.includes('soundcloud.com')) return;
-        
-        try {
-          // Vérifier les messages d'état du lecteur
-          if (typeof event.data === 'object' && 
-              event.data.soundcloud && 
-              event.data.soundcloud.playerState) {
-            
-            const newState = event.data.soundcloud.playerState === 'playing';
-            
-            // Mettre à jour seulement si l'état a changé
-            if (newState !== isMusicPlaying) {
-              console.log(`🎵 EN5EMBLE: Musique ${newState ? 'démarrée' : 'arrêtée'}`);
-              toggleMusic(newState);
-            }
-          }
-        } catch (e) {
-          // Ignorer les erreurs cross-origin
-        }
-      });
-      
-      // Activer l'API sur les iframes Soundcloud
-      updateSoundcloudIframes();
-      
-      // Observer les nouveaux iframes
-      const observer = new MutationObserver((mutations) => {
-        for (const mutation of mutations) {
-          if (mutation.type === 'childList' && mutation.addedNodes.length) {
-            // Vérifier pour de nouveaux iframes
-            const hasNewIframes = Array.from(mutation.addedNodes).some(node => {
-              return node.tagName === 'IFRAME' && node.src && node.src.includes('soundcloud.com');
-            });
-            
-            if (hasNewIframes) {
-              updateSoundcloudIframes();
-            }
-          }
-        }
-      });
-      
-      observer.observe(document.body, {
-        childList: true,
-        subtree: true
-      });
-    }
-    
-    // Mettre à jour les iframes Soundcloud pour activer l'API
-    function updateSoundcloudIframes() {
-      const iframes = document.querySelectorAll('iframe[src*="soundcloud.com"]');
-      let updated = 0;
-      
-      iframes.forEach(iframe => {
-        if (!iframe.src.includes('api_widget=1') && !iframe.dataset.apiEnabled) {
-          try {
-            const newSrc = iframe.src + (iframe.src.includes('?') ? '&' : '?') + 'api_widget=1';
-            iframe.src = newSrc;
-            iframe.dataset.apiEnabled = 'true';
-            updated++;
-          } catch (e) {
-            // Ignorer les erreurs
-          }
-        }
-      });
-      
-      if (updated > 0) {
-        console.log(`🎵 EN5EMBLE: API activée sur ${updated} iframes Soundcloud`);
+      // Check response status
+      if (!response.ok) {
+        console.warn('API response not OK:', response.status, response.statusText);
+        throw new Error('API response not OK: ' + response.status);
       }
       
-      return iframes.length;
-    }
-    
-    // Activer/désactiver l'état de lecture de musique
-    function toggleMusic(state) {
-      isMusicPlaying = (state !== undefined) ? !!state : !isMusicPlaying;
+      // Check if the response is actually JSON (not HTML)
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        console.warn('API returned non-JSON response:', contentType);
+        console.log('Switching to direct image loading (bypassing API)');
+        throw new Error('API returned non-JSON response');
+      }
       
-      if (isMusicPlaying) {
-        startRandomSpins();
+      const data = await response.json();
+      console.log('API response:', data);
+      
+      if (data.images && data.images.length > 0) {
+        await loadImages(data.images);
       } else {
-        stopRandomSpins();
+        console.log('No images returned from API, using fallback image');
+        await loadImages([FLOATING_HEADS_CONFIG.fallbackImage]);
       }
+    } catch (error) {
+      console.warn('Error fetching images from API:', error);
       
-      return `Musique ${isMusicPlaying ? 'en lecture' : 'arrêtée'}`;
-    }
-    
-    // Démarrer les rotations aléatoires
-    function startRandomSpins() {
-      if (spinInterval) return;
+      // Fallback: try to directly load the image we know exists
+      console.log('Trying fallback image:', FLOATING_HEADS_CONFIG.fallbackImage);
       
-      console.log("🎵 EN5EMBLE: Démarrage des rotations aléatoires");
-      
-      // Faire une première rotation après un court délai
-      setTimeout(spinRandomHead, 1000);
-      
-      // Planifier la prochaine rotation avec un intervalle aléatoire
-      scheduleNextSpin();
-    }
-    
-    // Planifier la prochaine rotation
-    function scheduleNextSpin() {
-      if (spinInterval) {
-        clearTimeout(spinInterval);
-      }
-      
-      const delay = Math.floor(
-        Math.random() * (config.maxInterval - config.minInterval) + 
-        config.minInterval
-      );
-      
-      spinInterval = setTimeout(() => {
-        if (isMusicPlaying) {
-          spinRandomHead();
-          scheduleNextSpin();
-        }
-      }, delay);
-    }
-    
-    // Arrêter les rotations aléatoires
-    function stopRandomSpins() {
-      if (spinInterval) {
-        clearTimeout(spinInterval);
-        spinInterval = null;
-        console.log("🎵 EN5EMBLE: Arrêt des rotations aléatoires");
-      }
-    }
-    
-    // Faire tourner une tête aléatoire
-    function spinRandomHead() {
-      // Chercher toutes les têtes à chaque fois pour s'assurer d'avoir les plus récentes
-      const heads = document.querySelectorAll('img[src*="5_heads"]');
-      
-      if (heads.length === 0) {
-        console.log("🎵 EN5EMBLE: Aucune tête trouvée pour la rotation");
-        return false;
-      }
-      
-      // Sélectionner une tête aléatoire
-      const index = Math.floor(Math.random() * heads.length);
-      const head = heads[index];
-      
-      // Ignorer si déjà en rotation
-      if (head.dataset.spinning === 'true') {
-        console.log("🎵 EN5EMBLE: Tête déjà en rotation, essai d'une autre");
-        if (heads.length > 1) {
-          return spinRandomHead();
-        }
-        return false;
-      }
-      
-      // Marquer comme en rotation
-      head.dataset.spinning = 'true';
-      
-      // Déterminer le nombre de rotations (1-3)
-      const rotations = Math.floor(Math.random() * config.maxRotations) + 1;
-      const duration = config.spinDuration * rotations;
-      
-      console.log(`🎵 EN5EMBLE: Rotation de la tête ${index} (${rotations} tours)`);
-      
-      // Sauvegarder les styles originaux
-      const originalTransform = head.style.transform || '';
-      
-      // Appliquer la rotation
-      // Utiliser animation si disponible pour une meilleure performance
+      // Test if fallback image exists
       try {
-        head.style.animation = `en5embleSpin ${duration}ms ease-in-out`;
-      } catch (e) {
-        // Fallback sur transform en cas d'erreur
-        head.style.transition = `transform ${duration}ms ease-in-out`;
+        const testImage = new Image();
+        testImage.src = FLOATING_HEADS_CONFIG.fallbackImage;
+        await new Promise((resolve, reject) => {
+          testImage.onload = resolve;
+          testImage.onerror = reject;
+        });
         
-        // Forcer un reflow pour s'assurer que la transition s'applique
-        head.offsetHeight;
-        
-        // Appliquer la rotation
-        head.style.transform = `${originalTransform} rotate(${360 * rotations}deg)`;
+        // If we get here, the image loaded successfully
+        await loadImages([FLOATING_HEADS_CONFIG.fallbackImage]);
+      } catch (imgError) {
+        console.error('Fallback image failed to load:', imgError);
       }
-      
-      // Réinitialiser après la fin de l'animation
-      setTimeout(() => {
-        head.style.animation = '';
-        head.style.transition = '';
-        head.style.transform = originalTransform;
-        head.dataset.spinning = 'false';
+    }
+  };
+  
+  // Load specific images
+  const loadImages = async function(imagePaths) {
+    console.log('Loading images:', imagePaths);
+    
+    // Create loading promises for all images
+    const loadPromises = imagePaths.map((path, index) => {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.src = path;
         
-        console.log(`🎵 EN5EMBLE: Rotation de la tête ${index} terminée`);
-      }, duration + 50);
-      
-      return true;
+        img.onload = () => {
+          console.log(`Image loaded: ${path}`);
+          // Create a head object with random properties
+          heads.push({
+            id: index,
+            img: img,
+            x: Math.random() * window.innerWidth * 0.7 + window.innerWidth * 0.15,
+            y: Math.random() * window.innerHeight * 0.7 + window.innerHeight * 0.15,
+            rotation: Math.random() * FLOATING_HEADS_CONFIG.rotationRange * 2 - FLOATING_HEADS_CONFIG.rotationRange,
+            rotationSpeed: (Math.random() * 0.3 - 0.15),
+            scale: FLOATING_HEADS_CONFIG.minScale + Math.random() * (FLOATING_HEADS_CONFIG.maxScale - FLOATING_HEADS_CONFIG.minScale),
+            velocityX: (Math.random() * 0.4 - 0.2),
+            velocityY: (Math.random() * 0.4 - 0.2),
+            lastMoveTime: 0
+          });
+          resolve();
+        };
+        
+        img.onerror = () => {
+          console.error(`Failed to load image: ${path}`);
+          resolve(); // Resolve anyway to not block other images
+        };
+      });
+    });
+    
+    // Wait for all images to load or fail
+    await Promise.all(loadPromises);
+    console.log(`Loaded ${heads.length} images out of ${imagePaths.length} paths`);
+  };
+  
+  // Event handlers
+  const handleMouseMove = function(e) {
+    mousePos = { x: e.clientX, y: e.clientY };
+  };
+  
+  const handleResize = function() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  };
+  
+  // Animation functions
+  const startAnimation = function() {
+    if (animationId) cancelAnimationFrame(animationId);
+    animationId = requestAnimationFrame(animate);
+  };
+  
+  const animate = function(timestamp) {
+    // Skip frame rate limiting if fps is 0 (unlimited)
+    if (FLOATING_HEADS_CONFIG.fps > 0) {
+      const frameInterval = 1000 / FLOATING_HEADS_CONFIG.fps;
+      if (timestamp - lastFrameTime < frameInterval) {
+        animationId = requestAnimationFrame(animate);
+        return;
+      }
     }
     
-    // Initialiser lorsque le DOM est prêt
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', init);
-    } else {
-      init();
+    lastFrameTime = timestamp;
+    
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Update and draw each head
+    heads.forEach(head => {
+      // Calculate distance from mouse for repulsion effect
+      const dx = mousePos.x - head.x;
+      const dy = mousePos.y - head.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      
+      // Apply mouse repulsion when mouse is close
+      if (distance < FLOATING_HEADS_CONFIG.repulsionRadius) {
+        const repulsionForce = FLOATING_HEADS_CONFIG.repulsionForce * (1 - distance / FLOATING_HEADS_CONFIG.repulsionRadius);
+        head.velocityX -= (dx / distance) * repulsionForce;
+        head.velocityY -= (dy / distance) * repulsionForce;
+      }
+      
+      // Apply slight randomness for natural movement (every 500ms)
+      if (timestamp - head.lastMoveTime > 500) {
+        head.velocityX += (Math.random() * 0.2 - 0.1);
+        head.velocityY += (Math.random() * 0.2 - 0.1);
+        head.lastMoveTime = timestamp;
+      }
+      
+      // Apply velocity (with damping)
+      head.x += head.velocityX;
+      head.y += head.velocityY;
+      head.velocityX *= 0.98;
+      head.velocityY *= 0.98;
+      
+      // Apply rotation
+      head.rotation += head.rotationSpeed;
+      
+      // Boundary checking to keep heads within screen
+      const margin = 50;
+      if (head.x < margin) {
+        head.x = margin;
+        head.velocityX *= -0.5;
+      } else if (head.x > canvas.width - margin) {
+        head.x = canvas.width - margin;
+        head.velocityX *= -0.5;
+      }
+      
+      if (head.y < margin) {
+        head.y = margin;
+        head.velocityY *= -0.5;
+      } else if (head.y > canvas.height - margin) {
+        head.y = canvas.height - margin;
+        head.velocityY *= -0.5;
+      }
+      
+      // Draw the head with shadow for 3D effect
+      ctx.save();
+      ctx.translate(head.x, head.y);
+      ctx.rotate((head.rotation * Math.PI) / 180);
+      ctx.scale(head.scale, head.scale);
+      
+      // Add shadow for 3D paper cutout effect
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+      ctx.shadowBlur = FLOATING_HEADS_CONFIG.shadowBlur;
+      ctx.shadowOffsetX = FLOATING_HEADS_CONFIG.shadowOffsetX;
+      ctx.shadowOffsetY = FLOATING_HEADS_CONFIG.shadowOffsetY;
+      
+      // Draw the head
+      const imgWidth = head.img.width;
+      const imgHeight = head.img.height;
+      ctx.drawImage(head.img, -imgWidth / 2, -imgHeight / 2, imgWidth, imgHeight);
+      
+      ctx.restore();
+    });
+    
+    animationId = requestAnimationFrame(animate);
+  };
+  
+  // Cleanup function
+  this.cleanup = function() {
+    if (animationId) cancelAnimationFrame(animationId);
+    window.removeEventListener('mousemove', handleMouseMove);
+    window.removeEventListener('resize', handleResize);
+    container.removeChild(canvas);
+  };
+  
+  // Initialize
+  this.init();
+}
+
+// Add CSS style for container
+const style = document.createElement('style');
+style.textContent = `
+  #floating-heads-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 5;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  
+  #floating-heads-canvas {
+    filter: drop-shadow(0px 5px 15px rgba(0, 0, 0, 0.2));
+  }
+`;
+
+// Attempt to directly load images from common paths if needed
+window.addEventListener('load', function() {
+  setTimeout(() => {
+    const floatingHeadsCanvas = document.getElementById('floating-heads-canvas');
+    const headsContainer = document.getElementById('floating-heads-container');
+    
+    // If no floating heads are visible after 3 seconds, try direct loading
+    if (!floatingHeadsCanvas || headsContainer.childElementCount === 0) {
+      console.log('Floating heads not initialized after timeout, trying direct loading');
+      
+      // Create new instance with direct loading
+      const directInstance = new FloatingHeads(headsContainer || document.body);
+      
+      // Store for debugging
+      window.floatingHeadsDirectInstance = directInstance;
     }
-  })();
+  }, 3000);
+});
+document.head.appendChild(style);
