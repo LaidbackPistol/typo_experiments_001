@@ -96,18 +96,36 @@ const FLOATING_HEADS_CONFIG = {
       // Apply changes to all heads
       heads.forEach(head => {
         if (enabled) {
-          // Music playing - make heads spin faster and more randomly
-          head.rotationSpeed = (Math.random() * 5 - 2.5); // -2.5 to 2.5
-          // Add a bit more energy to movement
-          head.velocityX += (Math.random() * 0.4 - 0.2);
-          head.velocityY += (Math.random() * 0.4 - 0.2);
+          // Reset any ongoing rotation
+          head.rotationSpeed = 0;
+          
+          // Add a bit of initial movement
+          head.velocityX += (Math.random() * 0.3 - 0.15);
+          head.velocityY += (Math.random() * 0.3 - 0.15);
+          
+          // Visual cue that music mode is starting - small quick bounce
+          head.scale *= 1.1;
+          setTimeout(() => {
+            if (head && isMusicMode) head.scale /= 1.1;
+          }, 200);
         } else {
           // Music stopped - restore normal values
           head.rotationSpeed = (Math.random() * 0.3 - 0.15); // Original value
           head.velocityX *= 0.5; // Slow down
           head.velocityY *= 0.5; // Slow down
+          
+          // Reset music-specific properties
+          head.bobbingStartTime = 0;
+          head.spinningNow = false;
         }
       });
+      
+      // Add a body class for potential CSS animations
+      if (enabled) {
+        document.body.classList.add('music-playing');
+      } else {
+        document.body.classList.remove('music-playing');
+      }
       
       console.log(`Floating heads music mode ${enabled ? 'enabled' : 'disabled'}`);
     };
@@ -252,16 +270,61 @@ const FLOATING_HEADS_CONFIG = {
         
         // Apply music mode effects
         if (isMusicMode || FLOATING_HEADS_CONFIG.musicModeActive) {
-          // Music playing - more random movement and faster rotation
-          if (timestamp - head.lastMoveTime > 200) { // More frequent randomness
-            head.velocityX += (Math.random() * 0.4 - 0.2);
-            head.velocityY += (Math.random() * 0.4 - 0.2);
+          // Music playing - bobbing at 130 BPM (462ms per beat)
+          
+          // Set up bobbing motion if not already set
+          if (!head.bobbingStartTime) {
+            head.bobbingStartTime = timestamp;
+            head.bobbingOffset = Math.random() * Math.PI * 2; // Random start phase
+            head.spinningNow = false;
+            head.spinStartTime = 0;
+            head.spinDuration = 0;
             
-            // Occasionally change rotation direction
-            if (Math.random() > 0.8) {
-              head.rotationSpeed = (Math.random() * 10 - 5); // More dramatic rotation
+            // Each head has slightly different bobbing frequency around 130 BPM
+            head.bpm = 130 + (Math.random() * 10 - 5); // 125-135 BPM range
+            head.beatDuration = 60000 / head.bpm; // ms per beat
+          }
+          
+          // Occasionally start a full spin
+          if (!head.spinningNow && Math.random() > 0.996) { // About once every few seconds per head
+            head.spinningNow = true;
+            head.spinStartTime = timestamp;
+            head.spinDuration = 500 + Math.random() * 500; // 0.5 to 1 second spin
+            head.spinDirection = Math.random() > 0.5 ? 1 : -1; // Clockwise or counter-clockwise
+            head.initialRotation = head.rotation; // Remember starting rotation
+            head.targetRotation = head.initialRotation + (360 * head.spinDirection); // Full 360 spin
+          }
+          
+          if (head.spinningNow) {
+            // Calculate spin progress
+            const spinProgress = Math.min(1, (timestamp - head.spinStartTime) / head.spinDuration);
+            
+            // Use easeInOutQuad for smooth start/stop
+            const eased = spinProgress < 0.5 
+              ? 2 * spinProgress * spinProgress 
+              : 1 - Math.pow(-2 * spinProgress + 2, 2) / 2;
+              
+            // Apply rotation based on spin progress
+            head.rotation = head.initialRotation + (eased * (head.targetRotation - head.initialRotation));
+            
+            // End spinning when complete
+            if (spinProgress >= 1) {
+              head.spinningNow = false;
+              head.rotation = head.targetRotation % 360; // Normalize rotation
             }
+          } else {
+            // Apply bobbing motion based on beat
+            const beatProgress = ((timestamp - head.bobbingStartTime) % head.beatDuration) / head.beatDuration;
+            const bobAmount = 8; // Degrees of bob
             
+            // Sine wave bobbing (up and down motion)
+            head.rotation = head.rotation * 0.9 + (Math.sin(beatProgress * Math.PI * 2 + head.bobbingOffset) * bobAmount) * 0.1;
+          }
+          
+          // Add subtle movement with the beat
+          if (timestamp - head.lastMoveTime > head.beatDuration / 2) {
+            head.velocityX += (Math.random() * 0.3 - 0.15) * 0.5;
+            head.velocityY += (Math.random() * 0.3 - 0.15) * 0.5;
             head.lastMoveTime = timestamp;
           }
         } else {
@@ -271,6 +334,10 @@ const FLOATING_HEADS_CONFIG = {
             head.velocityY += (Math.random() * 0.2 - 0.1);
             head.lastMoveTime = timestamp;
           }
+          
+          // Reset music properties when music stops
+          head.bobbingStartTime = 0;
+          head.spinningNow = false;
         }
         
         // Apply velocity (with damping)
