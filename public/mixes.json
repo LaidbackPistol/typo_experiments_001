@@ -1,20 +1,20 @@
 {
-    "mixes": [
-      {
-        "title": "Mix à la maison #2",
-        "artist": "Baru",
-        "date": "2025-03-11",
-        "description": "Special contest TDN UVF 2",
-        "soundcloudUrl": "https://soundcloud.com/th-o-baruzzi/mix-a-la-maison-2-special-contest-tdn-uvf-2",
-        "embedCode": "<iframe width=\"100%\" height=\"200\" scrolling=\"no\" frameborder=\"no\" allow=\"autoplay\" src=\"https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/2049177024&color=%23ffff00&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false&visual=true\"></iframe><div style=\"font-size: 10px; color: #cccccc;line-break: anywhere;word-break: normal;overflow: hidden;white-space: nowrap;text-overflow: ellipsis; font-family: Interstate,Lucida Grande,Lucida Sans Unicode,Lucida Sans,Garuda,Verdana,Tahoma,sans-serif;font-weight: 100;\"><a href=\"https://soundcloud.com/th-o-baruzzi\" title=\"Baru\" target=\"_blank\" style=\"color: #cccccc; text-decoration: none;\">Baru</a> · <a href=\"https://soundcloud.com/th-o-baruzzi/mix-a-la-maison-2-special-contest-tdn-uvf-2\" title=\"Mix à la maison #2 - Special contest TDN UVF 2\" target=\"_blank\" style=\"color: #cccccc; text-decoration: none;\">Mix à la maison #2 - Special contest TDN UVF 2</a></div>"
-      },
-      {
-        "title": "Mix à la maison #1",
-        "artist": "Baru",
-        "date": "2025-01-15",
-        "description": "Deep House - Progressive",
-        "soundcloudUrl": "https://soundcloud.com/th-o-baruzzi/fc-ensemble-mix-a-la-maison-1",
-        "embedCode": "<iframe width=\"100%\" height=\"200\" scrolling=\"no\" frameborder=\"no\" allow=\"autoplay\" src=\"https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/2015718267&color=%23ffff00&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false&visual=true\"></iframe><div style=\"font-size: 10px; color: #cccccc;line-break: anywhere;word-break: normal;overflow: hidden;white-space: nowrap;text-overflow: ellipsis; font-family: Interstate,Lucida Grande,Lucida Sans Unicode,Lucida Sans,Garuda,Verdana,Tahoma,sans-serif;font-weight: 100;\"><a href=\"https://soundcloud.com/th-o-baruzzi\" title=\"Baru\" target=\"_blank\" style=\"color: #cccccc; text-decoration: none;\">Baru</a> · <a href=\"https://soundcloud.com/th-o-baruzzi/fc-ensemble-mix-a-la-maison-1\" title=\"Mix à la maison #1 - Deep House - Progressive\" target=\"_blank\" style=\"color: #cccccc; text-decoration: none;\">Mix à la maison #1 - Deep House - Progressive</a></div>"
-      }
-    ]
+  "mixes": [
+    {
+      "title": "Mix à la maison #2",
+      "artist": "Baru",
+      "date": "2025-03-11",
+      "description": "Special contest TDN UVF 2",
+      "soundcloudUrl": "https://soundcloud.com/th-o-baruzzi/mix-a-la-maison-2-special-contest-tdn-uvf-2",
+      "embedCode": "<iframe width=\"100%\" height=\"200\" scrolling=\"no\" frameborder=\"no\" allow=\"autoplay\" src=\"https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/2049177024&color=%23000000&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false&visual=true\"></iframe><div style=\"font-size: 10px; color: #cccccc;line-break: anywhere;word-break: normal;overflow: hidden;white-space: nowrap;text-overflow: ellipsis; font-family: Interstate,Lucida Grande,Lucida Sans Unicode,Lucida Sans,Garuda,Verdana,Tahoma,sans-serif;font-weight: 100;\"><a href=\"https://soundcloud.com/th-o-baruzzi\" title=\"Baru\" target=\"_blank\" style=\"color: #cccccc; text-decoration: none;\">Baru</a> · <a href=\"https://soundcloud.com/th-o-baruzzi/mix-a-la-maison-2-special-contest-tdn-uvf-2\" title=\"Mix à la maison #2 - Special contest TDN UVF 2\" target=\"_blank\" style=\"color: #cccccc; text-decoration: none;\">Mix à la maison #2 - Special contest TDN UVF 2</a></div>"
+    },
+    {
+      "title": "Mix à la maison #1",
+      "artist": "Baru",
+      "date": "2025-01-15",
+      "description": "Deep House - Progressive",
+      "soundcloudUrl": "https://soundcloud.com/th-o-baruzzi/fc-ensemble-mix-a-la-maison-1",
+      "embedCode": "<iframe width=\"100%\" height=\"200\" scrolling=\"no\" frameborder=\"no\" allow=\"autoplay\" src=\"https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/2015718267&color=%23000000&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false&visual=true\"></iframe><div style=\"font-size: 10px; color: #cccccc;line-break: anywhere;word-break: normal;overflow: hidden;white-space: nowrap;text-overflow: ellipsis; font-family: Interstate,Lucida Grande,Lucida Sans Unicode,Lucida Sans,Garuda,Verdana,Tahoma,sans-serif;font-weight: 100;\"><a href=\"https://soundcloud.com/th-o-baruzzi\" title=\"Baru\" target=\"_blank\" style=\"color: #cccccc; text-decoration: none;\">Baru</a> · <a href=\"https://soundcloud.com/th-o-baruzzi/fc-ensemble-mix-a-la-maison-1\" title=\"Mix à la maison #1 - Deep House - Progressive\" target=\"_blank\" style=\"color: #cccccc; text-decoration: none;\">Mix à la maison #1 - Deep House - Progressive</a></div>"
+    }
+  ]
 }
