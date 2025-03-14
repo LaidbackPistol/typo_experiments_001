@@ -91,26 +91,27 @@ if (process.env.VERCEL) {
 }
 
 app.get('/api/heads', (req, res) => {
-  // The path to the 5_heads directory
-  const headsPath = path.join(__dirname, 'public', 'archive_assets', '5_heads');
+  const headsPath = path.join(__dirname, 'public', '5_heads');
   
-  // Check if the directory exists
+  // Check if 5_heads directory exists
   if (!fs.existsSync(headsPath)) {
+    console.log('Directory not found:', headsPath);
     return res.json({ images: [] });
   }
   
   try {
-    // Read all image files in the directory
+    // Read all image files in the 5_heads folder
     const imageFiles = fs.readdirSync(headsPath)
       .filter(file => {
         const ext = path.extname(file).toLowerCase();
         return ['.jpg', '.jpeg', '.png', '.gif', '.webp'].includes(ext);
       })
-      .map(file => `/archive_assets/5_heads/${encodeURIComponent(file)}`);
+      .map(file => `/5_heads/${encodeURIComponent(file)}`);
     
+    console.log('Found images:', imageFiles);
     res.json({ images: imageFiles });
   } catch (error) {
     console.error('Error reading 5_heads directory:', error);
-    res.status(500).json({ error: 'Failed to read 5_heads directory' });
+    res.status(500).json({ error: 'Failed to read head images', details: error.message });
   }
 });
