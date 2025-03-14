@@ -476,3 +476,4 @@ const FLOATING_HEADS_CONFIG = {
   });
   
   document.head.appendChild(style);
+  
