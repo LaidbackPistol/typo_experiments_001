@@ -5,7 +5,7 @@
 
 // Configuration
 const FLOATING_HEADS_CONFIG = {
-  fps: 6,               // Frames per second (lower = more stop-motion feel)
+  fps: 0,               // Frames per second (lower = more stop-motion feel; 0 = no restrictions)
   repulsionRadius: 200,  // How close mouse needs to be to affect heads
   repulsionForce: 0.8,   // Strength of mouse repulsion
   shadowBlur: 15,        // Shadow blur amount for 3D effect
@@ -190,11 +190,13 @@ function FloatingHeads(container) {
   };
   
   const animate = function(timestamp) {
-    // Control frame rate for stop-motion effect
-    const frameInterval = 1000 / FLOATING_HEADS_CONFIG.fps;
-    if (timestamp - lastFrameTime < frameInterval) {
-      animationId = requestAnimationFrame(animate);
-      return;
+    // Skip frame rate limiting if fps is 0 (unlimited)
+    if (FLOATING_HEADS_CONFIG.fps > 0) {
+      const frameInterval = 1000 / FLOATING_HEADS_CONFIG.fps;
+      if (timestamp - lastFrameTime < frameInterval) {
+        animationId = requestAnimationFrame(animate);
+        return;
+      }
     }
     
     lastFrameTime = timestamp;
