@@ -60,70 +60,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Doto:wght,ROND@200,4&family=Offside&family=Rubik+Puddles&family=Silkscreen&family=Tulpen+One&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders:opsz,wght@10..72,100..900&family=Inknut+Antiqua:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
-     :root {
-      /* Primary Font Variables */
-      --font-primary: 'Inknut Antiqua', serif;
-      --font-secondary: 'Big Shoulders', sans-serif;
-      --font-accent: monospace;
-      
-      /* Font Weights */
-      --font-weight-normal: 400;
-      --font-weight-bold: 700;
-      
-      /* Font Sizes */
-      --font-size-menu: 22px;
-      --font-size-menu-active: 28px;
-      --font-size-menu-mobile: 18px;
-      --font-size-menu-active-mobile: 24px;
-      --font-size-title: 18px;
-    }
-
-    /* Menu Typography */
-    .menu-item {
-      color: #ffff00;
-      font-size: var(--font-size-menu);
-      text-decoration: none;
-      transition: all 0.4s ease;
-      font-family: var(--font-primary);
-      opacity: 0.9;
-      display: inline-block;
-    }
-
-    .menu-item.active {
-      font-size: var(--font-size-menu-active);
-      font-weight: var(--font-weight-bold);
-      opacity: 1;
-      transform: translateX(5px);
-    }
-
-    /* Album title */
-    .album-title {
-      color: #ffff00;
-      font-size: var(--font-size-title);
-      margin-bottom: 4px;
-      font-family: var(--font-primary);
-      text-shadow: 0 0 10px rgba(0, 0, 0, 0.8), 0 0 20px rgba(0, 0, 0, 0.8);
-      pointer-events: auto;
-    }
-
-    /* Mix title */
-    .mix-title {
-      color: #ffff00;
-      font-family: var(--font-primary);
-      display: none;
-    }
-
-    /* Media query for responsive design */
-    @media (max-width: 768px) {
-      .menu-item {
-        font-size: var(--font-size-menu-mobile);
-      }
-      
-      .menu-item.active {
-        font-size: var(--font-size-menu-active-mobile);
-      }
-    }
-
     * {
       margin: 0;
       padding: 0;
@@ -1201,6 +1137,136 @@
   </style>
   <link rel="stylesheet" href="/floating-heads.css">
   <link rel="stylesheet" href="/future-events.css">
+  <style id="font-manager-styles">
+    /* Font Management System - This must be placed AFTER all other styles */
+    :root {
+      /* Primary Font Variables */
+      --font-primary: 'Inknut Antiqua', serif;
+      --font-secondary: 'Big Shoulders', sans-serif;
+      --font-accent: monospace;
+      
+      /* Font Weights */
+      --font-weight-normal: 400;
+      --font-weight-bold: 700;
+      
+      /* Font Sizes */
+      --font-size-menu: 22px;
+      --font-size-menu-active: 28px;
+      --font-size-menu-mobile: 18px;
+      --font-size-menu-active-mobile: 24px;
+      --font-size-title: 18px;
+    }
+  
+    /* Override menu typography with !important to ensure it takes precedence */
+    .menu-item {
+      font-family: var(--font-primary) !important;
+      font-size: var(--font-size-menu) !important;
+    }
+  
+    .menu-item.active {
+      font-size: var(--font-size-menu-active) !important;
+      font-weight: var(--font-weight-bold) !important;
+    }
+  
+    /* Override album and mix titles */
+    .album-title {
+      font-family: var(--font-primary) !important;
+      font-size: var(--font-size-title) !important;
+    }
+  
+    .mix-title {
+      font-family: var(--font-primary) !important;
+    }
+  
+    /* Caption using accent font */
+    .image-caption {
+      font-family: var(--font-accent) !important;
+    }
+  
+    /* Media query for responsive design */
+    @media (max-width: 768px) {
+      .menu-item {
+        font-size: var(--font-size-menu-mobile) !important;
+      }
+      
+      .menu-item.active {
+        font-size: var(--font-size-menu-active-mobile) !important;
+      }
+    }
+  
+    /* Font switcher panel */
+    .font-switcher {
+      position: fixed;
+      bottom: 70px;
+      left: 20px;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 10px;
+      border-radius: 5px;
+      z-index: 102;
+      display: none;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+  
+    .font-switcher.visible {
+      display: block;
+    }
+  
+    .font-switcher button {
+      display: block;
+      margin: 5px 0;
+      width: 100%;
+      text-align: left;
+      padding: 5px 10px;
+      border: none;
+      background: rgba(40, 40, 40, 0.7);
+      color: #ffff00;
+      cursor: pointer;
+      border-radius: 3px;
+      font-size: 14px;
+      transition: all 0.2s ease;
+    }
+  
+    .font-switcher button:hover {
+      background: rgba(60, 60, 60, 0.9);
+    }
+  
+    .font-switcher button.active {
+      border-left: 3px solid #ffff00;
+      font-weight: bold;
+    }
+  
+    .font-toggle {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      background: rgba(0, 0, 0, 0.7);
+      color: #ffff00;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 103;
+      border: 1px solid #444;
+      font-weight: bold;
+      font-size: 18px;
+      opacity: 0.5;
+      transition: opacity 0.3s ease;
+    }
+  
+    .font-toggle:hover {
+      opacity: 1;
+    }
+  
+    /* Only show on desktop - hide on mobile to avoid conflicts with menu */
+    @media (max-width: 768px) {
+      .font-toggle, .font-switcher {
+        display: none !important;
+      }
+    }
+  </style>
 </head>
 <body>
   <div id="canvas-container">
@@ -4181,39 +4247,53 @@
       }, 500);
     }
   </script>
+<script src="/floating-heads.js"></script>
+<script src="/soundcloud-integration.js"></script>
+<script src="/music-indicator.js"></script>
+<script src="/events-content.js"></script>
+<script src="/shake-detector.js"></script>
+<div class="font-toggle" id="font-toggle">F</div>
+<div class="font-switcher" id="font-switcher">
+  <button data-preset="default">Inknut</button>
+  <button data-preset="display">Big Shoulders</button>
+  <button data-preset="elegant">Cinzel</button>
+  <button data-preset="monospace">Monospace</button>
+</div>
+
+<!-- Add this JavaScript before the closing </body> tag -->
 <script>
   /**
-   * Font Manager - A simple system to manage fonts across the website
+   * Font Manager - A system to manage fonts across the website
    */
   const FontManager = {
-    // Font presets - add more as needed
+    // Font presets
     presets: {
-      // Default (what's set in CSS variables)
+      // Default
       default: {
-        primary: 'Inknut Antiqua, serif',
-        secondary: 'Big Shoulders, sans-serif',
-        accent: 'monospace'
+        primary: "'Inknut Antiqua', serif",
+        secondary: "'Big Shoulders', sans-serif",
+        accent: "monospace"
       },
       
       // Monospace preset
       monospace: {
-        primary: 'monospace',
-        secondary: 'monospace',
-        accent: 'monospace'
+        primary: "monospace",
+        secondary: "monospace",
+        accent: "monospace"
       },
       
       // Bold display preset
       display: {
-        primary: 'Big Shoulders, sans-serif',
-        secondary: 'Inknut Antiqua, serif',
-        accent: 'Silkscreen, sans-serif'
+        primary: "'Big Shoulders', sans-serif",
+        secondary: "'Inknut Antiqua', serif",
+        accent: "'Silkscreen', sans-serif"
       },
       
       // Elegant preset
       elegant: {
-        primary: 'Cinzel, serif',
-        secondary: 'Inknut Antiqua, serif',
-        accent: 'monospace'
+        primary: "'Cinzel', serif",
+        secondary: "'Inknut Antiqua', serif",
+        accent: "monospace"
       }
     },
     
@@ -4222,21 +4302,85 @@
       // Get the preset (or default if not found)
       const preset = this.presets[presetName] || this.presets.default;
       
-      // Apply to CSS variables
+      // Apply to CSS variables directly in the document
       document.documentElement.style.setProperty('--font-primary', preset.primary);
       document.documentElement.style.setProperty('--font-secondary', preset.secondary);
       document.documentElement.style.setProperty('--font-accent', preset.accent);
       
+      // Update active button in the UI
+      this.updateButtonUI(presetName);
+      
       // Save the current preset to localStorage for persistence
       localStorage.setItem('en5emble-font-preset', presetName);
       
-      console.log(`Applied font preset: ${presetName}`);
+      console.log(`Applied font preset: ${presetName}`, preset);
+      
+      // Show notification of font change if the function exists
+      if (typeof showNotification === 'function') {
+        showNotification(`Font: ${presetName}`);
+      }
+      
       return preset;
+    },
+    
+    // Update button UI states
+    updateButtonUI: function(activePreset) {
+      // Find all preset buttons
+      const buttons = document.querySelectorAll('#font-switcher button');
+      
+      // Remove active class from all buttons
+      buttons.forEach(btn => {
+        btn.classList.remove('active');
+        
+        // Add active class to the current preset button
+        if (btn.dataset.preset === activePreset) {
+          btn.classList.add('active');
+          
+          // Update the button's font to match the preset
+          const preset = this.presets[activePreset];
+          if (preset) {
+            btn.style.fontFamily = preset.primary;
+          }
+        }
+      });
     },
     
     // Get the current preset name
     getCurrentPreset: function() {
       return localStorage.getItem('en5emble-font-preset') || 'default';
+    },
+    
+    // Setup the font switcher UI
+    setupUI: function() {
+      // Get UI elements
+      const fontToggle = document.getElementById('font-toggle');
+      const fontSwitcher = document.getElementById('font-switcher');
+      const buttons = document.querySelectorAll('#font-switcher button');
+      
+      if (fontToggle && fontSwitcher) {
+        // Toggle the font switcher panel
+        fontToggle.addEventListener('click', () => {
+          fontSwitcher.classList.toggle('visible');
+        });
+        
+        // Close font switcher when clicking elsewhere
+        document.addEventListener('click', (e) => {
+          if (!fontSwitcher.contains(e.target) && e.target !== fontToggle) {
+            fontSwitcher.classList.remove('visible');
+          }
+        });
+        
+        // Handle preset button clicks
+        buttons.forEach(btn => {
+          btn.addEventListener('click', () => {
+            const presetName = btn.dataset.preset;
+            if (presetName) {
+              this.applyPreset(presetName);
+              fontSwitcher.classList.remove('visible');
+            }
+          });
+        });
+      }
     },
     
     // Initialize the font manager
@@ -4245,22 +4389,32 @@
       const savedPreset = this.getCurrentPreset();
       this.applyPreset(savedPreset);
       
+      // Setup UI interaction
+      this.setupUI();
+      
       console.log('Font Manager initialized with preset:', savedPreset);
     }
   };
 
   // Initialize the Font Manager when the page loads
   document.addEventListener('DOMContentLoaded', function() {
-    FontManager.init();
+    // Short delay to ensure all styles are loaded first
+    setTimeout(function() {
+      FontManager.init();
+    }, 100);
     
     // Optional: Expose font manager to window for console access
     window.FontManager = FontManager;
   });
+
+  // Also run on full window load as a backup
+  window.addEventListener('load', function() {
+    if (!window.FontManager) {
+      console.log('Font Manager not initialized in DOMContentLoaded, initializing now');
+      FontManager.init();
+      window.FontManager = FontManager;
+    }
+  });
 </script>
-<script src="/floating-heads.js"></script>
-<script src="/soundcloud-integration.js"></script>
-<script src="/music-indicator.js"></script>
-<script src="/events-content.js"></script>
-<script src="/shake-detector.js"></script>
 </body>
 </html>
