@@ -60,6 +60,70 @@
   <link href="https://fonts.googleapis.com/css2?family=Doto:wght,ROND@200,4&family=Offside&family=Rubik+Puddles&family=Silkscreen&family=Tulpen+One&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders:opsz,wght@10..72,100..900&family=Inknut+Antiqua:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
+     :root {
+      /* Primary Font Variables */
+      --font-primary: 'Inknut Antiqua', serif;
+      --font-secondary: 'Big Shoulders', sans-serif;
+      --font-accent: monospace;
+      
+      /* Font Weights */
+      --font-weight-normal: 400;
+      --font-weight-bold: 700;
+      
+      /* Font Sizes */
+      --font-size-menu: 22px;
+      --font-size-menu-active: 28px;
+      --font-size-menu-mobile: 18px;
+      --font-size-menu-active-mobile: 24px;
+      --font-size-title: 18px;
+    }
+
+    /* Menu Typography */
+    .menu-item {
+      color: #ffff00;
+      font-size: var(--font-size-menu);
+      text-decoration: none;
+      transition: all 0.4s ease;
+      font-family: var(--font-primary);
+      opacity: 0.9;
+      display: inline-block;
+    }
+
+    .menu-item.active {
+      font-size: var(--font-size-menu-active);
+      font-weight: var(--font-weight-bold);
+      opacity: 1;
+      transform: translateX(5px);
+    }
+
+    /* Album title */
+    .album-title {
+      color: #ffff00;
+      font-size: var(--font-size-title);
+      margin-bottom: 4px;
+      font-family: var(--font-primary);
+      text-shadow: 0 0 10px rgba(0, 0, 0, 0.8), 0 0 20px rgba(0, 0, 0, 0.8);
+      pointer-events: auto;
+    }
+
+    /* Mix title */
+    .mix-title {
+      color: #ffff00;
+      font-family: var(--font-primary);
+      display: none;
+    }
+
+    /* Media query for responsive design */
+    @media (max-width: 768px) {
+      .menu-item {
+        font-size: var(--font-size-menu-mobile);
+      }
+      
+      .menu-item.active {
+        font-size: var(--font-size-menu-active-mobile);
+      }
+    }
+
     * {
       margin: 0;
       padding: 0;
@@ -4117,6 +4181,82 @@
       }, 500);
     }
   </script>
+<script>
+  /**
+   * Font Manager - A simple system to manage fonts across the website
+   */
+  const FontManager = {
+    // Font presets - add more as needed
+    presets: {
+      // Default (what's set in CSS variables)
+      default: {
+        primary: 'Inknut Antiqua, serif',
+        secondary: 'Big Shoulders, sans-serif',
+        accent: 'monospace'
+      },
+      
+      // Monospace preset
+      monospace: {
+        primary: 'monospace',
+        secondary: 'monospace',
+        accent: 'monospace'
+      },
+      
+      // Bold display preset
+      display: {
+        primary: 'Big Shoulders, sans-serif',
+        secondary: 'Inknut Antiqua, serif',
+        accent: 'Silkscreen, sans-serif'
+      },
+      
+      // Elegant preset
+      elegant: {
+        primary: 'Cinzel, serif',
+        secondary: 'Inknut Antiqua, serif',
+        accent: 'monospace'
+      }
+    },
+    
+    // Apply a font preset by name
+    applyPreset: function(presetName) {
+      // Get the preset (or default if not found)
+      const preset = this.presets[presetName] || this.presets.default;
+      
+      // Apply to CSS variables
+      document.documentElement.style.setProperty('--font-primary', preset.primary);
+      document.documentElement.style.setProperty('--font-secondary', preset.secondary);
+      document.documentElement.style.setProperty('--font-accent', preset.accent);
+      
+      // Save the current preset to localStorage for persistence
+      localStorage.setItem('en5emble-font-preset', presetName);
+      
+      console.log(`Applied font preset: ${presetName}`);
+      return preset;
+    },
+    
+    // Get the current preset name
+    getCurrentPreset: function() {
+      return localStorage.getItem('en5emble-font-preset') || 'default';
+    },
+    
+    // Initialize the font manager
+    init: function() {
+      // Apply the saved preset or default
+      const savedPreset = this.getCurrentPreset();
+      this.applyPreset(savedPreset);
+      
+      console.log('Font Manager initialized with preset:', savedPreset);
+    }
+  };
+
+  // Initialize the Font Manager when the page loads
+  document.addEventListener('DOMContentLoaded', function() {
+    FontManager.init();
+    
+    // Optional: Expose font manager to window for console access
+    window.FontManager = FontManager;
+  });
+</script>
 <script src="/floating-heads.js"></script>
 <script src="/soundcloud-integration.js"></script>
 <script src="/music-indicator.js"></script>
