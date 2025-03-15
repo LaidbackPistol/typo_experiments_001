@@ -2,22 +2,22 @@
 <html lang="en">
 <head>
   <!-- Update the title tag to your desired name -->
-  <title>EN5EMBLE Collectif</title>
+  <title>????? Collectif</title>
 
   <!-- Basic metadata -->
-  <meta name="description" content="EN5EMBLE est un collectif de gens qui mixx">
+  <meta name="description" content="????? est un collectif de gens qui mixx">
 
   <!-- Open Graph metadata (used by many platforms for previews) -->
-  <meta property="og:title" content="EN5EMBLE Collectif">
-  <meta property="og:description" content="EN5EMBLE est un collectif de gens qui mixx">
+  <meta property="og:title" content="????? Collectif">
+  <meta property="og:description" content="????? est un collectif de gens qui mixx">
   <meta property="og:image" content="https://yourdomain.com/path/to/logo.jpg">
   <meta property="og:url" content="https://typo001.laidbackpistol.xyz">
   <meta property="og:type" content="website">
 
   <!-- Twitter Card metadata -->
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="EN5EMBLE Collectif">
-  <meta name="twitter:description" content="EN5EMBLE est un collectif de gens qui mixx">
+  <meta name="twitter:title" content="????? Collectif">
+  <meta name="twitter:description" content="????? est un collectif de gens qui mixx">
   <meta name="twitter:image" content="https://yourdomain.com/path/to/logo.jpg">
 
   <!-- Theme color for browser UI elements and media notifications -->
@@ -58,7 +58,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Bebas+Neue&family=Cinzel:wght@700&family=Comfortaa:wght@700&family=DM+Serif+Display&family=Faster+One&family=Permanent+Marker&family=Righteous&family=Rubik+Glitch&family=Russo+One&family=Special+Elite&family=VT323&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Doto:wght,ROND@200,4&family=Offside&family=Rubik+Puddles&family=Silkscreen&family=Tulpen+One&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders:opsz,wght@10..72,100..900&family=Inknut+Antiqua:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Arimo:ital,wght@0,400..700;1,400..700&family=Big+Shoulders:opsz,wght@10..72,100..900&family=Inknut+Antiqua:wght@300;400;500;600;700;800;900&family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
   <style>
     * {
       margin: 0;
@@ -1313,7 +1313,7 @@
     </div>
   </div>
   <div class="text-input">
-    <input type="text" id="text-content" placeholder="Type something..." value="EN5EMBLE">
+    <input type="text" id="text-content" placeholder="Type something..." value="?????">
   </div>
   <div class="menu-container">
     <nav class="main-menu">
@@ -1715,7 +1715,7 @@
       const controlsValid = validateControls();
 
       // State - with fallbacks for each value
-      let text = textInput ? textInput.value : 'EN5EMBLE';
+      let text = textInput ? textInput.value : '?????';
       let fontSize = fontSizeControl && fontSizeControl.value ? parseInt(fontSizeControl.value) : 138;
       let duplications = duplicationsControl && duplicationsControl.value ? parseInt(duplicationsControl.value) : 20;
       let blur = blurControl && blurControl.value ? parseInt(blurControl.value) : 50;
@@ -3428,7 +3428,7 @@
               
               // Apply default preset when deselecting and set default text
               applyPresetByName("Unsure");
-              updateCanvasText("EN5EMBLE");
+              updateCanvasText("?????");
             } else {
               // First, remove active class from all items
               menuItems.forEach(i => {
@@ -3524,7 +3524,7 @@
         const sectionMap = {
           "events": {
             preset: "Beacon of truth",
-            text: "EVENTS EN5EMBLE"
+            text: "EVENTS ?????"
           },
           "mixxs": {
             preset: "Skeud",
@@ -3536,11 +3536,11 @@
           },
           "contact": {
             preset: "Equilibrium",
-            text: "@EN5EMBLE"
+            text: "@?????"
           }
         };
         
-        const mapping = sectionMap[section] || { preset: "Unsure", text: "EN5EMBLE" };
+        const mapping = sectionMap[section] || { preset: "Unsure", text: "?????" };
         
         // Apply the preset WITH instant=true to skip transition
         applyPresetByName(mapping.preset, true);
@@ -4294,7 +4294,22 @@
         primary: "'Cinzel', serif",
         secondary: "'Inknut Antiqua', serif",
         accent: "monospace"
+      },
+      
+      // Elegant preset
+      openSans: {
+        primary: "'Open Sans', sans-serif",
+        secondary: "'Open Sans', sans-serif",
+        accent: "'Open Sans', sans-serif"
+      },
+
+      // Elegant preset
+      arimo: {
+        primary: "'Arimo', sans-serif",
+        secondary: "'Arimo', sans-serif",
+        accent: "'Arimo', sans-serif"
       }
+      
     },
     
     // Apply a font preset by name
@@ -4311,7 +4326,7 @@
       this.updateButtonUI(presetName);
       
       // Save the current preset to localStorage for persistence
-      localStorage.setItem('en5emble-font-preset', presetName);
+      localStorage.setItem('?????-font-preset', presetName);
       
       console.log(`Applied font preset: ${presetName}`, preset);
       
@@ -4347,7 +4362,7 @@
     
     // Get the current preset name
     getCurrentPreset: function() {
-      return localStorage.getItem('en5emble-font-preset') || 'default';
+      return localStorage.getItem('?????-font-preset') || 'default';
     },
     
     // Setup the font switcher UI
