@@ -375,15 +375,18 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background-color: transparent; /* Completely transparent background */
+      background-color: rgba(0, 0, 0, 0.9); /* Black background with 90% opacity */
       z-index: 300;
       display: none;
       align-items: center;
       justify-content: center;
+      opacity: 0;
+      transition: opacity 0.3s ease;
     }
 
     .fullscreen-viewer.active {
       display: flex;
+      opacity: 1;
     }
 
     /* When fullscreen viewer is active, move canvas container up in the stacking order */
@@ -984,8 +987,24 @@
       // Setup event listeners for fullscreen viewer
       if (closeViewerButton) {
         closeViewerButton.addEventListener('click', () => {
-          fullscreenViewer.classList.remove('active');
+          closeFullscreenViewer();
         });
+      }
+      
+      // Close fullscreen viewer function
+      function closeFullscreenViewer() {
+        if (!fullscreenViewer) return;
+        
+        fullscreenViewer.style.opacity = '0'; // Start fade out
+        
+        // Wait for the fade before removing the active class
+        setTimeout(() => {
+          fullscreenViewer.classList.remove('active');
+          // Reset opacity for next time
+          setTimeout(() => {
+            fullscreenViewer.style.opacity = '';
+          }, 100);
+        }, 300); // Match transition duration
       }
       
       if (prevButton) {
@@ -1011,13 +1030,23 @@
         if (!fullscreenViewer || !fullscreenViewer.classList.contains('active')) return;
         
         if (e.key === 'Escape') {
-          fullscreenViewer.classList.remove('active');
+          closeFullscreenViewer();
         } else if (e.key === 'ArrowLeft') {
           if (prevButton) prevButton.click();
         } else if (e.key === 'ArrowRight') {
           if (nextButton) nextButton.click();
         }
       });
+      
+      // Click on fullscreen viewer background to close
+      if (fullscreenViewer) {
+        fullscreenViewer.addEventListener('click', (e) => {
+          // Only close if clicking on the background (not on controls or image)
+          if (e.target === fullscreenViewer) {
+            closeFullscreenViewer();
+          }
+        });
+      }
       
       // Add keyboard shortcut (Ctrl+Shift+D) to toggle design mode
       document.addEventListener('keydown', (e) => {
@@ -1101,61 +1130,68 @@
             const parentLi = clickedItem.parentElement;
             const section = clickedItem.getAttribute('data-section');
             
-            // Hide all sections first
-            if (section !== 'archives' && archiveGallery && archiveGallery.classList.contains('active')) {
-              archiveGallery.classList.remove('active');
-            }
-            
-            if (section !== 'mixxs' && mixesGallery && mixesGallery.classList.contains('active')) {
-              mixesGallery.classList.remove('active');
-            }
-            
-            if (section !== 'events' && eventsGallery && eventsGallery.classList.contains('active')) {
-              eventsGallery.classList.remove('active');
-            }
-            
-            // Toggle active state or update URL
+            // If this item is already active, deactivate it and return to main view
             if (clickedItem.classList.contains('active')) {
-              // If already active, deactivate and clear URL hash
+              // Deactivate this menu item
               clickedItem.classList.remove('active');
               parentLi.classList.remove('active-item');
-              history.pushState(null, '', window.location.pathname); // Remove hash from URL
-            } else {
-              // First, remove active class from all items
-              menuItems.forEach(i => {
-                i.classList.remove('active');
-                i.parentElement.classList.remove('active-item');
-              });
               
-              // Then, add active class to clicked item
-              clickedItem.classList.add('active');
-              parentLi.classList.add('active-item');
+              // Hide all galleries
+              if (archiveGallery) archiveGallery.classList.remove('active');
+              if (mixesGallery) mixesGallery.classList.remove('active');
+              if (eventsGallery) eventsGallery.classList.remove('active');
               
-              // Update URL without navigation - using History API
-              history.pushState(null, '', `#${section}`);
+              // Clear URL hash
+              history.pushState(null, '', window.location.pathname);
               
-              // Show the appropriate section
-              if (section === 'archives') {
-                if (!archiveContentLoaded) {
-                  loadArchiveContent();
-                  archiveContentLoaded = true;
-                }
-                if (archiveGallery) archiveGallery.classList.add('active');
-              } 
-              else if (section === 'mixxs') {
-                if (!mixesContentLoaded) {
-                  loadMixesContent();
-                  mixesContentLoaded = true;
-                }
-                if (mixesGallery) mixesGallery.classList.add('active');
+              // Animation feedback
+              clickedItem.style.color = '#ffffff';
+              setTimeout(() => {
+                clickedItem.style.color = '';
+              }, 200);
+              
+              return; // Exit early
+            }
+            
+            // Otherwise, this is a new selection - first deactivate all menu items
+            menuItems.forEach(i => {
+              i.classList.remove('active');
+              i.parentElement.classList.remove('active-item');
+            });
+            
+            // Then activate the clicked item
+            clickedItem.classList.add('active');
+            parentLi.classList.add('active-item');
+            
+            // Hide all galleries first
+            if (archiveGallery) archiveGallery.classList.remove('active');
+            if (mixesGallery) mixesGallery.classList.remove('active');
+            if (eventsGallery) eventsGallery.classList.remove('active');
+            
+            // Update URL
+            history.pushState(null, '', `#${section}`);
+            
+            // Show the appropriate section
+            if (section === 'archives') {
+              if (!archiveContentLoaded) {
+                loadArchiveContent();
+                archiveContentLoaded = true;
               }
-              else if (section === 'events') {
-                if (!eventsContentLoaded) {
-                  loadEventsContent();
-                  eventsContentLoaded = true;
-                }
-                if (eventsGallery) eventsGallery.classList.add('active');
+              if (archiveGallery) archiveGallery.classList.add('active');
+            } 
+            else if (section === 'mixxs') {
+              if (!mixesContentLoaded) {
+                loadMixesContent();
+                mixesContentLoaded = true;
               }
+              if (mixesGallery) mixesGallery.classList.add('active');
+            }
+            else if (section === 'events') {
+              if (!eventsContentLoaded) {
+                loadEventsContent();
+                eventsContentLoaded = true;
+              }
+              if (eventsGallery) eventsGallery.classList.add('active');
             }
             
             // Simple feedback animation
@@ -1408,7 +1444,9 @@
             
             // Update and show viewer
             updateViewerImage();
-            if (fullscreenViewer) fullscreenViewer.classList.add('active');
+            if (fullscreenViewer) {
+              fullscreenViewer.classList.add('active');
+            }
           });
         });
       }
