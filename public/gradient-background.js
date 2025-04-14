@@ -1470,7 +1470,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (gradientControls && toggleButton) {
       if (isDesignMode) {
-        toggleButton.style.display = 'block';
+        toggleButton.style.display = 'flex';
         // Only show controls if toggle button is clicked
       } else {
         toggleButton.style.display = 'none';
