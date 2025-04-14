@@ -82,7 +82,7 @@
       left: 0;
       width: 100%;
       height: 100%;
-      z-index: -1; /* Default: behind everything */
+      z-index: -1; /* Behind everything */
     }
 
     /* NEW RULE: When fullscreen viewer is active, move canvas up in z-index */
@@ -95,330 +95,7 @@
       visibility: hidden;
     }
 
-    #feedback-canvas {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: -1; /* Behind the main canvas */
-    }
-
-    #typography-canvas {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-    }
-
-    /* New styles for the feedback canvas */
-    #feedback-canvas {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: -1; /* Behind the main canvas */
-    }
-
-    /* Add feedback effect controls to existing controls */
-    .control-group {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-    }
-
-    .controls {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      background: rgba(0, 0, 0, 0.5);
-      padding: 10px;
-      border-radius: 8px;
-      backdrop-filter: blur(5px);
-      z-index: 100;
-      opacity: 0.3;
-      transition: all 0.3s ease;
-      transform: translateX(0);
-    }
-
-    .controls:hover {
-      opacity: 1;
-    }
-
-    .controls.hidden {
-      transform: translateX(calc(100% + 20px));
-    }
-
-    .toggle-controls-panel {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background: rgba(0, 0, 0, 0.7);
-      color: white;
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      z-index: 101;
-      border: 1px solid #444;
-      font-weight: bold;
-      font-size: 18px;
-      opacity: 0.5;
-      transition: opacity 0.3s ease;
-    }
-
-    .toggle-controls-panel:hover {
-      background: rgba(50, 50, 50, 0.7);
-      opacity: 1;
-    }
-
-    .toggle-controls-panel.panel-hidden {
-      right: 20px;
-    }
-
-    .control-group {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-    }
-
-    .control-label {
-      font-size: 12px;
-      width: 120px;
-    }
-
-    input[type="range"] {
-      width: 120px;
-      background: transparent;
-    }
-
-    input[type="color"] {
-      width: 30px;
-      height: 30px;
-      border: none;
-      background: none;
-      cursor: pointer;
-    }
-
-    select, button {
-      background: rgba(30, 30, 30, 0.8);
-      color: #fff;
-      border: 1px solid #555;
-      padding: 5px;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-
-    button {
-      width: 100%;
-      margin-top: 5px;
-      transition: background 0.3s ease;
-    }
-
-    button:hover {
-      background: rgba(60, 60, 60, 0.8);
-    }
-
-    .text-input {
-      position: fixed;
-      top: 20px;
-      left: 20px;
-      background: rgba(0, 0, 0, 0.5);
-      backdrop-filter: blur(5px);
-      padding: 10px;
-      border-radius: 8px;
-      z-index: 100;
-      opacity: 0.3;
-      transition: opacity 0.3s ease;
-    }
-
-    .text-input:hover {
-      opacity: 1;
-    }
-
-    #text-content {
-      background: rgba(30, 30, 30, 0.8);
-      color: #fff;
-      border: 1px solid #555;
-      padding: 5px;
-      border-radius: 4px;
-      width: 200px;
-    }
-
-    /* Preset System Styles */
-    .preset-panel {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background: rgba(0, 0, 0, 0.7);
-      backdrop-filter: blur(5px);
-      padding: 15px;
-      border-radius: 8px;
-      z-index: 100;
-      width: 300px;
-      max-height: 80vh;
-      overflow-y: auto;
-      transform: translateX(320px);
-      transition: transform 0.3s ease;
-    }
-
-    .preset-panel.open {
-      transform: translateX(0);
-    }
-
-    .preset-panel h3 {
-      margin-bottom: 10px;
-      font-size: 16px;
-    }
-
-    .preset-list {
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-      margin-bottom: 15px;
-      max-height: 200px;
-      overflow-y: auto;
-    }
-
-    .preset-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 5px;
-      border: 1px solid #333;
-      border-radius: 4px;
-    }
-
-    .preset-item:hover {
-      background: rgba(60, 60, 60, 0.5);
-    }
-
-    .preset-actions {
-      display: flex;
-      gap: 5px;
-    }
-
-    .preset-actions button {
-      width: auto;
-      padding: 2px 5px;
-      margin: 0;
-      font-size: 11px;
-    }
-
-    #preset-name {
-      width: 100%;
-      margin-bottom: 10px;
-      background: rgba(30, 30, 30, 0.8);
-      color: #fff;
-      border: 1px solid #555;
-      padding: 5px;
-      border-radius: 4px;
-    }
-
-    #preset-code {
-      width: 100%;
-      height: 100px;
-      margin-top: 10px;
-      background: rgba(30, 30, 30, 0.8);
-      color: #fff;
-      border: 1px solid #555;
-      padding: 5px;
-      border-radius: 4px;
-      font-family: monospace;
-      font-size: 11px;
-      resize: vertical;
-    }
-
-    .preset-buttons {
-      display: flex;
-      gap: 10px;
-      margin-top: 10px;
-    }
-
-    .preset-buttons button {
-      flex: 1;
-    }
-
-    .toggle-preset-panel {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background: rgba(0, 0, 0, 0.7);
-      color: white;
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      z-index: 101;
-      border: 1px solid #444;
-      font-weight: bold;
-      font-size: 18px;
-    }
-
-    .toggle-preset-panel:hover {
-      background: rgba(50, 50, 50, 0.7);
-    }
-
-    .notification {
-      position: fixed;
-      top: 80px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(0, 0, 0, 0.8);
-      color: white;
-      padding: 10px 20px;
-      border-radius: 4px;
-      z-index: 1000;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-      pointer-events: none;
-    }
-
-    .notification.show {
-      opacity: 1;
-    }
-
-    /* Built-in presets section */
-    .preset-category {
-      margin-bottom: 15px;
-    }
-
-    .preset-category h4 {
-      margin-bottom: 5px;
-      font-size: 14px;
-      color: #aaa;
-      border-bottom: 1px solid #333;
-      padding-bottom: 3px;
-    }
-
-    .font-heading {
-      margin-top: 10px;
-      margin-bottom: 2px;
-      font-size: 12px;
-      color: #aaa;
-      opacity: 0.8;
-    }
-
-    .font-preview {
-      display: inline-block;
-      margin-left: 10px;
-      font-size: 14px;
-      opacity: 0.8;
-    }
-
+    /* Menu container */
     .menu-container {
       position: fixed;
       left: 20px;
@@ -717,11 +394,6 @@
 
     /* When in fullscreen mode, hide UI elements except for the viewer */
     body.fullscreen-mode .menu-container,
-    body.fullscreen-mode .text-input,
-    body.fullscreen-mode .controls,
-    body.fullscreen-mode .toggle-controls-panel,
-    body.fullscreen-mode .preset-panel,
-    body.fullscreen-mode .toggle-preset-panel,
     body.fullscreen-mode .archive-gallery,
     body.fullscreen-mode .mixes-gallery {
       visibility: hidden !important;
@@ -1133,6 +805,37 @@
       visibility: visible !important;
       display: block !important;
     }
+
+    /* Events section styles */
+    .events-gallery {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: transparent;
+      z-index: 200;
+      overflow-y: auto;
+      display: none;
+      padding: 60px 20px 20px 20px;
+      pointer-events: none;
+    }
+    
+    .events-gallery.active {
+      display: block;
+    }
+
+    .floating-heads-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 50; /* Above canvas but below UI elements */
+      transition: opacity 0.5s ease;
+    }
   </style>
   <link rel="stylesheet" href="/floating-heads.css">
   <link rel="stylesheet" href="/future-events.css">
@@ -1140,8 +843,7 @@
 </head>
 <body>
   <div id="canvas-container">
-    <canvas id="feedback-canvas"></canvas>
-    <canvas id="typography-canvas"></canvas>
+    <!-- Canvas container for gradient background -->
   </div>
   <!-- Events gallery -->
   <div id="events-gallery" class="events-gallery">
@@ -1182,9 +884,6 @@
       <img class="viewer-image" src="" alt="">
     </div>
   </div>
-  <div class="text-input">
-    <input type="text" id="text-content" placeholder="Type something..." value="EN5EMBLE">
-  </div>
   <div class="menu-container">
     <nav class="main-menu">
       <ul>
@@ -1195,350 +894,27 @@
       </ul>
     </nav>
   </div>
-  <div class="toggle-controls-panel">T</div>
-  <div class="controls">
-    <div class="control-group">
-      <span class="control-label">Font Size</span>
-      <input type="range" id="font-size" min="50" max="400" value="138">
-    </div>
-    <div class="control-group">
-      <span class="control-label">Duplications</span>
-      <input type="range" id="duplications" min="1" max="20" value="20">
-    </div>
-    <div class="control-group">
-      <span class="control-label">Blur Intensity</span>
-      <input type="range" id="blur" min="0" max="50" value="50">
-    </div>
-    <div class="control-group">
-      <span class="control-label">Rotation Speed</span>
-      <input type="range" id="rotation-speed" min="0" max="10" value="0">
-    </div>
-    <div class="control-group">
-      <span class="control-label">Distortion</span>
-      <input type="range" id="distortion" min="0" max="1000" value="1000">
-    </div>
-    <div class="control-group">
-      <span class="control-label">Primary Color</span>
-      <input type="color" id="primary-color" value="#ffffff">
-    </div>
-    <div class="control-group">
-      <span class="control-label">Secondary Color</span>
-      <input type="color" id="secondary-color" value="#ffffff">
-    </div>
-    <div class="control-group">
-      <span class="control-label">Effect Type</span>
-      <select id="effect-type">
-        <option value="glitch">Glitch</option>
-        <option value="wave">Wave</option>
-        <option value="fracture">Fracture</option>
-        <option value="spiral">Spiral</option>
-      </select>
-    </div>
-    <div class="control-group">
-      <span class="control-label">Font Type</span>
-      <select id="font-type">
-        <option value="sans-serif">Sans-serif</option>
-        <option value="serif">Serif</option>
-        <option value="monospace">Monospace</option>
-      </select>
-    </div>
-    <div class="control-group">
-      <span class="control-label">Trail Effect</span>
-      <input type="checkbox" id="feedback-enabled" checked>
-    </div>
-    <div class="control-group">
-      <span class="control-label">Trail Decay</span>
-      <input type="range" id="feedback-decay" min="0.1" max="0.9" step="0.01" value="0.5">
-    </div>
-    <div class="control-group">
-      <span class="control-label">Trail Opacity</span>
-      <input type="range" id="feedback-opacity" min="0.05" max="0.6" step="0.01" value="0.1">
-    </div>
-    <div class="control-group">
-      <span class="control-label">Trail Zoom</span>
-      <input type="range" id="feedback-zoom" min="0.8" max="1.2" step="0.001" value="0.95">
-    </div>
-    <div class="control-group">
-      <span class="control-label">Trail Shift X</span>
-      <input type="range" id="feedback-shift-x" min="-50" max="50" step="0.5" value="0">
-    </div>
-    <div class="control-group">
-      <span class="control-label">Trail Shift Y</span>
-      <input type="range" id="feedback-shift-y" min="-50" max="50" step="0.5" value="0">
-    </div>
-    <!-- Transition time control -->
-    <div class="control-group">
-      <span class="control-label">Transition Time</span>
-      <input type="range" id="transition-time" min="0.01" max="0.5" step="0.01" value="0.1">
-    </div>
-    <button id="randomize">Randomize</button>
-    <button id="save-preset-btn">Save Preset</button>
-  </div>
-
-  <!-- Preset Toggle Button -->
-  <div class="toggle-preset-panel">P</div>
-
-  <!-- Preset Panel -->
-  <div class="preset-panel">
-    <h3>TYPO_001 Presets</h3>
-    
-    <!-- Built-in Presets -->
-    <div class="preset-category">
-      <h4>Built-in Presets</h4>
-      <div class="preset-list" id="builtin-preset-list">
-        <!-- Built-in presets will be loaded here -->
-      </div>
-    </div>
-    
-    <!-- User Presets -->
-    <div class="preset-category">
-      <h4>Your Presets</h4>
-      <div class="preset-list" id="user-preset-list">
-        <!-- User presets will be loaded here -->
-      </div>
-    </div>
-    
-    <!-- Save New Preset Form -->
-    <h4>Create New Preset</h4>
-    <input type="text" id="preset-name" placeholder="Preset Name">
-    <div class="preset-buttons">
-      <button id="save-current">Save Current</button>
-      <button id="generate-code">Generate Code</button>
-    </div>
-    
-    <!-- Import/Export -->
-    <h4>Import/Export</h4>
-    <textarea id="preset-code" placeholder="Paste preset code here to import"></textarea>
-    <div class="preset-buttons">
-      <button id="import-preset">Import</button>
-      <button id="export-preset">Export Current</button>
-    </div>
-  </div>
-
-  <!-- Notification -->
-  <div class="notification" id="notification"></div>
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      // Design Mode Control - toggle between design tools and production view
-      let designMode = localStorage.getItem('designMode') === 'true'; // Default to false unless explicitly set to true
+      // Menu setup
+      setupMenu();
+      // Check if URL has a hash and select the corresponding menu item
+      checkUrlHash();
 
-      // Function to toggle design mode
-      function toggleDesignMode() {
-        designMode = !designMode;
-        
-        // Save setting to localStorage
-        localStorage.setItem('designMode', designMode);
-        
-        // Update UI elements visibility
-        updateDesignModeUI();
-        
-        // Show notification
-        showNotification(designMode ? 'Design Mode Activated' : 'Production Mode Activated');
-      }
-
-      // Function to update UI based on current mode
-      function updateDesignModeUI() {
-        // Elements to hide in production mode
-        const designElements = [
-          document.querySelector('.toggle-preset-panel'),       // P button
-          document.querySelector('.preset-panel'),              // Presets panel
-          document.querySelector('.toggle-controls-panel'),     // C button (both states)
-          document.querySelector('.controls'),                  // Controls panel
-          document.querySelector('.text-input'),                // Text input field
-          document.querySelector('.notification')               // Notifications
-        ];
-        
-        // Make sure we also hide the C button in all states
-        const allControlButtons = document.querySelectorAll('.toggle-controls-panel, .toggle-controls-panel.panel-hidden');
-        
-        // Hide/show design elements based on current mode
-        designElements.forEach(el => {
-          if (el) {
-            el.style.display = designMode ? '' : 'none';
-          }
-        });
-        
-        // Specifically handle all control buttons in case the querySelector above missed any
-        allControlButtons.forEach(btn => {
-          if (btn) {
-            btn.style.display = designMode ? '' : 'none';
-          }
-        });
-        
-        // Update the body class for potential CSS styling
-        if (designMode) {
-          document.body.classList.add('design-mode');
-          document.body.classList.remove('production-mode');
-        } else {
-          document.body.classList.add('production-mode');
-          document.body.classList.remove('design-mode');
-        }
-        
-        // Override showNotification function when in production mode
-        if (!designMode) {
-          // Store the original function if we haven't already
-          if (!window._originalShowNotification) {
-            window._originalShowNotification = window.showNotification || function() {};
-          }
-          
-          // Override with empty function in production mode
-          window.showNotification = function() { 
-            // Do nothing in production mode
-          };
-        } else {
-          // Restore original function in design mode
-          if (window._originalShowNotification) {
-            window.showNotification = window._originalShowNotification;
-          }
-        }
-      }
-
-      // Add keyboard shortcut (Ctrl+Shift+D) to toggle design mode
-      document.addEventListener('keydown', (e) => {
-        if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'd') {
-          toggleDesignMode();
-          e.preventDefault(); // Prevent browser's default action
-        }
-      });
-
-      // Create a more visible toggle button in the corner for touch devices
-      function createDesignModeToggleButton() {
-        const toggleButton = document.createElement('div');
-        toggleButton.id = 'design-mode-toggle';
-        toggleButton.style.cssText = `
-          position: fixed;
-          bottom: 10px;
-          left: 10px;
-          width: 20px;
-          height: 20px;
-          background-color: rgba(100, 100, 100, 0.05);
-          border: 1px solid rgba(255, 255, 255, 0);
-          border-radius: 50%;
-          z-index: 9999;
-          cursor: pointer;
-          opacity: 0.5;
-        `;
-        
-        toggleButton.addEventListener('click', (e) => {
-          // Require triple click to toggle (to prevent accidental activation)
-          if (e.detail === 3) {
-            toggleDesignMode();
-          }
-        });
-        
-        document.body.appendChild(toggleButton);
-      }
-
-      // Initialize design mode with improved timing
-      function initDesignMode() {
-        createDesignModeToggleButton();
-        
-        // First immediate update
-        updateDesignModeUI();
-        
-        // Run again after a short delay to catch elements created later
-        setTimeout(updateDesignModeUI, 100);
-        
-        // And again after the page has fully loaded
-        window.addEventListener('load', () => {
-          updateDesignModeUI();
-          
-          // One final update after everything is definitely loaded
-          setTimeout(updateDesignModeUI, 500);
-        });
-        
-        // Set up a MutationObserver to watch for newly added elements
-        const observer = new MutationObserver((mutations) => {
-          for (const mutation of mutations) {
-            if (mutation.addedNodes.length) {
-              // If we detect new elements, update the UI again
-              updateDesignModeUI();
-            }
-          }
-        });
-        
-        // Start observing the document body for added nodes
-        observer.observe(document.body, { childList: true, subtree: true });
-        
-        // Show initial message in design mode only
-        if (designMode) {
-          setTimeout(() => {
-            showNotification('Design Mode Active - Press Ctrl+Shift+D to toggle');
-          }, 1000);
-        }
-      }
-
-      // Override applyDefaultPreset to be silent in production mode
-      const originalApplyDefaultPreset = window.applyDefaultPreset || function() {};
-      window.applyDefaultPreset = function() {
-        // If we're in production mode, apply silently without notification
-        if (!designMode) {
-          // Find the Unsure preset
-          const unsurePreset = (window.builtinPresets || []).find(preset => preset.name === "Unsure");
-          if (unsurePreset) {
-            // Apply settings but don't show notification
-            if (window.applySettings) {
-              window.applySettings(unsurePreset.settings);
-            }
-          }
-        } else {
-          // In design mode, use the original function
-          originalApplyDefaultPreset.apply(this, arguments);
-        }
-      };
-
-      // Call initialization function immediately
-      initDesignMode();
-
-      // Elements
-      const canvas = document.getElementById('typography-canvas');
-      const ctx = canvas.getContext('2d');
-      const feedbackCanvas = document.getElementById('feedback-canvas');
-      const feedbackCtx = feedbackCanvas.getContext('2d');
-      
-      const textInput = document.getElementById('text-content');
-      
-      // Controls
-      const fontSizeControl = document.getElementById('font-size') || { value: 138, addEventListener: () => {} };
-      const duplicationsControl = document.getElementById('duplications') || { value: 20, addEventListener: () => {} };
-      const blurControl = document.getElementById('blur') || { value: 50, addEventListener: () => {} };
-      const rotationSpeedControl = document.getElementById('rotation-speed') || { value: 0, addEventListener: () => {} };
-      const distortionControl = document.getElementById('distortion') || { value: 1000, addEventListener: () => {} };
-      const primaryColorControl = document.getElementById('primary-color') || { value: "#ffffff", addEventListener: () => {} };
-      const secondaryColorControl = document.getElementById('secondary-color') || { value: "#ffffff", addEventListener: () => {} };
-      const effectTypeControl = document.getElementById('effect-type') || { value: "glitch", addEventListener: () => {} };
-      const fontTypeControl = document.getElementById('font-type') || { value: "sans-serif", addEventListener: () => {} };
-      const transitionTimeControl = document.getElementById('transition-time') || { value: 0.1, addEventListener: () => {} };
-      const randomizeBtn = document.getElementById('randomize');
-
-      // feedback effect controls
-      const feedbackEnabledControl = document.getElementById('feedback-enabled');
-      const feedbackDecayControl = document.getElementById('feedback-decay');
-      const feedbackOpacityControl = document.getElementById('feedback-opacity');
-      const feedbackZoomControl = document.getElementById('feedback-zoom');
-      const feedbackShiftXControl = document.getElementById('feedback-shift-x');
-      const feedbackShiftYControl = document.getElementById('feedback-shift-y');
-      
-      // Preset Controls
-      const togglePresetPanel = document.querySelector('.toggle-preset-panel');
-      const presetPanel = document.querySelector('.preset-panel');
-      const userPresetList = document.getElementById('user-preset-list');
-      const builtinPresetList = document.getElementById('builtin-preset-list');
-      const presetNameInput = document.getElementById('preset-name');
-      const saveCurrentBtn = document.getElementById('save-current');
-      const generateCodeBtn = document.getElementById('generate-code');
-      const importPresetBtn = document.getElementById('import-preset');
-      const exportPresetBtn = document.getElementById('export-preset');
-      const presetCodeTextarea = document.getElementById('preset-code');
-      const savePresetBtn = document.getElementById('save-preset-btn');
-      const notification = document.getElementById('notification');
-
-      // Archive Gallery Variables
+      // Variables for the archive gallery
       const archiveMenuItem = document.querySelector('.menu-item[data-section="archives"]');
       const archiveGallery = document.getElementById('archive-gallery');
       const galleryContainer = archiveGallery.querySelector('.gallery-container');
-      const closeButton = archiveGallery.querySelector('.gallery-close');
+      
+      // Variables for the mixes gallery
+      const mixxsMenuItem = document.querySelector('.menu-item[data-section="mixxs"]');
+      const mixesGallery = document.getElementById('mixes-gallery');
+      const mixesContainer = mixesGallery.querySelector('.gallery-container');
+
+      // Variables for events gallery
+      const eventsMenuItem = document.querySelector('.menu-item[data-section="events"]');
+      const eventsGallery = document.getElementById('events-gallery');
 
       // Fullscreen Viewer Variables
       const fullscreenViewer = document.getElementById('fullscreen-viewer');
@@ -1546,1583 +922,409 @@
       const nextButton = fullscreenViewer.querySelector('.next-button');
       const closeViewerButton = fullscreenViewer.querySelector('.close-button');
       const viewerImage = fullscreenViewer.querySelector('.viewer-image');
+      
       let currentImageIndex = 0;
       let currentGalleryImages = [];
 
-      // Variables for the mixes gallery
-      const mixxsMenuItem = document.querySelector('.menu-item[data-section="mixxs"]');
-      const mixesGallery = document.getElementById('mixes-gallery');
-      const mixesContainer = mixesGallery.querySelector('.gallery-container');
-      
-      const mobileFontScaleFactor = 0.5;
+      // Track loaded content 
+      let archiveContentLoaded = false;
+      let mixesContentLoaded = false;
+      let eventsContentLoaded = false;
 
-      // THEN define the validateControls function after all the controls are defined
-      function validateControls() {
-        const requiredControls = [
-          { id: 'font-size', element: fontSizeControl },
-          { id: 'duplications', element: duplicationsControl },
-          { id: 'blur', element: blurControl },
-          { id: 'rotation-speed', element: rotationSpeedControl },
-          { id: 'distortion', element: distortionControl },
-          { id: 'primary-color', element: primaryColorControl },
-          { id: 'secondary-color', element: secondaryColorControl },
-          { id: 'effect-type', element: effectTypeControl },
-          { id: 'font-type', element: fontTypeControl }
-        ];
+      // Menu setup function
+      function setupMenu() {
+        const menuItems = document.querySelectorAll('.menu-item');
         
-        const missingControls = requiredControls.filter(control => !control.element);
-        if (missingControls.length > 0) {
-          missingControls.forEach(control => {
-            console.error(`Missing required control element: #${control.id}`);
-          });
-          console.warn(`Found ${missingControls.length} missing controls. App may not function correctly.`);
-        }
-        
-        return missingControls.length === 0;
-      }
-
-      // NOW call validateControls after it's defined and after the controls are defined
-      const controlsValid = validateControls();
-
-      // State - with fallbacks for each value
-      let text = textInput ? textInput.value : 'EN5EMBLE';
-      let fontSize = fontSizeControl && fontSizeControl.value ? parseInt(fontSizeControl.value) : 138;
-      let duplications = duplicationsControl && duplicationsControl.value ? parseInt(duplicationsControl.value) : 20;
-      let blur = blurControl && blurControl.value ? parseInt(blurControl.value) : 50;
-      let rotationSpeed = rotationSpeedControl && rotationSpeedControl.value ? parseFloat(rotationSpeedControl.value) : 0;
-      let distortion = distortionControl && distortionControl.value ? parseInt(distortionControl.value) : 1000;
-      let primaryColor = primaryColorControl && primaryColorControl.value ? primaryColorControl.value : '#ffffff';
-      let secondaryColor = secondaryColorControl && secondaryColorControl.value ? secondaryColorControl.value : '#ffffff';
-      let effectType = effectTypeControl && effectTypeControl.value ? effectTypeControl.value : 'glitch';
-      let fontType = fontTypeControl && fontTypeControl.value ? fontTypeControl.value : 'sans-serif';
-      let feedbackEnabled = feedbackEnabledControl && feedbackEnabledControl.checked;
-      let feedbackDecay = feedbackDecayControl ? parseFloat(feedbackDecayControl.value) : 0.5;
-      let feedbackOpacity = feedbackOpacityControl ? parseFloat(feedbackOpacityControl.value) : 0.1;
-      let feedbackZoom = feedbackZoomControl ? parseFloat(feedbackZoomControl.value) : 0.95;
-      let feedbackShiftX = feedbackShiftXControl ? parseFloat(feedbackShiftXControl.value) : 0;
-      let feedbackShiftY = feedbackShiftYControl ? parseFloat(feedbackShiftYControl.value) : 0;
-      let transitionTime = transitionTimeControl && transitionTimeControl.value ? parseFloat(transitionTimeControl.value) : 0.1;
-      
-      // Target values for interpolation
-      let targetFontSize = fontSize;
-      let targetDuplications = duplications;
-      let targetBlur = blur;
-      let targetRotationSpeed = rotationSpeed;
-      let targetDistortion = distortion;
-      let targetPrimaryColor = primaryColor;
-      let targetSecondaryColor = secondaryColor;
-      let targetEffectType = effectType;
-      let targetFontType = fontType;
-      
-      // Interpolation state
-      let isInterpolating = false;
-      let interpolationStartTime = 0;
-      let interpolationDuration = transitionTime * 1000; // in milliseconds
-      
-      // Previous values for interpolation
-      let prevFontSize = fontSize;
-      let prevDuplications = duplications;
-      let prevBlur = blur;
-      let prevRotationSpeed = rotationSpeed;
-      let prevDistortion = distortion;
-      let prevPrimaryColor = primaryColor;
-      let prevSecondaryColor = secondaryColor;
-      let prevEffectType = effectType;
-      let prevFontType = fontType;
-      
-      // Mouse position for interactive effects
-      let mouseX = 0;
-      let mouseY = 0;
-      
-      // Animation variables
-      let time = 0;
-      let isAnimating = true;
-      
-      // User presets storage
-      let userPresets = JSON.parse(localStorage.getItem('typographyPresets')) || [];
-
-      // Variables for feedback processing
-      let frameCount = 0;
-
-      const fontSystem = {
-        // Maps display names to actual CSS font families
-        fontMap: {
-          // Standard fonts (maintaining backward compatibility)
-          "sans-serif": "sans-serif",
-          "serif": "serif", 
-          "monospace": "monospace",
-
-          // Display fonts
-          "Alfa Slab": "'Alfa Slab One', sans-serif",
-          "Cinzel": "'Cinzel', serif",
-          "Arimo": "'Arimo', sans-serif",
-          "Open Sans": "'Open Sans', sans-serif",
-
-          //Creative fonts
-          "Silkscreen": "'Silkscreen', sans-serif",
-          "Offside": "'Offside', sans-serif",
-          "Tulpen One": "'Tulpen One', sans-serif",
-          "Doto": "'Doto', sans-serif"
-        },
-        
-        // Categories for organization
-        categories: {
-          "Standard": ["sans-serif", "serif", "monospace"],
-          "Display": ["Alfa Slab", "Cinzel", "Arimo", "Open Sans"],
-          "Creative": ["Silkscreen", "Offside", "Tulpen One", "Doto"]
-        },
-        
-        // Get actual font family from selection name
-        getFontFamily(fontName) {
-          return this.fontMap[fontName] || fontName;
-        },
-        
-        // Ensure backward compatibility with old presets
-        getCompatibleFontName(fontFamily) {
-          // If it's a direct match, return it
-          if (this.fontMap[fontFamily]) {
-            return fontFamily;
-          }
-          
-          // Look for the font family in the values
-          for (const [key, value] of Object.entries(this.fontMap)) {
-            if (value === fontFamily) {
-              return key;
-            }
-          }
-          
-          // Default fallback
-          return "sans-serif";
-        },
-        
-        // Preload fonts to prevent FOUC (Flash of Unstyled Content)
-        preloadFonts() {
-          const preloadDiv = document.createElement('div');
-          preloadDiv.style.opacity = '0';
-          preloadDiv.style.position = 'absolute';
-          preloadDiv.style.top = '-9999px';
-          
-          // Create a span for each font
-          for (const fontFamily of Object.values(this.fontMap)) {
-            const span = document.createElement('span');
-            span.style.fontFamily = fontFamily;
-            span.textContent = 'abcdefghijklmnopqrstuvwxyz0123456789';
-            preloadDiv.appendChild(span);
-          }
-          
-          document.body.appendChild(preloadDiv);
-          
-          // Remove after a delay to ensure fonts are loaded
-          setTimeout(() => {
-            document.body.removeChild(preloadDiv);
-          }, 3000);
-        }
-      };
-
-      // Replace your populateFontSelector function with this fixed version:
-      function populateFontSelector() {
-        const fontTypeSelect = document.getElementById('font-type');
-        if (!fontTypeSelect) {
-          console.error('Font type select element not found!');
-          return;
-        }
-        
-        fontTypeSelect.innerHTML = ''; // Clear existing options
-        
-        // Add each category and its fonts
-        for (const [category, fonts] of Object.entries(fontSystem.categories)) {
-          // Add category group
-          const groupElement = document.createElement('optgroup');
-          groupElement.label = category;
-          
-          // Add fonts in this category
-          fonts.forEach(fontName => {
-            const option = document.createElement('option');
-            option.value = fontName;
-            option.textContent = fontName;
-            option.style.fontFamily = fontSystem.getFontFamily(fontName);
+        // Menu item click handler
+        menuItems.forEach(item => {
+          item.addEventListener('click', (e) => {
+            e.preventDefault();
             
-            // Set default selection for the first standard font (sans-serif)
-            if (fontName === 'sans-serif') {
-              option.selected = true;
-            }
+            const clickedItem = e.target;
+            const parentLi = clickedItem.parentElement;
+            const section = clickedItem.getAttribute('data-section');
             
-            groupElement.appendChild(option);
-          });
-          
-          fontTypeSelect.appendChild(groupElement);
-        }
-        
-        // Update the select styling to show the actual font
-        fontTypeSelect.addEventListener('change', function() {
-          if (this.value) {
-            this.style.fontFamily = fontSystem.getFontFamily(this.value);
-          }
-        });
-        
-        // Set initial style with safety check
-        try {
-          if (fontTypeSelect.options.length > 0) {
-            // Ensure a value exists by forcing selection of first option if none selected
-            if (!fontTypeSelect.value) {
-              fontTypeSelect.selectedIndex = 0;
-            }
-            fontTypeSelect.style.fontFamily = fontSystem.getFontFamily(fontTypeSelect.value);
-          } else {
-            // Fallback if somehow we have no options
-            fontTypeSelect.style.fontFamily = 'sans-serif';
-          }
-        } catch (e) {
-          console.error('Error setting initial font style:', e);
-          // Fallback to a safe default
-          fontTypeSelect.style.fontFamily = 'sans-serif';
-        }
-      }
-
-      // Make it available globally if needed
-      window.fontSystem = fontSystem;
-      
-      // Only then initialize the font selector
-      populateFontSelector();
-      
-      // And finally, preload fonts
-      fontSystem.preloadFonts();
-
-      let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-      let hasGyro = false;
-      let gyroData = { beta: 0, gamma: 0 };
-
-      // Built-in presets
-      const builtinPresets = [
-        {
-          name: "Unsure",
-          settings: {
-            fontSize: 138,
-            duplications: 20,
-            blur: 50,
-            rotationSpeed: 0,
-            distortion: 1000,
-            primaryColor: "#ffffff",
-            secondaryColor: "#ffffff",
-            effectType: "glitch",
-            fontType: "sans-serif",
-            feedbackEnabled: false,
-            feedbackDecay: 0.6,
-            feedbackOpacity: 0.1,
-            feedbackZoom: 0.98,
-            feedbackShiftX: 0,
-            feedbackShiftY: 0
-          }
-        },
-        {
-          name: "Beacon of truth",
-          settings: {
-            fontSize: 50,
-            duplications: 20,
-            blur: 0,
-            rotationSpeed: 3,
-            distortion: 330,
-            primaryColor: "#ffffff",
-            secondaryColor: "#ffffff",
-            effectType: "wave",
-            fontType: "monospace",
-            feedbackEnabled: true,
-            feedbackDecay: 0.9,
-            feedbackOpacity: 0.41,
-            feedbackZoom: 0.93,
-            feedbackShiftX: 0,
-            feedbackShiftY: 0
-          }
-        },
-        {
-            name: "Skeud",
-            settings: {
-            fontSize: 169,
-            duplications: 4,
-            blur: 21,
-            rotationSpeed: 7,
-            distortion: 0,
-            primaryColor: "#ffffff",
-            secondaryColor: "#ffffff",
-            effectType: "wave",
-            fontType: "sans-serif",
-            feedbackEnabled: true,
-            feedbackDecay: 0.87,
-            feedbackOpacity: 0.49,
-            feedbackZoom: 0.96,
-            feedbackShiftX: 0,
-            feedbackShiftY: 0
-        }
-        },
-        {
-            name: "Arabesque",
-            settings: {
-            fontSize: 400,
-            duplications: 9,
-            blur: 2,
-            rotationSpeed: 9,
-            distortion: 0,
-            primaryColor: "#ffffff",
-            secondaryColor: "#000000",
-            effectType: "spiral",
-            fontType: "serif",
-            feedbackEnabled: false,
-            feedbackDecay: 0.6,
-            feedbackOpacity: 0.1,
-            feedbackZoom: 0.98,
-            feedbackShiftX: 0,
-            feedbackShiftY: 0
-        }
-        },
-        {
-            name: "Equilibrium",
-            settings: {
-            fontSize: 68,
-            duplications: 11,
-            blur: 0,
-            rotationSpeed: 0,
-            distortion: 199,
-            primaryColor: "#ffffff",
-            secondaryColor: "#ffffff",
-            effectType: "spiral",
-            fontType: "monospace",
-            feedbackEnabled: true,
-            feedbackDecay: 0.17,
-            feedbackOpacity: 0.13,
-            feedbackZoom: 1.2,
-            feedbackShiftX: -4,
-            feedbackShiftY: -16.5
-        }
-        },
-        {
-            name: "Archives",
-            settings: {
-            fontSize: 125,
-            duplications: 19,
-            blur: 17,
-            rotationSpeed: 0,
-            distortion: 922,
-            primaryColor: "#404040",
-            secondaryColor: "#000000",
-            effectType: "spiral",
-            fontType: "monospace",
-            feedbackEnabled: true,
-            feedbackDecay: 0.77,
-            feedbackOpacity: 0.54,
-            feedbackZoom: 0.985,
-            feedbackShiftX: 0,
-            feedbackShiftY: 0
-        }
-        },
-        {
-            name: "001",
-            settings: {
-            fontSize: 63,
-            duplications: 7,
-            blur: 0,
-            rotationSpeed: 1,
-            distortion: 234,
-            primaryColor: "#ffffff",
-            secondaryColor: "#ffffff",
-            effectType: "wave",
-            fontType: "monospace",
-            feedbackEnabled: true,
-            feedbackDecay: 0.42,
-            feedbackOpacity: 0.41,
-            feedbackZoom: 0.93,
-            feedbackShiftX: 0,
-            feedbackShiftY: 0
-        }
-        },
-        {
-            name: "002",
-            settings: {
-            fontSize: 192,
-            duplications: 8,
-            blur: 2,
-            rotationSpeed: 1,
-            distortion: 850,
-            primaryColor: "#ffffff",
-            secondaryColor: "#ffffff",
-            effectType: "glitch",
-            fontType: "sans-serif",
-            feedbackEnabled: true,
-            feedbackDecay: 0.6,
-            feedbackOpacity: 0.36,
-            feedbackZoom: 0.98,
-            feedbackShiftX: 0,
-            feedbackShiftY: 0
-        }
-        },
-        
-        {
-            name: "003",
-            settings: {
-            fontSize: 100,
-            duplications: 20,
-            blur: 0,
-            rotationSpeed: 8,
-            distortion: 0,
-            primaryColor: "#ffffff",
-            secondaryColor: "#ffffff",
-            effectType: "spiral",
-            fontType: "Doto",
-            feedbackEnabled: true,
-            feedbackDecay: 0.68,
-            feedbackOpacity: 0.6,
-            feedbackZoom: 1.07,
-            feedbackShiftX: -1,
-            feedbackShiftY: 0
-        }
-        },
-        {
-            name: "004",
-            settings: {
-            fontSize: 255,
-            duplications: 8,
-            blur: 1,
-            rotationSpeed: 3,
-            distortion: 546,
-            primaryColor: "#ffffff",
-            secondaryColor: "#ffffff",
-            effectType: "spiral",
-            fontType: "sans-serif",
-            feedbackEnabled: true,
-            feedbackDecay: 0.68,
-            feedbackOpacity: 0.6,
-            feedbackZoom: 1.07,
-            feedbackShiftX: -1,
-            feedbackShiftY: 0
-        }
-        },
-        {
-            name: "005",
-            settings: {
-            fontSize: 81,
-            duplications: 7,
-            blur: 50,
-            rotationSpeed: 9,
-            distortion: 975,
-            primaryColor: "#ffffff",
-            secondaryColor: "#ffffff",
-            effectType: "glitch",
-            fontType: "sans-serif",
-            feedbackEnabled: true,
-            feedbackDecay: 0.6,
-            feedbackOpacity: 0.1,
-            feedbackZoom: 1.07,
-            feedbackShiftX: -1,
-            feedbackShiftY: 0
-        }
-        },
-        {
-            name: "006",
-            settings: {
-            fontSize: 94,
-            duplications: 7,
-            blur: 5,
-            rotationSpeed: 5,
-            distortion: 500,
-            primaryColor: "#ffffff",
-            secondaryColor: "#ffffff",
-            effectType: "spiral",
-            fontType: "sans-serif",
-            feedbackEnabled: true,
-            feedbackDecay: 0.8,
-            feedbackOpacity: 0.58,
-            feedbackZoom: 0.967,
-            feedbackShiftX: -1,
-            feedbackShiftY: 0
-        }
-        },
-        {
-            name: "007",
-            settings: {
-            fontSize: 153,
-            duplications: 2,
-            blur: 47,
-            rotationSpeed: 6,
-            distortion: 387,
-            primaryColor: "#ffffff",
-            secondaryColor: "#ffffff",
-            effectType: "glitch",
-            fontType: "sans-serif",
-            feedbackEnabled: true,
-            feedbackDecay: 0.68,
-            feedbackOpacity: 0.6,
-            feedbackZoom: 1.07,
-            feedbackShiftX: -1,
-            feedbackShiftY: 0
-        }
-        },
-        {
-            name: "008",
-            settings: {
-            fontSize: 349,
-            duplications: 5,
-            blur: 41,
-            rotationSpeed: 1,
-            distortion: 518,
-            primaryColor: "#ffffff",
-            secondaryColor: "#ffffff",
-            effectType: "spiral",
-            fontType: "sans-serif",
-            feedbackEnabled: true,
-            feedbackDecay: 0.87,
-            feedbackOpacity: 0.49,
-            feedbackZoom: 0.96,
-            feedbackShiftX: 0,
-            feedbackShiftY: 0
-        }
-        },
-        {
-            name: "009",
-            settings: {
-            fontSize: 119,
-            duplications: 4,
-            blur: 21,
-            rotationSpeed: 8,
-            distortion: 546,
-            primaryColor: "#ffffff",
-            secondaryColor: "#ffffff",
-            effectType: "wave",
-            fontType: "sans-serif",
-            feedbackEnabled: true,
-            feedbackDecay: 0.87,
-            feedbackOpacity: 0.49,
-            feedbackZoom: 0.96,
-            feedbackShiftX: 0,
-            feedbackShiftY: 0
-        }
-        },
-        {
-            name: "010",
-            settings: {
-            fontSize: 119,
-            duplications: 4,
-            blur: 21,
-            rotationSpeed: 8,
-            distortion: 0,
-            primaryColor: "#ffffff",
-            secondaryColor: "#ffffff",
-            effectType: "wave",
-            fontType: "sans-serif",
-            feedbackEnabled: true,
-            feedbackDecay: 0.87,
-            feedbackOpacity: 0.49,
-            feedbackZoom: 0.96,
-            feedbackShiftX: 0,
-            feedbackShiftY: 0
-        }
-        },
-        {
-            name: "011",
-            settings: {
-            fontSize: 256,
-            duplications: 4,
-            blur: 42,
-            rotationSpeed: 1,
-            distortion: 579,
-            primaryColor: "#ffffff",
-            secondaryColor: "#ffffff",
-            effectType: "glitch",
-            fontType: "sans-serif",
-            feedbackEnabled: true,
-            feedbackDecay: 0.9,
-            feedbackOpacity: 0.49,
-            feedbackZoom: 0.96,
-            feedbackShiftX: 0,
-            feedbackShiftY: 0
-        }
-        },
-        {
-            name: "012",
-            settings: {
-            fontSize: 138,
-            duplications: 20,
-            blur: 50,
-            rotationSpeed: 1,
-            distortion: 406,
-            primaryColor: "#ffffff",
-            secondaryColor: "#ffffff",
-            effectType: "glitch",
-            fontType: "sans-serif",
-            feedbackEnabled: true,
-            feedbackDecay: 0.9,
-            feedbackOpacity: 0.49,
-            feedbackZoom: 0.96,
-            feedbackShiftX: 0,
-            feedbackShiftY: 0
-        }
-        }
-      ];
-
-      // Set canvas dimensions
-      function setCanvasDimensions() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-
-        // Set dimensions for feedback canvas
-        feedbackCanvas.width = window.innerWidth;
-        feedbackCanvas.height = window.innerHeight;
-      }
-      
-      setCanvasDimensions();
-
-      // First, remove any existing toggle buttons to prevent duplicates
-      const existingToggleButtons = document.querySelectorAll('.toggle-controls-panel');
-      existingToggleButtons.forEach(button => {
-        if (button) button.remove();
-      });
-
-      // Get control elements
-      const controlsPanel = document.querySelector('.controls');
-
-      // Create a single toggle button
-      const toggleControlsBtn = document.createElement('div');
-      toggleControlsBtn.className = 'toggle-controls-panel';
-      toggleControlsBtn.textContent = 'C';
-      document.body.appendChild(toggleControlsBtn);
-
-      // Update toggle button position based on panel state
-      function updateTogglePosition() {
-        if (controlsPanel.classList.contains('hidden')) {
-          toggleControlsBtn.style.right = '20px';
-        } else {
-          const controlsWidth = controlsPanel.offsetWidth;
-          toggleControlsBtn.style.right = (controlsWidth + 30) + 'px';
-        }
-      }
-
-      // Toggle controls panel
-      toggleControlsBtn.addEventListener('click', () => {
-        controlsPanel.classList.toggle('hidden');
-        toggleControlsBtn.classList.toggle('panel-hidden');
-        updateTogglePosition();
-        
-        // Save the state to localStorage
-        localStorage.setItem('controlsPanelHidden', controlsPanel.classList.contains('hidden'));
-      });
-
-      // Check if the controls panel was hidden in the previous session
-      const wasPanelHidden = localStorage.getItem('controlsPanelHidden') === 'true';
-      if (wasPanelHidden) {
-        controlsPanel.classList.add('hidden');
-        toggleControlsBtn.classList.add('panel-hidden');
-      }
-
-      window.addEventListener('resize', () => {
-        setCanvasDimensions();
-        updateTogglePosition();
-      });
-
-      // Mouse move event
-      window.addEventListener('mousemove', (e) => {
-        mouseX = e.clientX;
-        mouseY = e.clientY;
-      });
-
-      if (isMobile) {
-        // Create a button to request permission on iOS (required for iOS 13+)
-        if (typeof DeviceOrientationEvent !== 'undefined' && 
-            typeof DeviceOrientationEvent.requestPermission === 'function') {
-          
-          const permissionBtn = document.createElement('button');
-          permissionBtn.textContent = 'Enable Gyroscope';
-          permissionBtn.style.position = 'fixed';
-          permissionBtn.style.top = '50%';
-          permissionBtn.style.left = '50%';
-          permissionBtn.style.transform = 'translate(-50%, -50%)';
-          permissionBtn.style.zIndex = '1000';
-          permissionBtn.style.padding = '12px 24px';
-          permissionBtn.style.backgroundColor = '#333';
-          permissionBtn.style.color = 'white';
-          permissionBtn.style.border = 'none';
-          permissionBtn.style.borderRadius = '4px';
-          permissionBtn.style.fontSize = '16px';
-          
-          permissionBtn.addEventListener('click', () => {
-            DeviceOrientationEvent.requestPermission()
-              .then(response => {
-                if (response === 'granted') {
-                  window.addEventListener('deviceorientation', handleOrientation);
-                  hasGyro = true;
-                  document.body.removeChild(permissionBtn);
-                  showNotification('Gyroscope enabled');
-                }
-              })
-              .catch(console.error);
-          });
-          
-          document.body.appendChild(permissionBtn);
-        } else {
-          // For non-iOS devices or older iOS versions
-          window.addEventListener('deviceorientation', handleOrientation);
-          hasGyro = true;
-        }
-      }
-
-      function applyDefaultPreset() {
-        // Apply the "Unsure" preset by default
-        const unsurePreset = builtinPresets.find(preset => preset.name === "Unsure");
-        if (unsurePreset) {
-          applySettings(unsurePreset.settings);
-          showNotification("Default preset 'Unsure' applied");
-        }
-      }
-
-      // Call this after all your initialization
-      applyDefaultPreset();
-
-      // Handle orientation data
-      function handleOrientation(event) {
-        // Normalize gyroscope data
-        gyroData.beta = event.beta;  // Front/back tilt: -180 to 180
-        gyroData.gamma = event.gamma; // Left/right tilt: -90 to 90
-      }                                    
-
-      // Function to convert hex color to RGB array
-      function hexToRgb(hex) {
-        const r = parseInt(hex.slice(1, 3), 16);
-        const g = parseInt(hex.slice(3, 5), 16);
-        const b = parseInt(hex.slice(5, 7), 16);
-        return [r, g, b];
-      }
-      
-      // Function to convert RGB array to hex color
-      function rgbToHex(r, g, b) {
-        return `#${Math.floor(r).toString(16).padStart(2, '0')}${Math.floor(g).toString(16).padStart(2, '0')}${Math.floor(b).toString(16).padStart(2, '0')}`;
-      }
-      
-      // Function to interpolate between two colors
-      function interpolateColor(color1, color2, factor) {
-        const rgb1 = hexToRgb(color1);
-        const rgb2 = hexToRgb(color2);
-        
-        const r = rgb1[0] + factor * (rgb2[0] - rgb1[0]);
-        const g = rgb1[1] + factor * (rgb2[1] - rgb1[1]);
-        const b = rgb1[2] + factor * (rgb2[2] - rgb1[2]);
-        
-        return rgbToHex(r, g, b);
-      }
-      
-      // Function to show notification
-      function showNotification(message) {
-        notification.textContent = message;
-        notification.classList.add('show');
-        setTimeout(() => {
-          notification.classList.remove('show');
-        }, 2000);
-      }
-
-      function isAnyMenuItemActive() {
-        const activeMenuItems = document.querySelectorAll('.menu-item.active');
-        return activeMenuItems.length > 0;
-      }
-
-      // Function to check if click is on the canvas area
-      function isAnyMenuItemActive() {
-        const activeMenuItems = document.querySelectorAll('.menu-item.active');
-        return activeMenuItems.length > 0;
-      }
-
-      // Function to check if click is on the canvas area
-      function isCanvasAreaClick(element) {
-        // Consider clicks only on the canvas elements or the direct canvas container
-        const canvasContainer = document.getElementById('canvas-container');
-        const typographyCanvas = document.getElementById('typography-canvas');
-        const feedbackCanvas = document.getElementById('feedback-canvas');
-        
-        // Check if the click is directly on the canvas or its container
-        if (element === typographyCanvas || 
-            element === feedbackCanvas || 
-            element === canvasContainer) {
-          return true;
-        }
-        
-        // Also consider clicks on the body that aren't on any specific UI element
-        // This is a fallback in case canvas containers are restructured
-        if (element === document.body) {
-          return true;
-        }
-        
-        return false;
-      }
-
-      // Variable to track the last applied random preset
-      let lastAppliedRandomPreset = "Unsure"; // Start with the default
-
-      // Function to pick a random preset from 001-011 + Unsure
-      function getRandomPreset() {
-        // Create an array with all preset names including "Unsure"
-        const presetNames = ["Unsure"];
-        
-        // Add numbered presets from 001 to 011
-        const numberedPresets = builtinPresets
-          .filter(preset => /^0\d{2}$/.test(preset.name)) // Filter presets with names like "001", "002", etc.
-          .map(preset => preset.name);
-        
-        presetNames.push(...numberedPresets);
-        
-        // If no numbered presets found, fall back to finding by index in the built-in presets
-        if (numberedPresets.length === 0) {
-          for (let i = 7; i <= 17; i++) { // Approximate indices based on the preset list
-            if (builtinPresets[i] && builtinPresets[i].name) {
-              presetNames.push(builtinPresets[i].name);
-            }
-          }
-        }
-        
-        // Filter out the last applied preset to prevent repetition
-        const availablePresets = presetNames.filter(name => name !== lastAppliedRandomPreset);
-        
-        // If somehow all presets were filtered out (shouldn't happen unless there's only one preset), 
-        // use the full list again
-        const presetsToChooseFrom = availablePresets.length > 0 ? availablePresets : presetNames;
-        
-        // Pick a random preset name from the filtered array
-        const randomIndex = Math.floor(Math.random() * presetsToChooseFrom.length);
-        return presetsToChooseFrom[randomIndex];
-      }
-
-      // Add click event listener to the document
-      document.addEventListener('click', (event) => {
-        // Only proceed if no menu item is active
-        if (!isAnyMenuItemActive()) {
-          // Check if the click is on the canvas area
-          if (isCanvasAreaClick(event.target)) {
-            // Get and apply a random preset
-            const randomPreset = getRandomPreset();
-            applyPresetByName(randomPreset);
-            
-            // Remember this preset to avoid repeating it next time
-            lastAppliedRandomPreset = randomPreset;
-          }
-        }
-      });
-
-      // Apply feedback effect
-      function applyFeedback() {
-        // Skip frames for performance if needed
-        frameCount++;
-        
-        // Save current transformation state
-        feedbackCtx.save();
-        
-        // Apply fade effect by drawing a semi-transparent black rectangle
-        feedbackCtx.fillStyle = `rgba(0, 0, 0, ${feedbackDecay})`;
-        feedbackCtx.fillRect(0, 0, feedbackCanvas.width, feedbackCanvas.height);
-        
-        // Set the composite operation to only show brighter parts
-        feedbackCtx.globalCompositeOperation = 'lighter';
-        
-        // Calculate center for transformations
-        const centerX = feedbackCanvas.width / 2;
-        const centerY = feedbackCanvas.height / 2;
-        
-        // Apply transformations relative to center
-        feedbackCtx.translate(centerX, centerY);
-        feedbackCtx.scale(feedbackZoom, feedbackZoom);
-        feedbackCtx.translate(-centerX + feedbackShiftX, -centerY + feedbackShiftY);
-        
-        // Draw the current canvas onto the feedback canvas with opacity
-        feedbackCtx.globalAlpha = feedbackOpacity;
-        feedbackCtx.drawImage(canvas, 0, 0);
-        
-        // Restore the context state
-        feedbackCtx.restore();
-      }
-      
-      // Function to get current settings
-      function getCurrentSettings() {
-        return {
-          fontSize: parseInt(fontSizeControl.value),
-          duplications: parseInt(duplicationsControl.value),
-          blur: parseInt(blurControl.value),
-          rotationSpeed: parseFloat(rotationSpeedControl.value),
-          distortion: parseInt(distortionControl.value),
-          primaryColor: primaryColorControl.value,
-          secondaryColor: secondaryColorControl.value,
-          effectType: effectTypeControl.value,
-          fontType: fontTypeControl.value,
-          feedbackEnabled: feedbackEnabledControl.checked,
-          feedbackDecay: parseFloat(feedbackDecayControl.value),
-          feedbackOpacity: parseFloat(feedbackOpacityControl.value),
-          feedbackZoom: parseFloat(feedbackZoomControl.value),
-          feedbackShiftX: parseFloat(feedbackShiftXControl.value),
-          feedbackShiftY: parseFloat(feedbackShiftYControl.value),
-        };
-      }
-      
-      // Function to apply settings from a preset
-      function applySettings(settings, instant = false) {
-        // Save previous values for interpolation (still needed even for instant)
-        prevFontSize = fontSize;
-        prevDuplications = duplications;
-        prevBlur = blur;
-        prevRotationSpeed = rotationSpeed;
-        prevDistortion = distortion;
-        prevPrimaryColor = primaryColor;
-        prevSecondaryColor = secondaryColor;
-        prevEffectType = effectType;
-        prevFontType = fontType;
-        
-        // Set the UI controls to new values
-        fontSizeControl.value = settings.fontSize;
-        duplicationsControl.value = settings.duplications;
-        blurControl.value = settings.blur;
-        rotationSpeedControl.value = settings.rotationSpeed;
-        distortionControl.value = settings.distortion;
-        primaryColorControl.value = settings.primaryColor;
-        secondaryColorControl.value = settings.secondaryColor;
-        effectTypeControl.value = settings.effectType;
-        fontTypeControl.value = fontSystem.getCompatibleFontName(settings.fontType);
-        
-        // For instant transitions, apply values directly
-        if (instant) {
-          // Skip interpolation and apply values immediately
-          fontSize = settings.fontSize;
-          duplications = settings.duplications;
-          blur = settings.blur;
-          rotationSpeed = settings.rotationSpeed;
-          distortion = settings.distortion;
-          primaryColor = settings.primaryColor;
-          secondaryColor = settings.secondaryColor;
-          effectType = settings.effectType;
-          fontType = settings.fontType;
-          
-          // Still set target values (for consistency)
-          targetFontSize = settings.fontSize;
-          targetDuplications = settings.duplications;
-          targetBlur = settings.blur;
-          targetRotationSpeed = settings.rotationSpeed;
-          targetDistortion = settings.distortion;
-          targetPrimaryColor = settings.primaryColor;
-          targetSecondaryColor = settings.secondaryColor;
-          targetEffectType = settings.effectType;
-          targetFontType = settings.fontType;
-          
-          // Don't start interpolation
-          isInterpolating = false;
-        } else {
-          // Original behavior: set target values for interpolation
-          targetFontSize = settings.fontSize;
-          targetDuplications = settings.duplications;
-          targetBlur = settings.blur;
-          targetRotationSpeed = settings.rotationSpeed;
-          targetDistortion = settings.distortion;
-          targetPrimaryColor = settings.primaryColor;
-          targetSecondaryColor = settings.secondaryColor;
-          targetEffectType = settings.effectType;
-          targetFontType = settings.fontType;
-          
-          // Start interpolation
-          isInterpolating = true;
-          interpolationStartTime = Date.now();
-        }
-
-        // Apply feedback settings if they exist in the preset
-        if (settings.feedbackEnabled !== undefined) {
-          feedbackEnabledControl.checked = settings.feedbackEnabled;
-          feedbackEnabled = settings.feedbackEnabled;
-        }
-        
-        if (settings.feedbackDecay !== undefined) {
-          feedbackDecayControl.value = settings.feedbackDecay;
-          feedbackDecay = settings.feedbackDecay;
-        }
-        
-        if (settings.feedbackOpacity !== undefined) {
-          feedbackOpacityControl.value = settings.feedbackOpacity;
-          feedbackOpacity = settings.feedbackOpacity;
-        }
-        
-        if (settings.feedbackZoom !== undefined) {
-          feedbackZoomControl.value = settings.feedbackZoom;
-          feedbackZoom = settings.feedbackZoom;
-        }
-        
-        if (settings.feedbackShiftX !== undefined) {
-          feedbackShiftXControl.value = settings.feedbackShiftX;
-          feedbackShiftX = settings.feedbackShiftX;
-        }
-        
-        if (settings.feedbackShiftY !== undefined) {
-          feedbackShiftYControl.value = settings.feedbackShiftY;
-          feedbackShiftY = settings.feedbackShiftY;
-        }
-
-        if (feedbackCanvas && feedbackCtx) {
-          feedbackCtx.clearRect(0, 0, feedbackCanvas.width, feedbackCanvas.height);
-        }
-      }
-      
-      // Animation function
-      function animate() {
-        if (!isAnimating) return;
-
-        if (!canvas || !ctx) {
-          console.error("Cannot animate: canvas or context is missing");
-          isAnimating = false;
-          return;
-        }
-              
-        // Handle interpolation
-        if (isInterpolating) {
-          const currentTime = Date.now();
-          const elapsed = currentTime - interpolationStartTime;
-          let progress = Math.min(elapsed / interpolationDuration, 1);
-          
-          // Ease in-out function for smoother transitions
-          progress = progress < 0.5 ? 4 * progress * progress * progress : 1 - Math.pow(-2 * progress + 2, 3) / 2;
-          
-          // Interpolate numeric values
-          fontSize = Math.round(prevFontSize + (targetFontSize - prevFontSize) * progress);
-          duplications = Math.round(prevDuplications + (targetDuplications - prevDuplications) * progress);
-          blur = Math.round(prevBlur + (targetBlur - prevBlur) * progress);
-          rotationSpeed = prevRotationSpeed + (targetRotationSpeed - prevRotationSpeed) * progress;
-          distortion = Math.round(prevDistortion + (targetDistortion - prevDistortion) * progress);
-          
-          // Interpolate colors
-          primaryColor = interpolateColor(prevPrimaryColor, targetPrimaryColor, progress);
-          secondaryColor = interpolateColor(prevSecondaryColor, targetSecondaryColor, progress);
-          
-          // For effect type and font type, we switch immediately at the midpoint of interpolation
-          if (progress >= 0.5) {
-            effectType = targetEffectType;
-            fontType = targetFontType;
-          }
-          
-          // Update UI controls to reflect current interpolated values
-          fontSizeControl.value = fontSize;
-          duplicationsControl.value = duplications;
-          blurControl.value = blur;
-          rotationSpeedControl.value = rotationSpeed;
-          distortionControl.value = distortion;
-          primaryColorControl.value = primaryColor;
-          secondaryColorControl.value = secondaryColor;
-          
-          // End interpolation when complete
-          if (progress >= 1) {
-            isInterpolating = false;
-            effectType = targetEffectType;
-            fontType = targetFontType;
-          }
-        }
-        
-        if (feedbackEnabled) {
-          applyFeedback();
-        }
-
-        // Clear canvas
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
-        // Update time
-        time += 0.01 * rotationSpeed;
-        
-        // Apply canvas-level blur if needed
-        if (blur > 0) {
-          ctx.filter = `blur(${blur / 5}px)`;
-        } else {
-          ctx.filter = 'none';
-        }
-        
-        // Calculate center position
-        const centerX = canvas.width / 2;
-        const centerY = canvas.height / 2;
-        
-        // Replace with this code:
-        let inputX, inputY;
-
-        if (isMobile && hasGyro) {
-          // Use gyroscope data
-          // Map gamma (-90 to 90) to canvas width with increased sensitivity for better effect
-          inputX = centerX + (gyroData.gamma / 30) * centerX;
-          // Map beta (-180 to 180) to canvas height with a limited range for better control
-          inputY = centerY + (Math.max(-30, Math.min(30, gyroData.beta)) / 30) * centerY;
-        } else {
-          // Use mouse data on desktop
-          inputX = mouseX;
-          inputY = mouseY;
-        }
-
-        const inputInfluenceX = (inputX - centerX) / centerX * distortion;
-        const inputInfluenceY = (inputY - centerY) / centerY * distortion;
-        
-        // Set text properties
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        
-        // Draw each duplication
-        for (let i = 0; i < duplications; i++) {
-          const progress = i / duplications;
-          const angle = time + progress * Math.PI * 2;
-          
-          // Color gradient based on progress
-          const ratio = progress;
-          const color = interpolateColor(primaryColor, secondaryColor, ratio);
-          ctx.fillStyle = color;
-          
-          // Apply effect-specific transformations
-          ctx.save();
-          
-          // Base position influenced by mouse
-          let xPos = centerX + inputInfluenceX * Math.sin(progress * Math.PI * 2);
-          let yPos = centerY + inputInfluenceY * Math.cos(progress * Math.PI * 2);
-          
-          let scaleFactor = 1;
-          let rotationAngle = angle * rotationSpeed;
-          
-          switch (effectType) {
-            case 'wave':
-              xPos += Math.sin(time * 2 + progress * Math.PI * 4) * distortion;
-              yPos += Math.cos(time * 2 + progress * Math.PI * 4) * distortion;
-              break;
-              
-            case 'fracture':
-              xPos += (Math.random() - 0.5) * distortion * 2;
-              yPos += (Math.random() - 0.5) * distortion * 2;
-              rotationAngle += (Math.random() - 0.5) * distortion / 100;
-              break;
-              
-            case 'spiral':
-              const spiralRadius = progress * distortion * 2;
-              xPos += Math.cos(angle * 3) * spiralRadius;
-              yPos += Math.sin(angle * 3) * spiralRadius;
-              break;
-              
-            case 'glitch':
-              if (Math.random() > 0.7) {
-                xPos += (Math.random() - 0.5) * distortion * 4;
-                ctx.filter = `blur(${Math.random() * blur / 2}px) contrast(${1 + Math.random()})`;
-              }
-              break;
-          }
-          
-          // Apply transforms
-          ctx.translate(xPos, yPos);
-          ctx.rotate(rotationAngle);
-          ctx.scale(1 + progress * 0.2, 1 + progress * 0.2);
-          
-          let displayFontSize = fontSize;
-          if (isMobile) {
-            displayFontSize = Math.floor(fontSize * mobileFontScaleFactor);
-          }
-
-          // Draw text with mobile-adjusted font size
-          ctx.font = `${displayFontSize}px ${fontSystem.getFontFamily(fontType)}`;
-          ctx.fillText(text, 0, 0);
-          
-          ctx.restore();
-        }
-        
-        ctx.globalCompositeOperation = 'destination-over';
-        ctx.drawImage(feedbackCanvas, 0, 0);
-        ctx.globalCompositeOperation = 'source-over';
-      
-        requestAnimationFrame(animate);
-      }
-      
-      // Function to generate preset code
-      function generatePresetCode(preset) {
-        return JSON.stringify(preset);
-      }
-      
-      // Function to generate embeddable code
-      function generateEmbeddableCode() {
-        const settings = getCurrentSettings();
-        const codeObj = {
-          type: "TYPO_001_PRESET",
-          version: "1.0",
-          preset: {
-            name: presetNameInput.value.trim() || "Unnamed Preset",
-            settings: settings
-          }
-        };
-        
-        // Format as JavaScript code that can be pasted directly into source
-        const presetStr = JSON.stringify(codeObj.preset, null, 2);
-        return `
-    // -------- Typography Preset Code --------
-    // Add this to the builtinPresets array in your source code
-    const customPreset = ${presetStr};
-    // builtinPresets.push(customPreset);
-    // ----------------------------------------
-    `;
-      }
-      
-      // Function to create preset element
-      function createPresetElement(preset, isBuiltin = false) {
-        const presetItem = document.createElement('div');
-        presetItem.className = 'preset-item';
-        
-        const presetName = document.createElement('span');
-        presetName.textContent = preset.name;
-        presetItem.appendChild(presetName);
-        
-        const presetActions = document.createElement('div');
-        presetActions.className = 'preset-actions';
-        
-        const loadBtn = document.createElement('button');
-        loadBtn.textContent = 'Load';
-        loadBtn.addEventListener('click', () => {
-          applySettings(preset.settings);
-          showNotification(`Loaded preset: ${preset.name}`);
-        });
-        presetActions.appendChild(loadBtn);
-        
-        if (!isBuiltin) {
-          const deleteBtn = document.createElement('button');
-          deleteBtn.textContent = 'Delete';
-          deleteBtn.addEventListener('click', () => {
-            userPresets = userPresets.filter(p => p.name !== preset.name);
-            localStorage.setItem('typographyPresets', JSON.stringify(userPresets));
-            renderUserPresets();
-            showNotification(`Deleted preset: ${preset.name}`);
-          });
-          presetActions.appendChild(deleteBtn);
-        }
-        
-        const codeBtn = document.createElement('button');
-        codeBtn.textContent = 'Code';
-        codeBtn.addEventListener('click', () => {
-          // Save the preset name for code generation
-          presetNameInput.value = preset.name;
-          presetCodeTextarea.value = generateEmbeddableCode();
-          showNotification(`Generated code for preset: ${preset.name}`);
-        });
-        presetActions.appendChild(codeBtn);
-        
-        presetItem.appendChild(presetActions);
-        return presetItem;
-      }
-      
-      // Function to render user presets
-      function renderUserPresets() {
-        userPresetList.innerHTML = '';
-        
-        if (userPresets.length === 0) {
-          const emptyMessage = document.createElement('div');
-          emptyMessage.textContent = 'No saved presets yet';
-          emptyMessage.style.padding = '5px';
-          emptyMessage.style.opacity = '0.7';
-          userPresetList.appendChild(emptyMessage);
-          return;
-        }
-        
-        userPresets.forEach(preset => {
-          const presetElement = createPresetElement(preset);
-          userPresetList.appendChild(presetElement);
-        });
-      }
-      
-      // Function to render builtin presets
-      function renderBuiltinPresets() {
-        builtinPresetList.innerHTML = '';
-        
-        builtinPresets.forEach(preset => {
-          const presetElement = createPresetElement(preset, true);
-          builtinPresetList.appendChild(presetElement);
-        });
-      }
-      
-      // Initialize preset lists
-      renderUserPresets();
-      renderBuiltinPresets();
-      
-      // Toggle preset panel
-      togglePresetPanel.addEventListener('click', () => {
-        presetPanel.classList.toggle('open');
-      });
-
-      if (feedbackEnabledControl) {
-        feedbackEnabledControl.addEventListener('change', () => {
-          feedbackEnabled = feedbackEnabledControl.checked;
-          
-          // Clear the feedback canvas if disabled
-          if (!feedbackEnabled) {
-            feedbackCtx.clearRect(0, 0, feedbackCanvas.width, feedbackCanvas.height);
-          }
-        });
-      }
-      
-      if (feedbackDecayControl) {
-        feedbackDecayControl.addEventListener('input', () => {
-          feedbackDecay = parseFloat(feedbackDecayControl.value);
-        });
-      }
-      
-      if (feedbackOpacityControl) {
-        feedbackOpacityControl.addEventListener('input', () => {
-          feedbackOpacity = parseFloat(feedbackOpacityControl.value);
-        });
-      }
-      
-      if (feedbackZoomControl) {
-        feedbackZoomControl.addEventListener('input', () => {
-          feedbackZoom = parseFloat(feedbackZoomControl.value);
-        });
-      }
-      
-      if (feedbackShiftXControl) {
-        feedbackShiftXControl.addEventListener('input', () => {
-          feedbackShiftX = parseFloat(feedbackShiftXControl.value);
-        });
-      }
-      
-      if (feedbackShiftYControl) {
-        feedbackShiftYControl.addEventListener('input', () => {
-          feedbackShiftY = parseFloat(feedbackShiftYControl.value);
-        });
-      }
-
-      // Save current settings as preset
-      saveCurrentBtn.addEventListener('click', () => {
-        const presetName = presetNameInput.value.trim();
-        if (!presetName) {
-          showNotification('Please enter a preset name');
-          return;
-        }
-        
-        // Check if name already exists
-        const existingIndex = userPresets.findIndex(p => p.name === presetName);
-        
-        const newPreset = {
-          name: presetName,
-          settings: getCurrentSettings()
-        };
-        
-        if (existingIndex >= 0) {
-          // Update existing preset
-          userPresets[existingIndex] = newPreset;
-          showNotification(`Updated preset: ${presetName}`);
-        } else {
-          // Add new preset
-          userPresets.push(newPreset);
-          showNotification(`Saved preset: ${presetName}`);
-        }
-        
-        localStorage.setItem('typographyPresets', JSON.stringify(userPresets));
-        renderUserPresets();
-        presetNameInput.value = '';
-      });
-      
-      // Generate code for current settings
-      generateCodeBtn.addEventListener('click', () => {
-        const presetName = presetNameInput.value.trim() || 'Unnamed Preset';
-        
-        // Generate embeddable code instead of just the JSON
-        presetCodeTextarea.value = generateEmbeddableCode();
-        presetCodeTextarea.select();
-        showNotification('Code generated! Copy to paste into source');
-      });
-      
-      // Export preset
-      exportPresetBtn.addEventListener('click', () => {
-        const presetName = presetNameInput.value.trim() || 'Exported Preset';
-        
-        const preset = {
-          name: presetName,
-          settings: getCurrentSettings()
-        };
-        
-        presetCodeTextarea.value = generatePresetCode(preset);
-        presetCodeTextarea.select();
-        document.execCommand('copy');
-        showNotification('Preset code copied to clipboard!');
-      });
-      
-      // Import preset
-      importPresetBtn.addEventListener('click', () => {
-        const code = presetCodeTextarea.value.trim();
-        if (!code) {
-          showNotification('Please enter preset code');
-          return;
-        }
-        
-        try {
-          // Try to parse as direct JSON first
-          let preset;
-          
-          try {
-            preset = JSON.parse(code);
-          } catch (e) {
-            // If that fails, try to extract JSON from embedded code format
-            const jsonMatch = code.match(/const\s+customPreset\s+=\s+({[\s\S]*?});/);
-            if (jsonMatch && jsonMatch[1]) {
-              preset = JSON.parse(jsonMatch[1]);
-            } else {
-              throw new Error('Could not parse preset code');
-            }
-          }
-          
-          if (!preset.name || !preset.settings) {
-            throw new Error('Invalid preset format');
-          }
-          
-          applySettings(preset.settings);
-          showNotification(`Imported preset: ${preset.name}`);
-          
-          // Ask if user wants to save this imported preset
-          if (confirm(`Do you want to save the imported preset "${preset.name}" to your collection?`)) {
-            const existingIndex = userPresets.findIndex(p => p.name === preset.name);
-            
-            if (existingIndex >= 0) {
-              // Update existing preset
-              userPresets[existingIndex] = preset;
-            } else {
-              // Add new preset
-              userPresets.push(preset);
-            }
-            
-            localStorage.setItem('typographyPresets', JSON.stringify(userPresets));
-            renderUserPresets();
-          }
-          
-          presetCodeTextarea.value = '';
-        } catch (error) {
-          showNotification('Invalid preset code');
-          console.error(error);
-        }
-      });
-      
-      // Save preset button in the main controls
-      savePresetBtn.addEventListener('click', () => {
-        presetPanel.classList.add('open');
-        presetNameInput.focus();
-      });
-      
-      // Handle control changes
-      if (textInput) {
-        textInput.addEventListener('input', () => text = textInput.value);
-      }
-      fontSizeControl.addEventListener('input', () => {
-        targetFontSize = parseInt(fontSizeControl.value);
-        if (!isInterpolating) fontSize = targetFontSize;
-      });
-      duplicationsControl.addEventListener('input', () => {
-        targetDuplications = parseInt(duplicationsControl.value);
-        if (!isInterpolating) duplications = targetDuplications;
-      });
-      blurControl.addEventListener('input', () => {
-        targetBlur = parseInt(blurControl.value);
-        if (!isInterpolating) blur = targetBlur;
-      });
-      rotationSpeedControl.addEventListener('input', () => {
-        targetRotationSpeed = parseFloat(rotationSpeedControl.value);
-        if (!isInterpolating) rotationSpeed = targetRotationSpeed;
-      });
-      distortionControl.addEventListener('input', () => {
-        targetDistortion = parseInt(distortionControl.value);
-        if (!isInterpolating) distortion = targetDistortion;
-      });
-      primaryColorControl.addEventListener('input', () => {
-        targetPrimaryColor = primaryColorControl.value;
-        if (!isInterpolating) primaryColor = targetPrimaryColor;
-      });
-      secondaryColorControl.addEventListener('input', () => {
-        targetSecondaryColor = secondaryColorControl.value;
-        if (!isInterpolating) secondaryColor = targetSecondaryColor;
-      });
-      effectTypeControl.addEventListener('change', () => {
-        targetEffectType = effectTypeControl.value;
-        if (!isInterpolating) effectType = targetEffectType;
-      });
-      fontTypeControl.addEventListener('change', () => {
-        targetFontType = fontTypeControl.value;
-        if (!isInterpolating) fontType = targetFontType;
-      });
-      transitionTimeControl.addEventListener('input', () => {
-        transitionTime = parseFloat(transitionTimeControl.value);
-        interpolationDuration = transitionTime * 1000;
-      });
-      
-      // Randomize settings
-      randomizeBtn.addEventListener('click', () => {
-        // Save previous values
-        prevFontSize = fontSize;
-        prevDuplications = duplications;
-        prevBlur = blur;
-        prevRotationSpeed = rotationSpeed;
-        prevDistortion = distortion;
-        prevPrimaryColor = primaryColor;
-        prevSecondaryColor = secondaryColor;
-        prevEffectType = effectType;
-        prevFontType = fontType;
-        
-        // Generate new random target values
-        fontSizeControl.value = Math.floor(Math.random() * 350 + 50);
-        duplicationsControl.value = Math.floor(Math.random() * 9 + 1);
-        blurControl.value = Math.floor(Math.random() * 50);
-        rotationSpeedControl.value = Math.floor(Math.random() * 10 + 1);
-        distortionControl.value = Math.floor(Math.random() * 1000);
-        
-        // Random effect and font
-        const effects = ['wave', 'fracture', 'spiral', 'glitch'];
-        
-        effectTypeControl.value = effects[Math.floor(Math.random() * effects.length)];
-        
-        // Set target values
-        targetFontSize = parseInt(fontSizeControl.value);
-        targetDuplications = parseInt(duplicationsControl.value);
-        targetBlur = parseInt(blurControl.value);
-        targetRotationSpeed = parseFloat(rotationSpeedControl.value);
-        targetDistortion = parseInt(distortionControl.value);
-        targetEffectType = effectTypeControl.value;
-        
-        // Start interpolation
-        isInterpolating = true;
-        interpolationStartTime = Date.now();
-      });
-      
-      // Start animation
-      animate();
-
-      // Setup menu
-      setupMenu();
-      // Check if URL has a hash and select the corresponding menu item
-      checkUrlHash();
-
-      //mixxs soudcloud
-
-      let mixesContentLoaded = false; // Add this at the top with your other variables
-
-      // Modified menu click handler for mixxs
-      if (mixxsMenuItem) {
-        mixxsMenuItem.addEventListener('click', (e) => {
-          // If mixxs section becomes active, show the gallery
-          if (mixxsMenuItem.classList.contains('active')) {
-            // Make sure mixes gallery has both proper visibility and active class
-            mixesGallery.style.visibility = 'visible';
-            mixesGallery.classList.add('active');
-            
-            // Only load content the first time, not on subsequent visits
-            if (!mixesContentLoaded) {
-              loadMixesContent();
-              mixesContentLoaded = true;
-            }
-            
-            // Make sure archive gallery is hidden to avoid conflicts
-            if (archiveGallery) {
+            // Hide all sections first
+            if (section !== 'archives' && archiveGallery.classList.contains('active')) {
               archiveGallery.classList.remove('active');
             }
-          } else {
-            mixesGallery.classList.remove('active');
-          }
-        });
-      } 
+            
+            if (section !== 'mixxs' && mixesGallery.classList.contains('active')) {
+              mixesGallery.classList.remove('active');
+            }
 
-      // Function to load mixes content from the server
+            if (section !== 'events' && eventsGallery.classList.contains('active')) {
+              eventsGallery.classList.remove('active');
+            }
+            
+            // Toggle active state or update URL
+            if (clickedItem.classList.contains('active')) {
+              // If already active, deactivate and clear URL hash
+              clickedItem.classList.remove('active');
+              parentLi.classList.remove('active-item');
+              history.pushState(null, '', window.location.pathname); // Remove hash from URL
+            } else {
+              // First, remove active class from all items
+              menuItems.forEach(i => {
+                i.classList.remove('active');
+                i.parentElement.classList.remove('active-item');
+              });
+              
+              // Then, add active class to clicked item
+              clickedItem.classList.add('active');
+              parentLi.classList.add('active-item');
+              
+              // Update URL without navigation - using History API
+              history.pushState(null, '', `#${section}`);
+
+              // Show the appropriate section
+              if (section === 'archives') {
+                if (!archiveContentLoaded) {
+                  loadArchiveContent();
+                  archiveContentLoaded = true;
+                }
+                archiveGallery.classList.add('active');
+              } 
+              else if (section === 'mixxs') {
+                if (!mixesContentLoaded) {
+                  loadMixesContent();
+                  mixesContentLoaded = true;
+                }
+                mixesGallery.classList.add('active');
+              }
+              else if (section === 'events') {
+                if (!eventsContentLoaded) {
+                  loadEventsContent();
+                  eventsContentLoaded = true;
+                }
+                eventsGallery.classList.add('active');
+              }
+            }
+            
+            // Simple feedback animation
+            const originalColor = window.getComputedStyle(clickedItem).color;
+            clickedItem.style.color = '#ffffff';
+            
+            setTimeout(() => {
+              clickedItem.style.color = '';
+            }, 200);
+          });
+        });
+      }
+
+      // Check URL hash and set appropriate section
+      function checkUrlHash() {
+        // First, clear all active states
+        const allMenuItems = document.querySelectorAll('.menu-item');
+        allMenuItems.forEach(item => {
+          item.classList.remove('active');
+          item.parentElement.classList.remove('active-item');
+        });
+        
+        // Hide all sections
+        archiveGallery.classList.remove('active');
+        mixesGallery.classList.remove('active');
+        eventsGallery.classList.remove('active');
+        
+        // Then, if there's a hash, find and activate the corresponding menu item
+        if (window.location.hash) {
+          const section = window.location.hash.substring(1); // Remove the # character
+          const menuItem = document.querySelector(`.menu-item[data-section="${section}"]`);
+          
+          if (menuItem) {
+            menuItem.classList.add('active');
+            menuItem.parentElement.classList.add('active-item');
+            
+            // Show the appropriate section
+            if (section === 'archives') {
+              if (!archiveContentLoaded) {
+                loadArchiveContent();
+                archiveContentLoaded = true;
+              }
+              archiveGallery.classList.add('active');
+            } 
+            else if (section === 'mixxs') {
+              if (!mixesContentLoaded) {
+                loadMixesContent();
+                mixesContentLoaded = true;
+              }
+              mixesGallery.classList.add('active');
+            }
+            else if (section === 'events') {
+              if (!eventsContentLoaded) {
+                loadEventsContent();
+                eventsContentLoaded = true;
+              }
+              eventsGallery.classList.add('active');
+            }
+          }
+        }
+      }
+
+      // Function to load archive content
+      async function loadArchiveContent() {
+        try {
+          galleryContainer.innerHTML = '<div style="color: white; text-align: center; padding: 50px;">Fetching archives...</div>';
+          
+          const response = await fetch('/api/archives');
+          const data = await response.json();
+          
+          galleryContainer.innerHTML = '';
+          
+          if (!data.albums || data.albums.length === 0) {
+            galleryContainer.innerHTML = '<div style="color: white; text-align: center; padding: 50px;">No archives found. Add folders to the archive_assets directory.</div>';
+            return;
+          }
+          
+          // Create and append album elements
+          data.albums.forEach(album => {
+            const albumElement = createAlbumElement(album);
+            galleryContainer.appendChild(albumElement);
+          });
+          
+          // Setup for mobile or desktop
+          const isMobile = window.innerWidth <= 768;
+          if (isMobile) {
+            // Force visibility on all images on mobile
+            setTimeout(() => {
+              document.querySelectorAll('.album-image img').forEach(img => {
+                if (!img.src || img.src.includes('data:image')) {
+                  img.src = img.getAttribute('data-src');
+                }
+                img.style.display = 'block';
+                img.style.visibility = 'visible';
+                img.style.opacity = '1';
+              });
+            }, 500);
+          } else {
+            // Desktop uses normal lazy loading
+            setupLazyLoading();
+          }
+          
+          // Setup click events
+          setupImageClickEvents();
+          setupImageHoverEffects();
+        } catch (error) {
+          console.error('Error loading archives:', error);
+          galleryContainer.innerHTML = `<div style="color: white; text-align: center; padding: 50px;">
+            Error loading archives: ${error.message || 'Unknown error'}
+          </div>`;
+        }
+      }
+
+      // Function to create an album element
+      function createAlbumElement(album) {
+        const albumElement = document.createElement('div');
+        albumElement.className = 'album';
+        
+        const titleElement = document.createElement('h2');
+        titleElement.className = 'album-title';
+        titleElement.textContent = album.title;
+        albumElement.appendChild(titleElement);
+        
+        const imagesContainer = document.createElement('div');
+        imagesContainer.className = 'album-images';
+        
+        // On mobile, use a simpler layout
+        const isMobile = window.innerWidth <= 768;
+        
+        album.images.forEach((image, index) => {
+          const imageContainer = document.createElement('div');
+          imageContainer.className = 'album-image';
+          
+          if (!isMobile) {
+            // Only apply fancy effects on desktop
+            // Add random rotation between -8 and 8 degrees
+            const randomRotation = (Math.random() * 16 - 8).toFixed(1);
+            imageContainer.style.transform = `rotate(${randomRotation}deg)`;
+            
+            // Random z-index for natural layering
+            imageContainer.style.zIndex = Math.floor(Math.random() * 5) + 1;
+            
+            // Store original z-index for later reference
+            imageContainer.dataset.zIndex = imageContainer.style.zIndex;
+          } else {
+            // Simpler mobile version
+            const randomMobileRotation = [(Math.random() * 6 - 3).toFixed(1)];
+            imageContainer.style.transform = `rotate(${randomMobileRotation}deg)`;
+            imageContainer.style.display = "inline-block";
+            imageContainer.style.margin = "-15px";
+            imageContainer.style.padding = "0";
+            imageContainer.style.position = "relative";
+          }
+          
+          const img = document.createElement('img');
+          img.alt = image.alt || 'Gallery image';
+          
+          // For mobile, load immediately
+          if (isMobile) {
+            img.src = image.src;
+            img.style.display = 'block';
+            img.style.maxWidth = '800px';
+            img.style.maxHeight = '800px';
+            img.style.width = 'auto';
+            img.style.height = 'auto';
+            img.style.objectFit = 'contain';
+            img.style.margin = '0';
+            img.style.padding = '0';
+          } else {
+            // Desktop lazy loading
+            img.setAttribute('data-src', image.src);
+            img.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1"%3E%3C/svg%3E';
+          }
+          
+          imageContainer.appendChild(img);
+          imagesContainer.appendChild(imageContainer);
+        });
+        
+        albumElement.appendChild(imagesContainer);
+        return albumElement;
+      }
+
+      // Function to setup lazy loading for images
+      function setupLazyLoading() {
+        if ('IntersectionObserver' in window) {
+          const lazyImageObserver = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+              if (entry.isIntersecting) {
+                const lazyImage = entry.target;
+                const src = lazyImage.getAttribute('data-src');
+                
+                if (src) {
+                  lazyImage.src = src;
+                  lazyImage.removeAttribute('data-src');
+                }
+                
+                lazyImageObserver.unobserve(lazyImage);
+              }
+            });
+          });
+          
+          const lazyImages = document.querySelectorAll('img[data-src]');
+          lazyImages.forEach(img => lazyImageObserver.observe(img));
+        } else {
+          // Fallback for browsers that don't support Intersection Observer
+          const lazyImages = document.querySelectorAll('img[data-src]');
+          lazyImages.forEach(img => {
+            img.src = img.getAttribute('data-src');
+            img.removeAttribute('data-src');
+          });
+        }
+      }
+
+      // Set up hover effects for images
+      function setupImageHoverEffects() {
+        document.querySelectorAll('.album-image').forEach(image => {
+          image.addEventListener('mouseenter', function() {
+            this.style.zIndex = '20'; // Higher than any random z-index
+          });
+          
+          image.addEventListener('mouseleave', function() {
+            // Restore the previous z-index after a delay
+            setTimeout(() => {
+              if (!this.matches(':hover')) {
+                this.style.zIndex = this.dataset.zIndex || '1';
+              }
+            }, 300);
+          });
+        });
+      }
+
+      // Set up click events for opening the fullscreen viewer
+      function setupImageClickEvents() {
+        document.querySelectorAll('.album-image').forEach((imageContainer) => {
+          imageContainer.addEventListener('click', (e) => {
+            // Find which album this image belongs to
+            const albumElement = e.currentTarget.closest('.album');
+            const allImages = albumElement.querySelectorAll('.album-image img');
+            
+            // Collect image data
+            currentGalleryImages = Array.from(allImages).map(img => ({
+              src: img.getAttribute('data-src') || img.src,
+              alt: img.alt
+            }));
+            
+            // Set current index
+            currentImageIndex = Array.from(albumElement.querySelectorAll('.album-image')).indexOf(e.currentTarget);
+            
+            // Update and show viewer
+            updateViewerImage();
+            fullscreenViewer.classList.add('active');
+          });
+        });
+      }
+
+      // Update the displayed image in the fullscreen viewer
+      function updateViewerImage() {
+        if (!viewerImage || currentGalleryImages.length === 0 || currentImageIndex < 0 || currentImageIndex >= currentGalleryImages.length) {
+          return;
+        }
+        
+        const imageData = currentGalleryImages[currentImageIndex];
+        viewerImage.src = imageData.src;
+        viewerImage.alt = imageData.alt || '';
+        
+        // Optional: Show image caption
+        let caption = fullscreenViewer.querySelector('.image-caption');
+        if (imageData.alt) {
+          if (!caption) {
+            caption = document.createElement('div');
+            caption.className = 'image-caption';
+            fullscreenViewer.querySelector('.viewer-image-container').appendChild(caption);
+          }
+          caption.textContent = imageData.alt;
+          caption.style.display = 'block';
+        } else if (caption) {
+          caption.style.display = 'none';
+        }
+      }
+
+      // Fullscreen viewer controls
+      if (closeViewerButton) {
+        closeViewerButton.addEventListener('click', () => {
+          fullscreenViewer.classList.remove('active');
+        });
+      }
+
+      if (prevButton) {
+        prevButton.addEventListener('click', () => {
+          if (currentGalleryImages.length === 0) return;
+          
+          currentImageIndex = (currentImageIndex - 1 + currentGalleryImages.length) % currentGalleryImages.length;
+          updateViewerImage();
+        });
+      }
+
+      if (nextButton) {
+        nextButton.addEventListener('click', () => {
+          if (currentGalleryImages.length === 0) return;
+          
+          currentImageIndex = (currentImageIndex + 1) % currentGalleryImages.length;
+          updateViewerImage();
+        });
+      }
+
+      // Keyboard navigation
+      document.addEventListener('keydown', (e) => {
+        if (!fullscreenViewer.classList.contains('active')) return;
+        
+        if (e.key === 'Escape') {
+          fullscreenViewer.classList.remove('active');
+        } else if (e.key === 'ArrowLeft') {
+          if (prevButton) prevButton.click();
+        } else if (e.key === 'ArrowRight') {
+          if (nextButton) nextButton.click();
+        }
+      });
+
+      // Function to load mixes content
       async function loadMixesContent() {
         try {
-          // Show loading state
           mixesContainer.innerHTML = '<div style="color: white; text-align: center; padding: 50px;">Loading mixes...</div>';
           
-          // Fetch mixes from the server
           const response = await fetch('/api/mixes');
           const data = await response.json();
           
-          // Clear loading message
           mixesContainer.innerHTML = '';
           
           if (!data.mixes || data.mixes.length === 0) {
@@ -3146,53 +1348,7 @@
         }
       }
 
-      function setupParallaxEffect() {
-        const mixesGallery = document.getElementById('mixes-gallery');
-        
-        mixesGallery.addEventListener('mousemove', (e) => {
-          // Only apply on desktop
-          if (window.innerWidth < 768) return;
-          
-          const containers = document.querySelectorAll('.mix-container');
-          const mouseX = e.clientX / window.innerWidth - 0.5; // -0.5 to 0.5
-          const mouseY = e.clientY / window.innerHeight - 0.5; // -0.5 to 0.5
-          
-          containers.forEach((container, index) => {
-            // Calculate a different intensity for each container
-            const intensity = 10 + (index % 3) * 5; // Varies between 10, 15, 20
-            
-            // Apply transform based on mouse position
-            container.style.transform = `
-              translateX(${mouseX * intensity}px) 
-              translateY(${mouseY * intensity}px)
-              rotate(${container.style.getPropertyValue('--rotation') || '0deg'})
-            `;
-          });
-        });
-        
-        // Reset positions when mouse leaves
-        mixesGallery.addEventListener('mouseleave', () => {
-          const containers = document.querySelectorAll('.mix-container');
-          
-          containers.forEach((container) => {
-            container.style.transform = `rotate(${container.style.getPropertyValue('--rotation') || '0deg'})`;
-          });
-        });
-      }
-
-      window.addEventListener('resize', function() {
-        // If we resize to mobile, remove any desktop styling
-        if (window.innerWidth < 768) {
-          const containers = document.querySelectorAll('.mix-container');
-          containers.forEach(container => {
-            container.style.transform = '';
-            container.style.animation = '';
-            container.style.opacity = '1';
-          });
-        }
-      });
-
-      // Function to create a mix element with Soundcloud embed
+      // Function to create a mix element
       function createMixElement(mix, index) {
         const mixElement = document.createElement('div');
         mixElement.className = 'mix-container';
@@ -3261,869 +1417,88 @@
         return mixElement;
       }
 
-      // Check if mixxs is already active on page load
-      if (mixxsMenuItem && mixxsMenuItem.classList.contains('active')) {
-        loadMixesContent();
-        mixesGallery.classList.add('active');
-      }
-
-      function setupMenu() {
-        const menuItems = document.querySelectorAll('.menu-item');
-        const archiveGallery = document.getElementById('archive-gallery');
-        const mixesGallery = document.getElementById('mixes-gallery'); // Add this line
+      // Function to set up parallax effect for mixes gallery
+      function setupParallaxEffect() {
+        const mixesGallery = document.getElementById('mixes-gallery');
         
-        // Menu item click handler
-        menuItems.forEach(item => {
-          item.addEventListener('click', (e) => {
-            e.preventDefault();
+        mixesGallery.addEventListener('mousemove', (e) => {
+          // Only apply on desktop
+          if (window.innerWidth < 768) return;
+          
+          const containers = document.querySelectorAll('.mix-container');
+          const mouseX = e.clientX / window.innerWidth - 0.5; // -0.5 to 0.5
+          const mouseY = e.clientY / window.innerHeight - 0.5; // -0.5 to 0.5
+          
+          containers.forEach((container, index) => {
+            // Calculate a different intensity for each container
+            const intensity = 10 + (index % 3) * 5; // Varies between 10, 15, 20
             
-            const clickedItem = e.target;
-            const parentLi = clickedItem.parentElement;
-            const section = clickedItem.getAttribute('data-section');
-            
-            // Check if we're clicking on a menu item that's not "archives" or "mixxs"
-            // If so, make sure both galleries are closed
-            if (section !== 'archives' && archiveGallery.classList.contains('active')) {
-              archiveGallery.classList.remove('active');
-            }
-            
-            if (section !== 'mixxs' && mixesGallery.classList.contains('active')) {
-              mixesGallery.classList.remove('active');
-            }
-            
-            // Toggle active state or update URL
-            if (clickedItem.classList.contains('active')) {
-              // If already active, deactivate and clear URL hash
-              clickedItem.classList.remove('active');
-              parentLi.classList.remove('active-item');
-              history.pushState(null, '', window.location.pathname); // Remove hash from URL
-              
-              // Apply default preset when deselecting and set default text
-              applyPresetByName("Unsure");
-              updateCanvasText("EN5EMBLE");
-            } else {
-              // First, remove active class from all items
-              menuItems.forEach(i => {
-                i.classList.remove('active');
-                i.parentElement.classList.remove('active-item');
-              });
-              
-              // Then, add active class to clicked item
-              clickedItem.classList.add('active');
-              parentLi.classList.add('active-item');
-              
-              // Update URL without navigation - using History API
-              history.pushState(null, '', `#${section}`);
-              
-              // Apply corresponding preset and text
-              applyPresetForSection(section);
-            }
-            
-            // Simple feedback animation
-            const originalColor = window.getComputedStyle(clickedItem).color;
-            clickedItem.style.color = '#ffffff';
-            
-            setTimeout(() => {
-              clickedItem.style.color = '';
-            }, 200);
-            
-            console.log(`Selected section: ${section}`);
+            // Apply transform based on mouse position
+            container.style.transform = `
+              translateX(${mouseX * intensity}px) 
+              translateY(${mouseY * intensity}px)
+              rotate(${container.style.getPropertyValue('--rotation') || '0deg'})
+            `;
+          });
+        });
+        
+        // Reset positions when mouse leaves
+        mixesGallery.addEventListener('mouseleave', () => {
+          const containers = document.querySelectorAll('.mix-container');
+          
+          containers.forEach((container) => {
+            container.style.transform = `rotate(${container.style.getPropertyValue('--rotation') || '0deg'})`;
           });
         });
       }
-      
-      // Check URL hash on page load and set the active menu item
-      function checkUrlHash() {
-        const archiveGallery = document.getElementById('archive-gallery');
-        const mixesGallery = document.getElementById('mixes-gallery'); 
+
+      // Function to load events content
+      function loadEventsContent() {
+        if (!eventsGallery) return;
         
-        // First, clear all active states
-        const allMenuItems = document.querySelectorAll('.menu-item');
-        allMenuItems.forEach(item => {
-          item.classList.remove('active');
-          item.parentElement.classList.remove('active-item');
-        });
-        
-        // Then, if there's a hash, find and activate the corresponding menu item
-        if (window.location.hash) {
-          const section = window.location.hash.substring(1); // Remove the # character
-          const menuItem = document.querySelector(`.menu-item[data-section="${section}"]`);
-          
-          // Close the archive gallery if we're not on the archives section
-          if (section !== 'archives' && archiveGallery.classList.contains('active')) {
-            archiveGallery.classList.remove('active');
+        try {
+          // Show placeholder for now - future events will be loaded here
+          const eventsPlaceholder = eventsGallery.querySelector('.events-placeholder');
+          if (eventsPlaceholder) {
+            eventsPlaceholder.style.display = 'flex';
           }
           
-          // Close the mixes gallery if we're not on the mixxs section
-          if (section !== 'mixxs' && mixesGallery.classList.contains('active')) {
-            mixesGallery.classList.remove('active');
-          }
-          
-          if (menuItem) {
-            menuItem.classList.add('active');
-            menuItem.parentElement.classList.add('active-item');
-            
-            // Apply the corresponding preset with instant transitions
-            applyPresetForSection(section);
-            
-            // Load content if needed - but don't reload existing content
-            if (section === 'mixxs' && !mixesContentLoaded) {
-              loadMixesContent();
-              mixesContentLoaded = true;
-            } else if (section === 'archives' && !archiveContentLoaded) {
-              loadArchiveContent();
-              archiveContentLoaded = true;
-            }
-          }
-        } else {
-          // If no hash, apply the default "Unsure" preset with instant transitions
-          applyPresetByName("Unsure", true);
-          
-          // Also ensure galleries are closed when there's no hash
-          if (archiveGallery.classList.contains('active')) {
-            archiveGallery.classList.remove('active');
-          }
-          
-          if (mixesGallery.classList.contains('active')) {
-            mixesGallery.classList.remove('active');
-          }
+          // Fetch events data from API (will be implemented in the future)
+          fetch('/api/events')
+            .then(response => response.json())
+            .then(data => {
+              console.log('Events data:', data);
+              
+              // For now, just display the placeholder
+              if (eventsPlaceholder) {
+                eventsPlaceholder.style.display = 'flex';
+              }
+            })
+            .catch(error => {
+              console.error('Error loading events:', error);
+              if (eventsPlaceholder) {
+                eventsPlaceholder.style.display = 'flex';
+              }
+            });
+        } catch (error) {
+          console.error('Error loading events:', error);
         }
       }
-      
-      // Function to apply a preset based on the selected section
-      function applyPresetForSection(section) {
-        // Map sections to preset names and corresponding text
-        const sectionMap = {
-          "events": {
-            preset: "Beacon of truth",
-            text: "EVENTS EN5EMBLE"
-          },
-          "mixxs": {
-            preset: "Skeud",
-            text: "MIXxxxxxES"
-          },
-          "archives": {
-            preset: "Archives",
-            text: "archives"
-          },
-          "contact": {
-            preset: "Equilibrium",
-            text: "@EN5EMBLE"
-          }
-        };
-        
-        const mapping = sectionMap[section] || { preset: "Unsure", text: "EN5EMBLE" };
-        
-        // Apply the preset WITH instant=true to skip transition
-        applyPresetByName(mapping.preset, true);
-        
-        // Update the text
-        updateCanvasText(mapping.text);
-      }
-      
-      // Function to update the canvas text
-      function updateCanvasText(newText) {
-        const textInput = document.getElementById('text-content');
-        if (textInput) {
-          textInput.value = newText;
-          // Trigger the input event to update the canvas
-          const event = new Event('input', { bubbles: true });
-          textInput.dispatchEvent(event);
-        }
-      }
-      
-      // Function to find and apply a preset by name
-      function applyPresetByName(presetName, instant = false) {
-        // First check built-in presets
-        let preset = builtinPresets.find(p => p.name === presetName);
-        
-        // If not found in built-in presets, check user presets
-        if (!preset && userPresets) {
-          preset = userPresets.find(p => p.name === presetName);
-        }
-        
-        // If preset found, apply it with the instant flag
-        if (preset) {
-          console.log(`Applying preset: ${presetName}${instant ? ' (instant)' : ''}`);
-          applySettings(preset.settings, instant);
-        } else {
-          console.warn(`Preset not found: ${presetName}`);
-        }
-      }
-      
+
       // Listen for back/forward browser navigation
       window.addEventListener('popstate', () => {
         checkUrlHash();
-        
-        // Check if the current hash isn't mixxs, and if so, hide the mixes gallery
-        if (window.location.hash !== '#mixxs' && document.getElementById('mixes-gallery').classList.contains('active')) {
-          document.getElementById('mixes-gallery').classList.remove('active');
-        }
       });
       
       // Also listen for hash changes directly (for manual URL edits)
       window.addEventListener('hashchange', checkUrlHash);
-
-      // Now handle the archive gallery functionality
-      // Make sure closeButton exists before adding event listener
-      if (closeButton) {
-        closeButton.addEventListener('click', () => {
-          archiveGallery.classList.remove('active');
-        });
-      } else {
-        console.warn('Gallery close button not found!');
-      }
-
-      let archiveContentLoaded = false;
-
-      if (archiveMenuItem) {
-        archiveMenuItem.addEventListener('click', (e) => {
-          // If archives section becomes active, show the gallery
-          if (archiveMenuItem.classList.contains('active')) {
-            if (!archiveContentLoaded) {
-              loadArchiveContent();
-              archiveContentLoaded = true;
-            }
-            archiveGallery.classList.add('active');
-          } else {
-            archiveGallery.classList.remove('active');
-          }
-        });
-      }
-
-      // Function to load archive content from the server
-      async function loadArchiveContent() {
-        try {
-        // Show loading state
-        galleryContainer.innerHTML = '<div style="color: white; text-align: center; padding: 50px;">Fetching archives...</div>';
-        
-        // Fetch albums from the server
-        const response = await fetch('/api/archives');
-        const data = await response.json();
-        
-        console.log("Archive API response:", data); // Debug log
-        
-        // Clear loading message
-        galleryContainer.innerHTML = '';
-        
-        if (!data.albums || data.albums.length === 0) {
-          galleryContainer.innerHTML = '<div style="color: white; text-align: center; padding: 50px;">No archives found. Add folders to the archive_assets directory.</div>';
-          return;
-        }
-        
-        // Create and append album elements
-        data.albums.forEach(album => {
-          console.log(`Creating album: ${album.title} with ${album.images.length} images`); // Debug log
-          const albumElement = createAlbumElement(album);
-          galleryContainer.appendChild(albumElement);
-        });
-        
-        // INJECT EMERGENCY STYLES FOR MOBILE
-        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        if (isMobile) {
-          const mobileStyle = document.createElement('style');
-          mobileStyle.id = 'mobileForcedStyles';
-          mobileStyle.textContent = `
-            .album-image {
-              margin: -15px !important;
-              padding: 0 !important;
-              position: relative !important;
-              display: inline-block !important;
-              visibility: visible !important;
-              opacity: 1 !important;
-            }
-            
-            .album-images {
-              display: flex !important;
-              flex-wrap: wrap !important;
-              justify-content: center !important;
-            }
-            
-            .album-image img {
-              display: block !important;
-              width: auto !important;
-              height: auto !important;
-              max-width: 600px !important;
-              max-height: 750px !important;
-              position: static !important;
-              margin: 0 !important;
-              padding: 0 !important;
-            }
-          `;
-          document.head.appendChild(mobileStyle);
-          
-          // Force visibility on all images on mobile
-          setTimeout(() => {
-            document.querySelectorAll('.album-image img').forEach(img => {
-              if (!img.src || img.src.includes('data:image')) {
-                img.src = img.getAttribute('data-src');
-              }
-              img.style.display = 'block';
-              img.style.visibility = 'visible';
-              img.style.opacity = '1';
-            });
-          }, 500);
-        } else {
-          // Desktop uses normal lazy loading
-          setupLazyLoading();
-        }
-        
-        // Setup click events
-        setupImageClickEvents();
-        setupImageHoverEffects();
-      } catch (error) {
-        console.error('Error loading archives:', error);
-        galleryContainer.innerHTML = `<div style="color: white; text-align: center; padding: 50px;">
-          Error loading archives: ${error.message || 'Unknown error'}
-        </div>`;
-      }
-    }
-
-      // Function to create an album element
-      function createAlbumElement(album) {
-        const albumElement = document.createElement('div');
-        albumElement.className = 'album';
-        
-        const titleElement = document.createElement('h2');
-        titleElement.className = 'album-title';
-        titleElement.textContent = album.title;
-        albumElement.appendChild(titleElement);
-        
-        const imagesContainer = document.createElement('div');
-        imagesContainer.className = 'album-images';
-        
-        // On mobile, use a simpler layout
-        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        
-        album.images.forEach((image, index) => {
-          const imageContainer = document.createElement('div');
-          imageContainer.className = 'album-image';
-          
-          if (!isMobile) {
-            // Only apply fancy effects on desktop
-            // Add random rotation between -8 and 8 degrees
-            const randomRotation = (Math.random() * 16 - 8).toFixed(1);
-            imageContainer.style.transform = `rotate(${randomRotation}deg)`;
-            
-            // Random z-index for natural layering
-            imageContainer.style.zIndex = Math.floor(Math.random() * 5) + 1;
-            
-            // Store original z-index for later reference
-            imageContainer.dataset.zIndex = imageContainer.style.zIndex;
-          } else {
-            // Simpler mobile version - EXPLICITLY SET INLINE STYLES FOR MOBILE
-            // Random small rotation 
-            const randomMobileRotation = [(Math.random() * 6 - 3).toFixed(1)];
-            imageContainer.style.transform = `rotate(${randomMobileRotation}deg)`;
-            imageContainer.style.display = "inline-block";
-            imageContainer.style.margin = "-15px";
-            imageContainer.style.padding = "0";
-            imageContainer.style.position = "relative";
-          }
-          
-          const img = document.createElement('img');
-          img.alt = image.alt || 'Gallery image';
-          
-          // For mobile, load immediately and SET EXPLICIT DIMENSIONS
-          if (isMobile) {
-            img.src = image.src;
-            img.style.display = 'block';
-            img.style.maxWidth = '800px';
-            img.style.maxHeight = '800px';
-            img.style.width = 'auto';
-            img.style.height = 'auto';
-            img.style.objectFit = 'contain';
-            img.style.margin = '0';
-            img.style.padding = '0';
-          } else {
-            // Desktop lazy loading
-            img.setAttribute('data-src', image.src);
-            img.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1"%3E%3C/svg%3E';
-          }
-          
-          imageContainer.appendChild(img);
-          imagesContainer.appendChild(imageContainer);
-        });
-        
-        albumElement.appendChild(imagesContainer);
-        return albumElement;
-      }
-
-      // Function to set up hover effects for images
-      function setupImageHoverEffects() {
-        document.querySelectorAll('.album-image').forEach(image => {
-          image.addEventListener('mouseenter', function() {
-            this.style.zIndex = '20'; // Higher than any random z-index
-          });
-          
-          image.addEventListener('mouseleave', function() {
-            // Restore the previous z-index after a delay
-            setTimeout(() => {
-              if (!this.matches(':hover')) {
-                this.style.zIndex = this.dataset.zIndex || '1';
-              }
-            }, 300);
-          });
-        });
-      }
-
-      // Function to setup lazy loading for images
-      function setupLazyLoading() {
-        // Use Intersection Observer API for modern browsers
-        if ('IntersectionObserver' in window) {
-          const lazyImageObserver = new IntersectionObserver(entries => {
-            entries.forEach(entry => {
-              if (entry.isIntersecting) {
-                const lazyImage = entry.target;
-                const src = lazyImage.getAttribute('data-src');
-                
-                if (src) {
-                  lazyImage.src = src;
-                  lazyImage.removeAttribute('data-src');
-                }
-                
-                lazyImageObserver.unobserve(lazyImage);
-              }
-            });
-          });
-          
-          // Observe all lazy images
-          const lazyImages = document.querySelectorAll('img[data-src]');
-          lazyImages.forEach(img => lazyImageObserver.observe(img));
-        } else {
-          // Fallback for browsers that don't support Intersection Observer
-          // Just load all images immediately
-          const lazyImages = document.querySelectorAll('img[data-src]');
-          lazyImages.forEach(img => {
-            img.src = img.getAttribute('data-src');
-            img.removeAttribute('data-src');
-          });
-        }
-      }
-
-      // Function to set up click events for opening the fullscreen viewer
-      function setupImageClickEvents() {
-        document.querySelectorAll('.album-image').forEach((imageContainer) => {
-          imageContainer.addEventListener('click', (e) => {
-            // Find which album this image belongs to
-            const albumElement = e.currentTarget.closest('.album');
-            const allImages = albumElement.querySelectorAll('.album-image img');
-            
-            // Collect image data
-            currentGalleryImages = Array.from(allImages).map(img => ({
-              src: img.getAttribute('data-src') || img.src,
-              alt: img.alt
-            }));
-            
-            // Set current index
-            currentImageIndex = Array.from(albumElement.querySelectorAll('.album-image')).indexOf(e.currentTarget);
-            
-            // Update and show viewer
-            updateViewerImage();
-            fullscreenViewer.classList.add('active');
-          });
-        });
-      }
-
-      // Fullscreen Viewer Functions
-      // Close viewer
-      if (closeViewerButton) {
-        closeViewerButton.addEventListener('click', () => {
-          fullscreenViewer.classList.remove('active');
-        });
-      }
-
-      // Previous image
-      if (prevButton) {
-        prevButton.addEventListener('click', () => {
-          if (currentGalleryImages.length === 0) return;
-          
-          currentImageIndex = (currentImageIndex - 1 + currentGalleryImages.length) % currentGalleryImages.length;
-          updateViewerImage();
-        });
-      }
-
-      // Next image
-      if (nextButton) {
-        nextButton.addEventListener('click', () => {
-          if (currentGalleryImages.length === 0) return;
-          
-          currentImageIndex = (currentImageIndex + 1) % currentGalleryImages.length;
-          updateViewerImage();
-        });
-      }
-
-      // Keyboard navigation
-      document.addEventListener('keydown', (e) => {
-        if (!fullscreenViewer.classList.contains('active')) return;
-        
-        if (e.key === 'Escape') {
-          fullscreenViewer.classList.remove('active');
-        } else if (e.key === 'ArrowLeft') {
-          if (prevButton) prevButton.click();
-        } else if (e.key === 'ArrowRight') {
-          if (nextButton) nextButton.click();
-        }
-      });
-
-      // Update the displayed image in the fullscreen viewer
-      function updateViewerImage() {
-        if (!viewerImage || currentGalleryImages.length === 0 || currentImageIndex < 0 || currentImageIndex >= currentGalleryImages.length) {
-          return;
-        }
-        
-        const imageData = currentGalleryImages[currentImageIndex];
-        viewerImage.src = imageData.src;
-        viewerImage.alt = imageData.alt || '';
-        
-        // Optional: Show image caption
-        let caption = fullscreenViewer.querySelector('.image-caption');
-        if (imageData.alt) {
-          if (!caption) {
-            caption = document.createElement('div');
-            caption.className = 'image-caption';
-            fullscreenViewer.appendChild(caption);
-          }
-          caption.textContent = imageData.alt;
-          caption.style.display = 'block';
-        } else if (caption) {
-          caption.style.display = 'none';
-        }
-      }
-
-      // Check if archives is already active on page load
-      if (archiveMenuItem && archiveMenuItem.classList.contains('active')) {
-        loadArchiveContent();
-        archiveGallery.classList.add('active');
-      }
     });
-
-    // Simplified fullscreen viewer functionality
-    function setupFullscreenViewer() {
-      // Cache DOM elements
-      const body = document.body;
-      const fullscreenViewer = document.getElementById('fullscreen-viewer');
-      const canvasContainer = document.getElementById('canvas-container');
-      const archiveGallery = document.getElementById('archive-gallery');
-      const viewerImage = fullscreenViewer.querySelector('.viewer-image');
-      const viewerImageContainer = fullscreenViewer.querySelector('.viewer-image-container');
-      const closeButton = fullscreenViewer.querySelector('.close-button');
-      const prevButton = fullscreenViewer.querySelector('.prev-button');
-      const nextButton = fullscreenViewer.querySelector('.next-button');
-      
-      // Shared gallery state
-      let currentGalleryImages = [];
-      let currentImageIndex = 0;
-      
-      // Open fullscreen viewer with the specified image
-      function openViewer(imageSrc, imageAlt, index, allImages) {
-        console.log("Opening viewer");
-        
-        // Reset any previous styles to ensure clean state
-        viewerImage.style.maxWidth = '';
-        viewerImage.style.maxHeight = '';
-        
-        // Check if we're on mobile
-        const isMobile = window.innerWidth <= 768;
-        
-        // Load the image first
-        viewerImage.onload = function() {
-          // Now that the image is loaded, optimize its size based on aspect ratio
-          const imgWidth = this.naturalWidth;
-          const imgHeight = this.naturalHeight;
-          const viewportWidth = window.innerWidth;
-          const viewportHeight = window.innerHeight;
-          
-          if (isMobile) {
-            // Mobile-specific adjustments - more conservative sizing
-            if (imgHeight > imgWidth) {
-              // Portrait image on mobile - ensure it's not too tall
-              viewerImage.style.maxHeight = 'calc(85vh - 100px)';
-              viewerImage.style.maxWidth = '90vw';
-            } else {
-              // Landscape image on mobile - ensure it's not too wide
-              viewerImage.style.maxWidth = '90vw';
-              viewerImage.style.maxHeight = 'calc(70vh - 80px)';
-            }
-          } else {
-            // Desktop adjustments
-            // For very tall images, adjust max-height to avoid truncation
-            if (imgHeight > imgWidth * 1.5) { // If height is significantly greater than width
-              viewerImage.style.maxHeight = 'calc(95vh - 80px)'; // Allow space for controls
-            }
-            
-            // For very wide images, ensure they fit properly
-            if (imgWidth > imgHeight * 1.5) { // If width is significantly greater than height
-              viewerImage.style.maxWidth = 'calc(95vw - 40px)'; // Allow space for controls
-            }
-          }
-        };
-        
-        // Set image src after setting up the onload handler
-        viewerImage.src = imageSrc;
-        viewerImage.alt = imageAlt || '';
-        
-        // Set navigation state
-        currentGalleryImages = allImages;
-        currentImageIndex = index;
-        
-        // Update caption
-        updateCaption(imageAlt);
-        
-        // Move the canvas container behind the fullscreen viewer
-        canvasContainer.style.zIndex = '290';
-        
-        // Hide UI elements
-        document.querySelectorAll('.menu-container, .text-input, .controls, .toggle-controls-panel, .preset-panel, .toggle-preset-panel, .mixes-gallery').forEach(el => {
-          el.style.visibility = 'hidden';
-        });
-        
-        // Hide the archive gallery while in fullscreen mode
-        if (archiveGallery) {
-          archiveGallery.style.visibility = 'hidden';
-        }
-        
-        // Show viewer
-        fullscreenViewer.style.display = 'flex';
-        fullscreenViewer.classList.add('active');
-        
-        // Add a class to the body to temporarily hide cursor (desktop only)
-        if (!isMobile) {
-          body.classList.add('viewing-fullscreen');
-          setTimeout(() => body.classList.remove('viewing-fullscreen'), 5000);
-        }
-      }
-      
-      // Close the fullscreen viewer - with explicit reset of all states
-      function closeViewer() {
-        // Hide the viewer first
-        fullscreenViewer.classList.remove('active');
-        fullscreenViewer.style.display = 'none';
-        
-        // Reset canvas container z-index
-        canvasContainer.style.zIndex = '-1';
-        
-        // Show all UI elements immediately
-        document.querySelectorAll('.menu-container, .text-input, .controls, .toggle-controls-panel, .preset-panel, .toggle-preset-panel').forEach(el => {
-          el.style.visibility = 'visible';
-        });
-        
-        // Handle gallery visibility based on which section is active
-        const mixxsMenuItem = document.querySelector('.menu-item[data-section="mixxs"]');
-        const archiveMenuItem = document.querySelector('.menu-item[data-section="archives"]');
-        
-        const archiveGallery = document.getElementById('archive-gallery');
-        const mixesGallery = document.getElementById('mixes-gallery');
-        
-        // First, properly reset both galleries' visibility
-        if (archiveGallery) archiveGallery.style.visibility = 'visible';
-        if (mixesGallery) mixesGallery.style.visibility = 'visible';
-        
-        // Then apply the correct active state and load content if needed
-        if (mixxsMenuItem && mixxsMenuItem.classList.contains('active')) {
-          // If mixesGallery is hidden, display it
-          if (mixesGallery && !mixesGallery.classList.contains('active')) {
-            mixesGallery.classList.add('active');
-            // Force reload mixes content to ensure it's displayed
-            loadMixesContent();
-          }
-          
-          // Make sure archive gallery is hidden
-          if (archiveGallery) {
-            archiveGallery.classList.remove('active');
-          }
-        } else if (archiveMenuItem && archiveMenuItem.classList.contains('active')) {
-          // If archive section is active
-          if (archiveGallery && !archiveGallery.classList.contains('active')) {
-            archiveGallery.classList.add('active');
-            // Optionally reload archive content
-            loadArchiveContent();
-          }
-          
-          // Make sure mixes gallery is hidden
-          if (mixesGallery) {
-            mixesGallery.classList.remove('active');
-          }
-        } else {
-          // If neither section is active, hide both galleries
-          if (archiveGallery) archiveGallery.classList.remove('active');
-          if (mixesGallery) mixesGallery.classList.remove('active');
-        }
-      }
-      
-      // Update or create the image caption
-      function updateCaption(text) {
-        let caption = fullscreenViewer.querySelector('.image-caption');
-        
-        if (text) {
-          if (!caption) {
-            caption = document.createElement('div');
-            caption.className = 'image-caption';
-            viewerImageContainer.appendChild(caption);
-          }
-          caption.textContent = text;
-          caption.style.display = 'block';
-        } else if (caption) {
-          caption.style.display = 'none';
-        }
-      }
-      
-      // Navigate to previous image
-      function showPreviousImage() {
-        if (!currentGalleryImages.length) return;
-        
-        currentImageIndex = (currentImageIndex - 1 + currentGalleryImages.length) % currentGalleryImages.length;
-        const image = currentGalleryImages[currentImageIndex];
-        
-        viewerImage.src = image.src;
-        viewerImage.alt = image.alt || '';
-        updateCaption(image.alt);
-      }
-      
-      // Navigate to next image
-      function showNextImage() {
-        if (!currentGalleryImages.length) return;
-        
-        currentImageIndex = (currentImageIndex + 1) % currentGalleryImages.length;
-        const image = currentGalleryImages[currentImageIndex];
-        
-        viewerImage.src = image.src;
-        viewerImage.alt = image.alt || '';
-        updateCaption(image.alt);
-      }
-      
-      // Event delegation for album image clicks
-      if (archiveGallery) {
-        archiveGallery.addEventListener('click', function(e) {
-          // Find if we clicked on an album image
-          let target = e.target;
-          
-          // Walk up the DOM to find the album-image container
-          while (target && target !== this) {
-            if (target.classList && target.classList.contains('album-image')) {
-              e.preventDefault();
-              
-              const albumElement = target.closest('.album');
-              const thisImg = target.querySelector('img');
-              
-              if (!thisImg || !albumElement) return;
-              
-              // Get image source (either from data-src or src)
-              const imgSrc = thisImg.getAttribute('data-src') || thisImg.src;
-              const imgAlt = thisImg.alt || '';
-              
-              // Get all images in this album for navigation
-              const allImagesElements = albumElement.querySelectorAll('.album-image img');
-              const allImages = Array.from(allImagesElements).map(img => ({
-                src: img.getAttribute('data-src') || img.src,
-                alt: img.alt || ''
-              }));
-              
-              // Find the index of the current image
-              const index = Array.from(albumElement.querySelectorAll('.album-image')).indexOf(target);
-              
-              // Open viewer with this image
-              openViewer(imgSrc, imgAlt, index, allImages);
-              return;
-            }
-            target = target.parentNode;
-          }
-        });
-      }
-      
-      // Add click handlers for navigation buttons
-      if (closeButton) {
-        closeButton.addEventListener('click', closeViewer);
-      }
-      
-      if (prevButton) {
-        prevButton.addEventListener('click', showPreviousImage);
-      }
-      
-      if (nextButton) {
-        nextButton.addEventListener('click', showNextImage);
-      }
-      
-      // Keyboard navigation - with special handling for Escape key
-      document.addEventListener('keydown', function(e) {
-        // Only handle keyboard events when the viewer is active
-        if (fullscreenViewer.classList.contains('active')) {
-          console.log(`Key pressed: ${e.key}`);
-          
-          // Handle Escape key with multiple fallbacks
-          if (e.key === 'Escape' || e.key === 'Esc' || e.keyCode === 27) {
-            console.log("Escape key detected");
-            e.preventDefault();
-            e.stopPropagation(); // Prevent other handlers from capturing this
-            
-            // Call closeViewer and add a class to track Escape usage
-            document.body.classList.add('closed-with-escape');
-            closeViewer();
-            
-            // Double-check the state after a short delay
-            setTimeout(function() {
-              if (fullscreenViewer.classList.contains('active')) {
-                console.log("Force-closing viewer");
-                fullscreenViewer.classList.remove('active');
-                fullscreenViewer.style.display = 'none';
-              }
-            }, 50);
-          } else if (e.key === 'ArrowLeft' || e.keyCode === 37) {
-            showPreviousImage();
-          } else if (e.key === 'ArrowRight' || e.keyCode === 39) {
-            showNextImage();
-          }
-        }
-      }, true); // Use capture phase to ensure we get the event first
-      
-      // Add a click handler on the fullscreen viewer background
-      fullscreenViewer.addEventListener('click', function(e) {
-        // Only close if clicking directly on the fullscreen viewer (not on images or controls)
-        if (e.target === fullscreenViewer) {
-          closeViewer();
-        }
-      });
-      
-      // Reset state when the window is resized
-      window.addEventListener('resize', function() {
-        // If the viewer is active, make sure z-index is correct
-        if (fullscreenViewer.classList.contains('active')) {
-          canvasContainer.style.zIndex = '290';
-        } else {
-          canvasContainer.style.zIndex = '-1';
-        }
-      });
-      
-      console.log("Fullscreen viewer setup complete");
-    }
-
-    // Initialize when DOM is ready
-    document.addEventListener('DOMContentLoaded', function() {
-      // Ensure all required elements exist before setup
-      if (document.getElementById('fullscreen-viewer')) {
-        setupFullscreenViewer();
-      } else {
-        console.error("Could not initialize fullscreen viewer - missing required elements");
-      }
-    });
-
-    // Fallback initialization in case DOM is already loaded
-    if (document.readyState === 'complete' || document.readyState === 'interactive') {
-      setTimeout(function() {
-        if (document.getElementById('fullscreen-viewer') &&
-            !document.body.classList.contains('fullscreen-initialized')) {
-          setupFullscreenViewer();
-          document.body.classList.add('fullscreen-initialized');
-          console.log("Fullscreen viewer setup complete (fallback)");
-        }
-      }, 500);
-    }
   </script>
-<script src="/floating-heads.js"></script>
-<script src="/soundcloud-integration.js"></script>
-<script src="/music-indicator.js"></script>
-<script src="/events-content.js"></script>
-<script src="/shake-detector.js"></script>
-<script src="/gradient-background.js"></script>
+  <script src="/floating-heads.js"></script>
+  <script src="/soundcloud-integration.js"></script>
+  <script src="/music-indicator.js"></script>
+  <script src="/events-content.js"></script>
+  <script src="/shake-detector.js"></script>
+  <script src="/gradient-background.js"></script>
 </body>
 </html>
