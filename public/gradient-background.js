@@ -69,24 +69,24 @@ document.addEventListener('DOMContentLoaded', function() {
     toggleButton.className = 'design-element'; // Will be controlled by design mode
     toggleButton.textContent = 'G'; // Changed from 'Gradient' to 'G'
     toggleButton.style.cssText = `
-      position: fixed;
-      top: 10px;
-      left: 10px;
-      background: rgba(0, 0, 0, 0.7);
-      color: white;
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      z-index: 101;
-      border: 1px solid #444;
-      font-weight: bold;
-      font-size: 18px;
-      opacity: 0.5;
-      transition: opacity 0.3s ease;
+        position: fixed;
+        top: 10px;
+        right: 10px; /* Changed from left: 10px to right: 10px */
+        background: rgba(0, 0, 0, 0.7);
+        color: white;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 101;
+        border: 1px solid #444;
+        font-weight: bold;
+        font-size: 18px;
+        opacity: 0.5;
+        transition: opacity 0.3s ease;
     `; // Styled to match the text toggle button
     
     toggleButton.addEventListener('mouseenter', function() {
