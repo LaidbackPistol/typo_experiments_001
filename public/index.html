@@ -836,6 +836,46 @@
       z-index: 50; /* Above canvas but below UI elements */
       transition: opacity 0.5s ease;
     }
+    
+    /* Design mode toggle */
+    #design-mode-toggle {
+      position: fixed;
+      bottom: 10px;
+      left: 10px;
+      width: 20px;
+      height: 20px;
+      background-color: rgba(100, 100, 100, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0);
+      border-radius: 50%;
+      z-index: 9999;
+      cursor: pointer;
+      opacity: 0.5;
+    }
+    
+    /* Notification styles */
+    .notification {
+      position: fixed;
+      top: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 4px;
+      z-index: 1000;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+    }
+
+    .notification.show {
+      opacity: 1;
+    }
+    
+    /* Only show design elements when in design mode */
+    body:not(.design-mode) .design-element {
+      display: none !important;
+    }
   </style>
   <link rel="stylesheet" href="/floating-heads.css">
   <link rel="stylesheet" href="/future-events.css">
@@ -894,43 +934,160 @@
       </ul>
     </nav>
   </div>
+  <!-- Notification element for feedback -->
+  <div class="notification" id="notification"></div>
 
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      // Menu setup
-      setupMenu();
-      // Check if URL has a hash and select the corresponding menu item
-      checkUrlHash();
-
-      // Variables for the archive gallery
-      const archiveMenuItem = document.querySelector('.menu-item[data-section="archives"]');
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize key DOM elements
       const archiveGallery = document.getElementById('archive-gallery');
-      const galleryContainer = archiveGallery.querySelector('.gallery-container');
-      
-      // Variables for the mixes gallery
-      const mixxsMenuItem = document.querySelector('.menu-item[data-section="mixxs"]');
       const mixesGallery = document.getElementById('mixes-gallery');
-      const mixesContainer = mixesGallery.querySelector('.gallery-container');
-
-      // Variables for events gallery
-      const eventsMenuItem = document.querySelector('.menu-item[data-section="events"]');
       const eventsGallery = document.getElementById('events-gallery');
-
-      // Fullscreen Viewer Variables
       const fullscreenViewer = document.getElementById('fullscreen-viewer');
-      const prevButton = fullscreenViewer.querySelector('.prev-button');
-      const nextButton = fullscreenViewer.querySelector('.next-button');
-      const closeViewerButton = fullscreenViewer.querySelector('.close-button');
-      const viewerImage = fullscreenViewer.querySelector('.viewer-image');
       
+      const archiveMenuItem = document.querySelector('.menu-item[data-section="archives"]');
+      const mixxsMenuItem = document.querySelector('.menu-item[data-section="mixxs"]');
+      const eventsMenuItem = document.querySelector('.menu-item[data-section="events"]');
+      
+      const notification = document.getElementById('notification');
+      
+      // Initialize gallery containers
+      const galleryContainer = archiveGallery ? archiveGallery.querySelector('.gallery-container') : null;
+      const mixesContainer = mixesGallery ? mixesGallery.querySelector('.gallery-container') : null;
+      const eventsContainer = eventsGallery ? eventsGallery.querySelector('.gallery-container') : null;
+      
+      // Fullscreen viewer elements
+      const prevButton = fullscreenViewer ? fullscreenViewer.querySelector('.prev-button') : null;
+      const nextButton = fullscreenViewer ? fullscreenViewer.querySelector('.next-button') : null;
+      const closeViewerButton = fullscreenViewer ? fullscreenViewer.querySelector('.close-button') : null;
+      const viewerImage = fullscreenViewer ? fullscreenViewer.querySelector('.viewer-image') : null;
+      
+      // Track state
       let currentImageIndex = 0;
       let currentGalleryImages = [];
-
-      // Track loaded content 
       let archiveContentLoaded = false;
       let mixesContentLoaded = false;
       let eventsContentLoaded = false;
+      
+      // Design mode tracking
+      let designMode = localStorage.getItem('designMode') === 'true';
+      
+      // Initialize design mode
+      initDesignMode();
 
+      // Setup menu
+      setupMenu();
+      
+      // Check if URL has a hash and select the corresponding menu item
+      checkUrlHash();
+      
+      // Setup event listeners for fullscreen viewer
+      if (closeViewerButton) {
+        closeViewerButton.addEventListener('click', () => {
+          fullscreenViewer.classList.remove('active');
+        });
+      }
+      
+      if (prevButton) {
+        prevButton.addEventListener('click', () => {
+          if (currentGalleryImages.length === 0) return;
+          
+          currentImageIndex = (currentImageIndex - 1 + currentGalleryImages.length) % currentGalleryImages.length;
+          updateViewerImage();
+        });
+      }
+      
+      if (nextButton) {
+        nextButton.addEventListener('click', () => {
+          if (currentGalleryImages.length === 0) return;
+          
+          currentImageIndex = (currentImageIndex + 1) % currentGalleryImages.length;
+          updateViewerImage();
+        });
+      }
+      
+      // Keyboard navigation
+      document.addEventListener('keydown', (e) => {
+        if (!fullscreenViewer || !fullscreenViewer.classList.contains('active')) return;
+        
+        if (e.key === 'Escape') {
+          fullscreenViewer.classList.remove('active');
+        } else if (e.key === 'ArrowLeft') {
+          if (prevButton) prevButton.click();
+        } else if (e.key === 'ArrowRight') {
+          if (nextButton) nextButton.click();
+        }
+      });
+      
+      // Add keyboard shortcut (Ctrl+Shift+D) to toggle design mode
+      document.addEventListener('keydown', (e) => {
+        if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'd') {
+          toggleDesignMode();
+          e.preventDefault(); // Prevent browser's default action
+        }
+      });
+      
+      // Function to toggle design mode
+      function toggleDesignMode() {
+        designMode = !designMode;
+        
+        // Save setting to localStorage
+        localStorage.setItem('designMode', designMode);
+        
+        // Update UI elements visibility
+        updateDesignModeUI();
+        
+        // Show notification
+        showNotification(designMode ? 'Design Mode Activated' : 'Production Mode Activated');
+      }
+      
+      // Function to update UI based on current mode
+      function updateDesignModeUI() {
+        // Update the body class for potential CSS styling
+        if (designMode) {
+          document.body.classList.add('design-mode');
+          document.body.classList.remove('production-mode');
+        } else {
+          document.body.classList.add('production-mode');
+          document.body.classList.remove('design-mode');
+        }
+      }
+      
+      // Function to initialize design mode
+      function initDesignMode() {
+        createDesignModeToggleButton();
+        updateDesignModeUI();
+      }
+      
+      // Create a design mode toggle button
+      function createDesignModeToggleButton() {
+        // Check if button already exists
+        if (document.getElementById('design-mode-toggle')) return;
+        
+        const toggleButton = document.createElement('div');
+        toggleButton.id = 'design-mode-toggle';
+        
+        toggleButton.addEventListener('click', (e) => {
+          // Require triple click to toggle (to prevent accidental activation)
+          if (e.detail === 3) {
+            toggleDesignMode();
+          }
+        });
+        
+        document.body.appendChild(toggleButton);
+      }
+      
+      // Function to show notification
+      function showNotification(message) {
+        if (!notification) return;
+        
+        notification.textContent = message;
+        notification.classList.add('show');
+        setTimeout(() => {
+          notification.classList.remove('show');
+        }, 2000);
+      }
+      
       // Menu setup function
       function setupMenu() {
         const menuItems = document.querySelectorAll('.menu-item');
@@ -945,15 +1102,15 @@
             const section = clickedItem.getAttribute('data-section');
             
             // Hide all sections first
-            if (section !== 'archives' && archiveGallery.classList.contains('active')) {
+            if (section !== 'archives' && archiveGallery && archiveGallery.classList.contains('active')) {
               archiveGallery.classList.remove('active');
             }
             
-            if (section !== 'mixxs' && mixesGallery.classList.contains('active')) {
+            if (section !== 'mixxs' && mixesGallery && mixesGallery.classList.contains('active')) {
               mixesGallery.classList.remove('active');
             }
-
-            if (section !== 'events' && eventsGallery.classList.contains('active')) {
+            
+            if (section !== 'events' && eventsGallery && eventsGallery.classList.contains('active')) {
               eventsGallery.classList.remove('active');
             }
             
@@ -976,28 +1133,28 @@
               
               // Update URL without navigation - using History API
               history.pushState(null, '', `#${section}`);
-
+              
               // Show the appropriate section
               if (section === 'archives') {
                 if (!archiveContentLoaded) {
                   loadArchiveContent();
                   archiveContentLoaded = true;
                 }
-                archiveGallery.classList.add('active');
+                if (archiveGallery) archiveGallery.classList.add('active');
               } 
               else if (section === 'mixxs') {
                 if (!mixesContentLoaded) {
                   loadMixesContent();
                   mixesContentLoaded = true;
                 }
-                mixesGallery.classList.add('active');
+                if (mixesGallery) mixesGallery.classList.add('active');
               }
               else if (section === 'events') {
                 if (!eventsContentLoaded) {
                   loadEventsContent();
                   eventsContentLoaded = true;
                 }
-                eventsGallery.classList.add('active');
+                if (eventsGallery) eventsGallery.classList.add('active');
               }
             }
             
@@ -1011,7 +1168,7 @@
           });
         });
       }
-
+      
       // Check URL hash and set appropriate section
       function checkUrlHash() {
         // First, clear all active states
@@ -1022,9 +1179,9 @@
         });
         
         // Hide all sections
-        archiveGallery.classList.remove('active');
-        mixesGallery.classList.remove('active');
-        eventsGallery.classList.remove('active');
+        if (archiveGallery) archiveGallery.classList.remove('active');
+        if (mixesGallery) mixesGallery.classList.remove('active');
+        if (eventsGallery) eventsGallery.classList.remove('active');
         
         // Then, if there's a hash, find and activate the corresponding menu item
         if (window.location.hash) {
@@ -1041,28 +1198,30 @@
                 loadArchiveContent();
                 archiveContentLoaded = true;
               }
-              archiveGallery.classList.add('active');
+              if (archiveGallery) archiveGallery.classList.add('active');
             } 
             else if (section === 'mixxs') {
               if (!mixesContentLoaded) {
                 loadMixesContent();
                 mixesContentLoaded = true;
               }
-              mixesGallery.classList.add('active');
+              if (mixesGallery) mixesGallery.classList.add('active');
             }
             else if (section === 'events') {
               if (!eventsContentLoaded) {
                 loadEventsContent();
                 eventsContentLoaded = true;
               }
-              eventsGallery.classList.add('active');
+              if (eventsGallery) eventsGallery.classList.add('active');
             }
           }
         }
       }
-
+      
       // Function to load archive content
       async function loadArchiveContent() {
+        if (!galleryContainer) return;
+        
         try {
           galleryContainer.innerHTML = '<div style="color: white; text-align: center; padding: 50px;">Fetching archives...</div>';
           
@@ -1111,7 +1270,7 @@
           </div>`;
         }
       }
-
+      
       // Function to create an album element
       function createAlbumElement(album) {
         const albumElement = document.createElement('div');
@@ -1180,7 +1339,7 @@
         albumElement.appendChild(imagesContainer);
         return albumElement;
       }
-
+      
       // Function to setup lazy loading for images
       function setupLazyLoading() {
         if ('IntersectionObserver' in window) {
@@ -1211,7 +1370,7 @@
           });
         }
       }
-
+      
       // Set up hover effects for images
       function setupImageHoverEffects() {
         document.querySelectorAll('.album-image').forEach(image => {
@@ -1229,7 +1388,7 @@
           });
         });
       }
-
+      
       // Set up click events for opening the fullscreen viewer
       function setupImageClickEvents() {
         document.querySelectorAll('.album-image').forEach((imageContainer) => {
@@ -1249,11 +1408,11 @@
             
             // Update and show viewer
             updateViewerImage();
-            fullscreenViewer.classList.add('active');
+            if (fullscreenViewer) fullscreenViewer.classList.add('active');
           });
         });
       }
-
+      
       // Update the displayed image in the fullscreen viewer
       function updateViewerImage() {
         if (!viewerImage || currentGalleryImages.length === 0 || currentImageIndex < 0 || currentImageIndex >= currentGalleryImages.length) {
@@ -1278,47 +1437,11 @@
           caption.style.display = 'none';
         }
       }
-
-      // Fullscreen viewer controls
-      if (closeViewerButton) {
-        closeViewerButton.addEventListener('click', () => {
-          fullscreenViewer.classList.remove('active');
-        });
-      }
-
-      if (prevButton) {
-        prevButton.addEventListener('click', () => {
-          if (currentGalleryImages.length === 0) return;
-          
-          currentImageIndex = (currentImageIndex - 1 + currentGalleryImages.length) % currentGalleryImages.length;
-          updateViewerImage();
-        });
-      }
-
-      if (nextButton) {
-        nextButton.addEventListener('click', () => {
-          if (currentGalleryImages.length === 0) return;
-          
-          currentImageIndex = (currentImageIndex + 1) % currentGalleryImages.length;
-          updateViewerImage();
-        });
-      }
-
-      // Keyboard navigation
-      document.addEventListener('keydown', (e) => {
-        if (!fullscreenViewer.classList.contains('active')) return;
-        
-        if (e.key === 'Escape') {
-          fullscreenViewer.classList.remove('active');
-        } else if (e.key === 'ArrowLeft') {
-          if (prevButton) prevButton.click();
-        } else if (e.key === 'ArrowRight') {
-          if (nextButton) nextButton.click();
-        }
-      });
-
+      
       // Function to load mixes content
       async function loadMixesContent() {
+        if (!mixesContainer) return;
+        
         try {
           mixesContainer.innerHTML = '<div style="color: white; text-align: center; padding: 50px;">Loading mixes...</div>';
           
@@ -1347,7 +1470,7 @@
           mixesContainer.innerHTML = '<div style="color: white; text-align: center; padding: 50px;">Error loading mixes. Please try again later.</div>';
         }
       }
-
+      
       // Function to create a mix element
       function createMixElement(mix, index) {
         const mixElement = document.createElement('div');
@@ -1416,10 +1539,11 @@
         
         return mixElement;
       }
-
+      
       // Function to set up parallax effect for mixes gallery
       function setupParallaxEffect() {
         const mixesGallery = document.getElementById('mixes-gallery');
+        if (!mixesGallery) return;
         
         mixesGallery.addEventListener('mousemove', (e) => {
           // Only apply on desktop
@@ -1451,7 +1575,7 @@
           });
         });
       }
-
+      
       // Function to load events content
       function loadEventsContent() {
         if (!eventsGallery) return;
@@ -1463,7 +1587,7 @@
             eventsPlaceholder.style.display = 'flex';
           }
           
-          // Fetch events data from API (will be implemented in the future)
+          // Fetch events data from API
           fetch('/api/events')
             .then(response => response.json())
             .then(data => {
@@ -1484,7 +1608,7 @@
           console.error('Error loading events:', error);
         }
       }
-
+      
       // Listen for back/forward browser navigation
       window.addEventListener('popstate', () => {
         checkUrlHash();
