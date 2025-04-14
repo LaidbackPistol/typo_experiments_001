@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', function() {
     gradientControls.style.cssText = `
       position: fixed;
       top: 20px;
-      left: 20px;
+      right: 20px; /* Position on right side instead of left */
       background-color: rgba(0, 0, 0, 0.7);
       border-radius: 8px;
       padding: 10px;
@@ -64,30 +64,30 @@ document.addEventListener('DOMContentLoaded', function() {
     `;
     
     // Add toggle button for gradient controls
-    const toggleButton = document.createElement('div'); // Changed from button to div
+    const toggleButton = document.createElement('div');
     toggleButton.id = 'toggle-gradient-controls';
     toggleButton.className = 'design-element'; // Will be controlled by design mode
-    toggleButton.textContent = 'G'; // Changed from 'Gradient' to 'G'
+    toggleButton.textContent = 'G';
     toggleButton.style.cssText = `
-        position: fixed;
-        top: 10px;
-        right: 10px; /* Changed from left: 10px to right: 10px */
-        background: rgba(0, 0, 0, 0.7);
-        color: white;
-        width: 36px;
-        height: 36px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        z-index: 101;
-        border: 1px solid #444;
-        font-weight: bold;
-        font-size: 18px;
-        opacity: 0.5;
-        transition: opacity 0.3s ease;
-    `; // Styled to match the text toggle button
+      position: fixed;
+      top: 10px;
+      right: 10px; /* Position on right side */
+      background: rgba(0, 0, 0, 0.7);
+      color: white;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 101;
+      border: 1px solid #444;
+      font-weight: bold;
+      font-size: 18px;
+      opacity: 0.5;
+      transition: opacity 0.3s ease;
+    `;
     
     toggleButton.addEventListener('mouseenter', function() {
       toggleButton.style.opacity = '1';
@@ -115,8 +115,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Create controls structure
     createGradientControlsUI();
   }
-  
-  // The rest of the file remains unchanged...
 
   // Create the UI controls for the gradient
   function createGradientControlsUI() {
