@@ -198,7 +198,7 @@ function updateGradientParametersFromPosition(x, y) {
   const newSeed = Math.round(x * 1000 * 100) / 100; // 0-1000 with 2 decimal places
   
   // Map y to amplitude (0-1)
-  const newAmplitude = Math.round(y * 100) / 100; // 0-1 with 2 decimal places
+  const newAmplitude = (Math.round(y * 100) / 100)+0.15; // 0-1 with 2 decimal places
   
   // Update UI sliders
   seedSlider.value = newSeed;
