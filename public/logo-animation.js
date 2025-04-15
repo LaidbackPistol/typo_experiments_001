@@ -66,7 +66,6 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(updateLogoVisibility, 100);
   }
   
-  // Update logo visibility based on active sections
   function updateLogoVisibility() {
     const logoContainer = document.getElementById('logo-container');
     if (!logoContainer) return;
@@ -80,6 +79,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const mixesActive = mixesGallery && mixesGallery.classList.contains('active');
     const eventsActive = eventsGallery && eventsGallery.classList.contains('active');
     
+    // Check if contact menu is active
+    const contactActive = document.querySelector('.menu-item[data-section="contact"]')?.classList.contains('active');
+    
     // Check if fullscreen viewer is active
     const fullscreenActive = document.getElementById('fullscreen-viewer') && 
                             document.getElementById('fullscreen-viewer').classList.contains('active');
@@ -87,8 +89,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Check if body has fullscreen mode class
     const fullscreenMode = document.body.classList.contains('fullscreen-mode');
     
-    // If any section is active, add hidden class to the logo
-    if (archiveActive || mixesActive || eventsActive || fullscreenActive || fullscreenMode) {
+    // If any section is active, hide the logo
+    if (archiveActive || mixesActive || contactActive || fullscreenActive || fullscreenMode) {
       logoContainer.style.opacity = '0';
     } else {
       logoContainer.style.opacity = '1';
