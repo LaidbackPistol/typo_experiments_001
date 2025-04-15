@@ -501,6 +501,21 @@ document.addEventListener('DOMContentLoaded', function() {
         border-radius: 4px;
         margin-bottom: 8px;
       }
+
+      .gradient-preset-copy {
+        background-color: rgba(80, 80, 150, 0.8);
+        color: white;
+        border: none;
+        border-radius: 3px;
+        padding: 2px 5px;
+        cursor: pointer;
+        font-size: 11px;
+        margin-left: 5px;
+      }
+
+      .gradient-preset-copy:hover {
+        background-color: rgba(100, 100, 180, 0.8);
+      }
       
       /* Make sure controls only show in design mode */
       body:not(.design-mode) .design-element {
@@ -1384,6 +1399,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <span>${preset.name}</span>
         <div class="gradient-preset-actions">
           <button class="gradient-preset-load">Load</button>
+          <button class="gradient-preset-copy">Copy Code</button>
         </div>
       `;
       
@@ -1392,8 +1408,16 @@ document.addEventListener('DOMContentLoaded', function() {
         applyGradientPreset(preset.name);
       });
       
+      // Add event listener for copy button
+      presetItem.querySelector('.gradient-preset-copy').addEventListener('click', () => {
+        copyPresetToCode(preset.name);
+      });
+      
       presetList.appendChild(presetItem);
     });
+    
+    // Add the copy current settings button
+    addCopyCurrentSettingsButton();
   }
   
   // Render user presets in the UI
@@ -1415,6 +1439,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <span>${preset.name}</span>
         <div class="gradient-preset-actions">
           <button class="gradient-preset-load">Load</button>
+          <button class="gradient-preset-copy">Copy Code</button>
           <button class="gradient-preset-delete">Delete</button>
         </div>
       `;
@@ -1422,6 +1447,11 @@ document.addEventListener('DOMContentLoaded', function() {
       // Add event listener for load button
       presetItem.querySelector('.gradient-preset-load').addEventListener('click', () => {
         applyGradientPreset(preset.name);
+      });
+      
+      // Add event listener for copy button
+      presetItem.querySelector('.gradient-preset-copy').addEventListener('click', () => {
+        copyPresetToCode(preset.name);
       });
       
       // Add event listener for delete button
@@ -1439,6 +1469,108 @@ document.addEventListener('DOMContentLoaded', function() {
     localStorage.setItem('gradientPresets', JSON.stringify(userGradientPresets));
     renderUserGradientPresets();
     alert(`Deleted preset: ${presetName}`);
+  }
+
+  // Function to format gradient settings as code
+  function formatGradientSettingsAsCode(preset) {
+    const settings = preset.settings;
+    
+    // Format the colors with backticks for easier embedding in code
+    const formattedSettings = {
+      ...settings,
+      color0: `\`${settings.color0}\``,
+      color1: `\`${settings.color1}\``,
+      color2: `\`${settings.color2}\``,
+      color3: `\`${settings.color3}\``,
+      color4: `\`${settings.color4}\``
+    };
+    
+    // Create the formatted string
+    const formattedString = `{ name: "${preset.name}", settings: ${JSON.stringify(formattedSettings).replace(/"(`[^`]+`)":/g, "$1:").replace(/"/g, "'")} },`;
+    
+    return formattedString;
+  }
+
+  // Function to copy current settings to clipboard
+  function copyCurrentGradientSettingsToCode() {
+    // Get current settings
+    const currentSettings = getCurrentGradientSettings();
+    
+    // Create a preset object with current settings
+    const tempPreset = {
+      name: "Custom Gradient",
+      settings: currentSettings
+    };
+    
+    // Get formatted code string
+    const codeString = formatGradientSettingsAsCode(tempPreset);
+    
+    // Copy to clipboard
+    navigator.clipboard.writeText(codeString)
+      .then(() => {
+        showNotification("Settings copied to clipboard as code");
+      })
+      .catch(err => {
+        console.error("Error copying settings to clipboard:", err);
+        showNotification("Failed to copy settings. See console for details.");
+      });
+  }
+
+  // Function to copy specific preset to clipboard
+  function copyPresetToCode(presetName) {
+    // Find the preset in built-in presets
+    let preset = gradientPresets.find(p => p.name === presetName);
+    
+    // If not found, check user presets
+    if (!preset) {
+      preset = userGradientPresets.find(p => p.name === presetName);
+    }
+    
+    if (!preset) {
+      showNotification("Preset not found");
+      return;
+    }
+    
+    // Get formatted code string
+    const codeString = formatGradientSettingsAsCode(preset);
+    
+    // Copy to clipboard
+    navigator.clipboard.writeText(codeString)
+      .then(() => {
+        showNotification(`Preset "${preset.name}" copied to clipboard as code`);
+      })
+      .catch(err => {
+        console.error("Error copying preset to clipboard:", err);
+        showNotification("Failed to copy preset. See console for details.");
+      });
+  }
+
+  // Function to add a "Copy Current Settings as Code" button
+  function addCopyCurrentSettingsButton() {
+    // Find the presets panel
+    const presetsPanel = document.getElementById('gradient-presets-panel');
+    if (!presetsPanel) return;
+    
+    // Check if button already exists
+    if (presetsPanel.querySelector('#gradient-copy-current-settings')) return;
+    
+    // Create button
+    const copyCurrentButton = document.createElement('button');
+    copyCurrentButton.id = 'gradient-copy-current-settings';
+    copyCurrentButton.className = 'gradient-action-button';
+    copyCurrentButton.textContent = 'Copy Current Settings as Code';
+    copyCurrentButton.style.marginTop = '20px';
+    
+    // Add event listener
+    copyCurrentButton.addEventListener('click', copyCurrentGradientSettingsToCode);
+    
+    // Add to panel (before the Save Preset form)
+    const savePresetHeading = presetsPanel.querySelector('h4:last-of-type');
+    if (savePresetHeading) {
+      presetsPanel.insertBefore(copyCurrentButton, savePresetHeading);
+    } else {
+      presetsPanel.appendChild(copyCurrentButton);
+    }
   }
   
   // Integrate with existing design mode
