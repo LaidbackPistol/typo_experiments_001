@@ -1,6 +1,7 @@
 /**
  * Interactive Gradient Controls
  * Makes the gradient respond to mouse position and device tilt
+ * Modified to only respond to horizontal movements for seed control
  */
 
 // Flag to track if interactive mode is enabled
@@ -110,10 +111,10 @@ function setupMouseInteraction() {
     
     // Calculate normalized position (0 to 1)
     const normalizedX = e.clientX / window.innerWidth;
-    const normalizedY = e.clientY / window.innerHeight;
+    // Don't use Y position anymore
     
-    // Map position to parameter ranges
-    updateGradientParametersFromPosition(normalizedX, normalizedY);
+    // Map position to parameter ranges - only use X for seed
+    updateGradientParametersFromPosition(normalizedX);
     
     // Set flag to indicate mouse is being used
     mouseOnScreen = true;
@@ -177,16 +178,16 @@ function handleDeviceOrientation(event) {
   const x = event.beta;  // -180 to 180 (front to back tilt)
   const y = event.gamma; // -90 to 90 (left to right tilt)
   
+  // For device orientation, we'll only use one axis (left to right tilt) for seed
   // Normalize to 0-1 range (limit tilt range to make it more usable)
-  const normalizedX = (Math.min(Math.max(x, -45), 45) + 45) / 90;
   const normalizedY = (Math.min(Math.max(y, -45), 45) + 45) / 90;
   
-  // Update gradient parameters
-  updateGradientParametersFromPosition(normalizedY, normalizedX); // Swap for intuitive control
+  // Update gradient parameters - only use one axis
+  updateGradientParametersFromPosition(normalizedY);
 }
 
-// Update gradient parameters based on position
-function updateGradientParametersFromPosition(x, y) {
+// Update gradient parameters based on position - MODIFIED to only use X for seed
+function updateGradientParametersFromPosition(x) {
   // Get the slider elements
   const seedSlider = document.getElementById('gradient-seed');
   const seedValue = document.getElementById('gradient-seed-value');
@@ -198,18 +199,16 @@ function updateGradientParametersFromPosition(x, y) {
   // Map x to seed (0-1000)
   const newSeed = Math.round(x * 1000 * 100) / 100; // 0-1000 with 2 decimal places
   
-  // Map y to amplitude (0-1)
-  const newAmplitude = (Math.round(y * 100) / 100)+0.15; // 0-1 with 2 decimal places
+  // Use a fixed amplitude value instead of mapping from y position
+  const fixedAmplitude = 0.75; // Keep amplitude at a fixed value
   
   // Update UI sliders
   seedSlider.value = newSeed;
   seedValue.value = newSeed;
-  amplitudeSlider.value = newAmplitude;
-  amplitudeValue.value = newAmplitude;
+  amplitudeSlider.value = fixedAmplitude;
+  amplitudeValue.value = fixedAmplitude;
   
-  // Trigger shader update (if needed)
-  // In most cases, the input event listeners will handle this
-  // But we'll trigger it manually just to be sure
+  // Trigger shader update
   updateGradientShaderManually();
 }
 
