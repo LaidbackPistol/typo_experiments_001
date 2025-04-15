@@ -1,0 +1,53 @@
+/* Logo Animation Styles */
+.logo-container {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 20; /* Above gradient (z-index: -10) and floating heads (z-index: 5) */
+  pointer-events: none; /* Allow clicks to pass through */
+  width: 200px;
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.7s ease;
+}
+
+.logo-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  animation: rotate-logo 40s linear infinite;
+  filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.3));
+}
+
+@keyframes rotate-logo {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Hide logo when any section is active */
+.archive-gallery.active ~ .logo-container,
+.mixes-gallery.active ~ .logo-container,
+.events-gallery.active ~ .logo-container,
+.fullscreen-viewer.active ~ .logo-container {
+  opacity: 0;
+}
+
+/* Also hide when in fullscreen mode */
+body.fullscreen-mode .logo-container {
+  opacity: 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .logo-container {
+    width: 150px;
+    height: 150px;
+  }
+}
