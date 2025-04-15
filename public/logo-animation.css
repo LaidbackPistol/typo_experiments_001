@@ -6,8 +6,8 @@
   transform: translate(-50%, -50%);
   z-index: 20; /* Above gradient (z-index: -10) and floating heads (z-index: 5) */
   pointer-events: none; /* Allow clicks to pass through */
-  width: 200px;
-  height: 200px;
+  width: 300px; /* Increased from 200px for desktop */
+  height: 300px; /* Increased from 200px for desktop */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -19,7 +19,7 @@
   height: 100%;
   object-fit: contain;
   animation: rotate-logo 40s linear infinite;
-  filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.3));
+  filter: drop-shadow(0 0 15px rgba(0, 0, 0, 0.4)); /* Enhanced shadow */
 }
 
 @keyframes rotate-logo {
@@ -49,5 +49,13 @@ body.fullscreen-mode .logo-container {
   .logo-container {
     width: 150px;
     height: 150px;
+  }
+}
+
+/* Additional breakpoint for very large screens */
+@media (min-width: 1440px) {
+  .logo-container {
+    width: 400px; /* Even larger for very large screens */
+    height: 400px;
   }
 }
