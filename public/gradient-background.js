@@ -724,16 +724,22 @@ document.addEventListener('DOMContentLoaded', function() {
           uv.y /= aspect;
         }
         
-        // Apply transformations
-        uv = (uv - 0.5) / uScale + uTranslate;
+        // First scale the coordinates around the center
+        // Center the coordinates to origin, scale, then recenter
+        uv = (uv - 0.5) / uScale + 0.5;
         
-        // Apply mirroring if enabled
+        // Now apply mirroring centered at 0.5, 0.5
         if (uMirrorMode == 1 || uMirrorMode == 3) { // X or Both
-          uv.x = abs(uv.x);
+          // Mirror around the vertical center line (x = 0.5)
+          uv.x = abs(uv.x - 0.5) + 0.5;
         }
         if (uMirrorMode == 2 || uMirrorMode == 3) { // Y or Both
-          uv.y = abs(uv.y);
+          // Mirror around the horizontal center line (y = 0.5)
+          uv.y = abs(uv.y - 0.5) + 0.5;
         }
+        
+        // Apply translation after mirroring
+        uv = uv + uTranslate - 0.5;
         
         // Generate noise with animation
         vec3 noisePos = vec3(
