@@ -1247,7 +1247,7 @@ document.addEventListener('DOMContentLoaded', function() {
           translateY: 0,
           scaleX: 0.1,
           scaleY: 3,
-          paperTexture: 0.06,
+          paperTexture: 0.13,
           mirrorMode: 0
         }
       },
@@ -1268,7 +1268,7 @@ document.addEventListener('DOMContentLoaded', function() {
           translateY: 0,
           scaleX: 0.2,
           scaleY: 2.5,
-          paperTexture: 0.04,
+          paperTexture: 0.13,
           mirrorMode: 2
         }
       },
@@ -1289,7 +1289,7 @@ document.addEventListener('DOMContentLoaded', function() {
           translateY: -0.5,
           scaleX: 0.15,
           scaleY: 2,
-          paperTexture: 0.08,
+          paperTexture: 0.13,
           mirrorMode: 1
         }
       },
@@ -1310,7 +1310,7 @@ document.addEventListener('DOMContentLoaded', function() {
           translateY: 0.5,
           scaleX: 0.3,
           scaleY: 2.2,
-          paperTexture: 0.1,
+          paperTexture: 0.13,
           mirrorMode: 3
         }
       }
