@@ -30,6 +30,7 @@ function setupInteractiveGradientControls() {
 function createInteractiveModeToggle() {
   const toggleButton = document.createElement('div');
   toggleButton.id = 'interactive-gradient-toggle';
+  toggleButton.className = 'design-element'; // Add design-element class to hide in production mode
   toggleButton.textContent = 'I';
   toggleButton.style.cssText = `
     position: fixed;
