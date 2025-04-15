@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Create image
     const logoImage = document.createElement('img');
-    logoImage.src = '/Logo/Logo_Round_White.png';
+    logoImage.src = '/Logo/LOGO_Round_White.png';
     logoImage.alt = 'FC Ensemble Logo';
     
     // Add image to container
