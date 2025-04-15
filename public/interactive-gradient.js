@@ -191,22 +191,15 @@ function updateGradientParametersFromPosition(x) {
   // Get the slider elements
   const seedSlider = document.getElementById('gradient-seed');
   const seedValue = document.getElementById('gradient-seed-value');
-  const amplitudeSlider = document.getElementById('gradient-amplitude');
-  const amplitudeValue = document.getElementById('gradient-amplitude-value');
   
-  if (!seedSlider || !seedValue || !amplitudeSlider || !amplitudeValue) return;
+  if (!seedSlider || !seedValue) return;
   
   // Map x to seed (0-1000)
   const newSeed = Math.round(x * 1000 * 100) / 100; // 0-1000 with 2 decimal places
   
-  // Use a fixed amplitude value instead of mapping from y position
-  const fixedAmplitude = 0.75; // Keep amplitude at a fixed value
-  
-  // Update UI sliders
+  // Update only the seed UI sliders
   seedSlider.value = newSeed;
   seedValue.value = newSeed;
-  amplitudeSlider.value = fixedAmplitude;
-  amplitudeValue.value = fixedAmplitude;
   
   // Trigger shader update
   updateGradientShaderManually();
