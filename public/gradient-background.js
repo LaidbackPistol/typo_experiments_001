@@ -1416,8 +1416,8 @@ document.addEventListener('DOMContentLoaded', function() {
       presetList.appendChild(presetItem);
     });
     
-    // Add the copy current settings button
-    addCopyCurrentSettingsButton();
+    // Add the copy current settings button with a slight delay to ensure DOM is ready
+    setTimeout(addCopyCurrentSettingsButton, 100);
   }
   
   // Render user presets in the UI
@@ -1564,11 +1564,14 @@ document.addEventListener('DOMContentLoaded', function() {
     // Add event listener
     copyCurrentButton.addEventListener('click', copyCurrentGradientSettingsToCode);
     
-    // Add to panel (before the Save Preset form)
-    const savePresetHeading = presetsPanel.querySelector('h4:last-of-type');
-    if (savePresetHeading) {
-      presetsPanel.insertBefore(copyCurrentButton, savePresetHeading);
+    // Find the save preset section - try to find the input first
+    const presetNameInput = presetsPanel.querySelector('#gradient-preset-name');
+    
+    if (presetNameInput) {
+      // Insert before the input's parent element
+      presetNameInput.parentElement.insertBefore(copyCurrentButton, presetNameInput);
     } else {
+      // If we can't find the input, just append to the end of the panel
       presetsPanel.appendChild(copyCurrentButton);
     }
   }
