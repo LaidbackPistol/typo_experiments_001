@@ -28,7 +28,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  pointer-events: auto;
+  pointer-events: none; /* Changed to none to allow click-through */
 }
 
 .circular-text-container {
@@ -37,6 +37,7 @@
   position: relative;
   /* Force center alignment */
   transform: translateX(-20px); /* Offset to account for the menu on left */
+  pointer-events: auto; /* Only the circular text should capture clicks */
 }
 
 #circular-text-svg {
