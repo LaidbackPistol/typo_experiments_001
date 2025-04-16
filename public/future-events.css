@@ -1,97 +1,97 @@
 /* Circular Text Animation Styles */
 .events-gallery {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: transparent;
-    z-index: 200;
-    overflow-y: auto;
-    display: none;
-    padding: 60px 20px 20px 20px;
-    pointer-events: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: transparent;
+  z-index: 200;
+  overflow-y: auto;
+  display: none;
+  padding: 60px 20px 20px 20px;
+  pointer-events: none;
+}
+
+.events-gallery.active {
+  display: block;
+}
+
+.events-placeholder {
+  width: 100%;
+  height: 100vh; /* Full viewport height */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  pointer-events: auto;
+  position: relative;
+}
+
+.circular-text-container {
+  width: 500px; /* Increased from 300px */
+  height: 500px; /* Increased from 300px */
+  position: relative;
+  margin: 0 auto;
+}
+
+#circular-text-svg {
+  width: 100%;
+  height: 100%;
+  animation: spin 20s linear infinite;
+  filter: drop-shadow(0 0 5px rgba(255, 255, 0, 0.7));
+}
+
+#circular-text-path {
+  fill: none;
+}
+
+#spinning-text {
+  fill: #ffffff;
+  font-family: monospace;
+  font-weight: bold;
+  font-size: 18px; /* Increased text size */
+  text-anchor: start;
+  dominant-baseline: middle;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
   }
-  
-  .events-gallery.active {
-    display: block;
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Media Queries */
+@media (min-width: 769px) {
+  .events-gallery {
+    padding-left: 200px;
+    padding-right: 20px;
+    box-sizing: border-box;
   }
   
   .events-placeholder {
-    width: 100%;
-    height: 80vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    pointer-events: auto;
-    position: relative;
+    padding-right: 0; /* Remove the offset padding for better centering */
+    margin-top: 0; /* Remove top margin for true centering */
   }
   
   .circular-text-container {
-    width: 300px;
-    height: 300px;
-    position: relative;
-    margin: 0 auto;
+    width: 700px; /* Increased from 400px for a much larger circle */
+    height: 700px; /* Increased from 400px for a much larger circle */
+  }
+}
+
+@media (max-width: 768px) {
+  .events-gallery {
+    padding: 60px 10px 70px 10px;
+    height: calc(100% - 64px);
+    bottom: 64px;
+    max-height: calc(100% - 64px);
   }
   
-  #circular-text-svg {
-    width: 100%;
-    height: 100%;
-    animation: spin 20s linear infinite;
-    filter: drop-shadow(0 0 5px rgba(255, 255, 0, 0.7));
+  .circular-text-container {
+    width: 320px; /* Increased from 250px */
+    height: 320px; /* Increased from 250px */
   }
-  
-  #circular-text-path {
-    fill: none;
-  }
-  
-  #spinning-text {
-    fill: #ffff00;
-    font-family: monospace;
-    font-weight: bold;
-    text-anchor: start;
-    dominant-baseline: middle;
-  }
-  
-  @keyframes spin {
-    0% {
-      transform: rotate(0deg);
-    }
-    100% {
-      transform: rotate(360deg);
-    }
-  }
-  
-  /* Media Queries */
-  @media (min-width: 769px) {
-    .events-gallery {
-      padding-left: 200px;
-      padding-right: 20px;
-      box-sizing: border-box;
-    }
-    
-    .events-placeholder {
-      padding-right: 180px; /* Offset the left padding to center the content */
-      margin-top: 5vh; /* Move it lower on desktop screens */
-    }
-    
-    .circular-text-container {
-      width: 400px;
-      height: 400px;
-      margin: 0 auto;
-    }
-  }
-  
-  @media (max-width: 768px) {
-    .events-gallery {
-      padding: 60px 10px 70px 10px;
-      height: calc(100% - 64px);
-      bottom: 64px;
-      max-height: calc(100% - 64px);
-    }
-    
-    .circular-text-container {
-      width: 250px;
-      height: 250px;
-    }
-  }
+}
