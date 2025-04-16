@@ -1465,18 +1465,31 @@ document.addEventListener('DOMContentLoaded', function() {
   function formatGradientSettingsAsCode(preset) {
     const settings = preset.settings;
     
-    // Format the colors with backticks for easier embedding in code
-    const formattedSettings = {
-      ...settings,
-      color0: `\`${settings.color0}\``,
-      color1: `\`${settings.color1}\``,
-      color2: `\`${settings.color2}\``,
-      color3: `\`${settings.color3}\``,
-      color4: `\`${settings.color4}\``
-    };
+    // Create a clean formatted string manually without using JSON.stringify
+    let formattedString = `{ name: "${preset.name}", \n  settings: {`;
     
-    // Create the formatted string
-    const formattedString = `{ name: "${preset.name}", settings: ${JSON.stringify(formattedSettings).replace(/"(`[^`]+`)":/g, "$1:").replace(/"/g, "'")} },`;
+    // Format color properties with backticks
+    formattedString += `\n    color0: \`${settings.color0}\`,`;
+    formattedString += `\n    color1: \`${settings.color1}\`,`;
+    formattedString += `\n    color2: \`${settings.color2}\`,`;
+    formattedString += `\n    color3: \`${settings.color3}\`,`;
+    formattedString += `\n    color4: \`${settings.color4}\`,`;
+    
+    // Format numeric properties
+    formattedString += `\n    seed: ${settings.seed},`;
+    formattedString += `\n    period: ${settings.period},`;
+    formattedString += `\n    roughness: ${settings.roughness},`;
+    formattedString += `\n    amplitude: ${settings.amplitude},`;
+    formattedString += `\n    animationSpeed: ${settings.animationSpeed},`;
+    formattedString += `\n    translateX: ${settings.translateX},`;
+    formattedString += `\n    translateY: ${settings.translateY},`;
+    formattedString += `\n    scaleX: ${settings.scaleX},`;
+    formattedString += `\n    scaleY: ${settings.scaleY},`;
+    formattedString += `\n    paperTexture: ${settings.paperTexture},`;
+    formattedString += `\n    mirrorMode: ${settings.mirrorMode}`;
+    
+    // Close the object
+    formattedString += `\n  }\n},`;
     
     return formattedString;
   }
