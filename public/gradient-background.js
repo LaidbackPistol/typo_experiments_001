@@ -1280,7 +1280,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
       },
       { name: "TEST", 
-        settings: {'color0':'`#116803`','color1':'`#055e68`','color2':'`#f8f978`','color3':'`#5759d8`','color4':'`#d6cab0`','seed':909.8,'period':0.9,'roughness':0.35,'amplitude':0.92,'animationSpeed':0.12,'translateX':-2.74,'translateY':0.03,'scaleX':0.22,'scaleY':2,'paperTexture':0.13,'mirrorMode':3
+        settings: {color0:`#116803`,color1:`#055e68`,color2:`#f8f978`,color3:`#5759d8`,color4:`#d6cab0`,seed:909.8,period:0.9,roughness:0.35,amplitude:0.92,animationSpeed:0.12,translateX:-2.74,translateY:0.03,scaleX:0.22,scaleY:2,paperTexture:0.13,mirrorMode:3
         } 
       },
       {
