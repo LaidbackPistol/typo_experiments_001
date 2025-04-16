@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', function() {
     setupGradientControls();
     
     // Load default preset
-    applyGradientPreset('default');
+    applyGradientPreset('TEST');
   });
   
   // Create required DOM elements for gradient
@@ -1279,27 +1279,7 @@ document.addEventListener('DOMContentLoaded', function() {
           mirrorMode: 2
         }
       },
-      {
-        name: "Ocean Deep",
-        settings: {
-          color0: '#005AA7',
-          color1: '#FFFDE4',
-          color2: '#4FACFE',
-          color3: '#00F2FE',
-          color4: '#003F75',
-          seed: 213.7,
-          period: 0.9,
-          roughness: 0.35,
-          amplitude: 0.9,
-          animationSpeed: 0.12,
-          translateX: -6,
-          translateY: -0.5,
-          scaleX: 0.15,
-          scaleY: 2,
-          paperTexture: 0.13,
-          mirrorMode: 1
-        }
-      },
+      { name: "TEST", settings: {'color0':'`#116803`','color1':'`#055e68`','color2':'`#f8f978`','color3':'`#5759d8`','color4':'`#d6cab0`','seed':909.8,'period':0.9,'roughness':0.35,'amplitude':0.92,'animationSpeed':0.12,'translateX':-2.74,'translateY':0.03,'scaleX':0.22,'scaleY':2,'paperTexture':0.13,'mirrorMode':3} },
       {
         name: "Purple Haze",
         settings: {
